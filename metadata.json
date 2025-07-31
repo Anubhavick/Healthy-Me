@@ -1,0 +1,7 @@
+{
+  "name": "Healthy Me",
+  "description": "Snap a photo of your meal to get an instant analysis of its ingredients, estimated calories, and dietary compatibility. Track your meals and get personalized health tips.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
