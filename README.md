@@ -85,23 +85,23 @@ yarn install
 
 ### 3. Environment Setup
 
-Create a `.env.local` file in the root directory:
+Create a `.env` file in the root directory (copy from `.env.example`):
 
 ```env
-# Gemini AI Configuration
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-
 # Firebase Configuration
 VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
-
-# Optional: Analytics and Performance Monitoring
 VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+# Gemini AI Configuration
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
+
+**⚠️ Important:** Never commit your `.env` file to version control. Use `.env.example` as a template.
 
 ### 4. Run Development Server
 
@@ -270,11 +270,13 @@ npm run format
 
 ## 🔐 Security Features
 
+- **Environment Variables**: All sensitive credentials stored in `.env` files (not committed to repo)
 - **Firebase Security Rules**: Restrict data access to authenticated users
-- **API Key Protection**: Environment variables for sensitive credentials
+- **API Key Protection**: Environment variables for sensitive credentials with TypeScript validation
 - **Input Validation**: Sanitization of user inputs and file uploads
 - **HTTPS Enforcement**: Secure data transmission
 - **Authentication Tokens**: JWT-based session management
+- **Gitignore Protection**: Automatic exclusion of environment files from version control
 
 ## 📊 Performance Optimizations
 
