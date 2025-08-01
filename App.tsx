@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Diet, AnalysisResult, Meal } from './types';
+import { Diet, AnalysisResult, Meal, UserProfile, MedicalCondition } from './types';
 import { analyzeImage } from './services/geminiService';
+import { ExportService } from './services/exportService';
 import ImageUploader from './components/ImageUploader';
 import DietSelector from './components/DietSelector';
 import AnalysisResultComponent from './components/AnalysisResult';
@@ -9,12 +10,20 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import FirebaseSync from './components/FirebaseSync';
 import AIServicesStatus from './components/AIServicesStatus';
 import AuthModal from './components/AuthModal';
+import BMICalculator from './components/BMICalculator';
+import MedicalConditionsSelector from './components/MedicalConditionsSelector';
+import StreakGoals from './components/StreakGoals';
+import SocialSharing from './components/SocialSharing';
+import EnhancedAnalytics from './components/EnhancedAnalytics';
 import { SparklesIcon, LoadingSpinner } from './components/icons';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const [showProfileSetup, setShowProfileSetup] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'analyze' | 'profile' | 'analytics' | 'social' | 'goals'>('profile');
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [diet, setDiet] = useState<Diet>(Diet.None);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
@@ -23,6 +32,34 @@ const App: React.FC = () => {
   const [mealHistory, setMealHistory] = useState<Meal[]>([]);
   const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
 
+  // Helper function to calculate health score
+  const calculateHealthScore = (analysis: AnalysisResult): number => {
+    let score = 10; // Base score
+    
+    // Calorie assessment
+    const calories = analysis.estimatedCalories;
+    if (calories <= 400) score += 3;
+    else if (calories <= 600) score += 4;
+    else if (calories <= 800) score += 2;
+    else score -= 2;
+    
+    // Ingredient quality
+    const ingredientCount = analysis.ingredients.length;
+    if (ingredientCount >= 5) score += 3;
+    else if (ingredientCount >= 3) score += 2;
+    else score += 1;
+    
+    // Diet compatibility
+    if (analysis.dietCompatibility.isCompatible) score += 3;
+    else score -= 1;
+    
+    // Medical safety
+    if (analysis.medicalAdvice?.isSafeForConditions) score += 2;
+    else score -= 2;
+    
+    return Math.max(1, Math.min(20, score));
+  };
+
   useEffect(() => {
     try {
         const storedMeals = localStorage.getItem('mealHistory');
@@ -30,34 +67,57 @@ const App: React.FC = () => {
             setMealHistory(JSON.parse(storedMeals));
         }
         
-        // For testing - comment out these lines to always show login
-        // const storedUser = localStorage.getItem('user');
-        // if (storedUser) {
-        //     setUser(JSON.parse(storedUser));
-        //     setIsAuthenticated(true);
-        // }
+        // Load stored user and profile
+        const storedUser = localStorage.getItem('user');
+        const storedProfile = localStorage.getItem('userProfile');
+        
+        if (storedUser) {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            setIsAuthenticated(true);
+            
+            if (storedProfile) {
+                setUserProfile(JSON.parse(storedProfile));
+            } else {
+                // Create default profile if user exists but no profile
+                const defaultProfile: UserProfile = {
+                  id: userData.id,
+                  email: userData.email,
+                  displayName: userData.displayName,
+                  diet: Diet.None,
+                  medicalConditions: [MedicalCondition.None],
+                  goals: {},
+                  streak: { current: 0, best: 0 }
+                };
+                setUserProfile(defaultProfile);
+            }
+        }
     } catch (e) {
         console.error("Failed to parse stored data from localStorage", e);
         setMealHistory([]);
     }
   }, []);
 
-    const handleAnalyzeImage = useCallback(async () => {
-    if (!image) return;
+  const handleAnalyzeImage = useCallback(async () => {
+    if (!image || !userProfile) return;
 
     setIsLoading(true);
     setError(null);
     setIsModelLoading(true);
 
     try {
-      const result = await analyzeImage(image, diet);
+      const result = await analyzeImage(image, userProfile);
       setAnalysisResult(result);
+      
+      // Calculate health score
+      const healthScore = calculateHealthScore(result);
       
       const newMeal: Meal = {
         id: Date.now().toString(),
         timestamp: new Date().toISOString(),
         imageDataUrl: image,
-        analysis: result
+        analysis: result,
+        healthScore
       };
       
       const updatedHistory = [newMeal, ...mealHistory];
@@ -70,7 +130,7 @@ const App: React.FC = () => {
       setIsLoading(false);
       setIsModelLoading(false);
     }
-  }, [image, diet, mealHistory]);
+  }, [image, userProfile, mealHistory]);
 
   const handleDeleteMeal = (mealId: string) => {
     const updatedHistory = mealHistory.filter(meal => meal.id !== mealId);
@@ -88,6 +148,64 @@ const App: React.FC = () => {
     setIsAuthenticated(true);
     setShowAuthModal(false);
     localStorage.setItem('user', JSON.stringify(userData));
+    
+    // Create default user profile
+    const defaultProfile: UserProfile = {
+      id: userData.id,
+      email: userData.email,
+      displayName: userData.displayName,
+      diet: Diet.None,
+      medicalConditions: [MedicalCondition.None],
+      goals: {
+        dailyCalories: undefined,
+        targetHealthScore: undefined,
+        targetWeight: undefined
+      },
+      streak: {
+        current: 0,
+        best: 0,
+        lastMealDate: undefined
+      }
+    };
+    
+    setUserProfile(defaultProfile);
+  };
+
+  const handleProfileUpdate = (updatedProfile: UserProfile) => {
+    setUserProfile(updatedProfile);
+    localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+  };
+
+  const handleBMIUpdate = (bmiData: any) => {
+    if (userProfile) {
+      const updatedProfile = { ...userProfile, bmi: bmiData };
+      handleProfileUpdate(updatedProfile);
+    }
+  };
+
+  const handleConditionsUpdate = (conditions: MedicalCondition[], customCondition?: string) => {
+    if (userProfile) {
+      const updatedProfile = { 
+        ...userProfile, 
+        medicalConditions: conditions,
+        customCondition 
+      };
+      handleProfileUpdate(updatedProfile);
+    }
+  };
+
+  const handleGoalsUpdate = (goals: UserProfile['goals']) => {
+    if (userProfile) {
+      const updatedProfile = { ...userProfile, goals };
+      handleProfileUpdate(updatedProfile);
+    }
+  };
+
+  const handleStreakUpdate = (streak: UserProfile['streak']) => {
+    if (userProfile) {
+      const updatedProfile = { ...userProfile, streak };
+      handleProfileUpdate(updatedProfile);
+    }
   };
 
   const handleLogout = () => {
@@ -259,7 +377,15 @@ const App: React.FC = () => {
               <ImageUploader onImageUpload={handleImageUpload} imagePreviewUrl={image} />
               
               <h2 className="text-xl font-semibold text-gray-700 pt-4">2. Select Your Diet</h2>
-              <DietSelector selectedDiet={diet} onDietChange={setDiet} />
+              <DietSelector 
+                selectedDiet={userProfile?.diet || Diet.None} 
+                onDietChange={(newDiet) => {
+                  setDiet(newDiet);
+                  if (userProfile) {
+                    setUserProfile({...userProfile, diet: newDiet});
+                  }
+                }} 
+              />
 
               <button
                 onClick={handleAnalyzeImage}
@@ -311,13 +437,123 @@ const App: React.FC = () => {
         </div>
 
         <div className="mt-12 space-y-8">
+            {/* Profile & Health Section */}
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Health Profile & Analytics</h2>
+              
+              {/* Navigation Tabs */}
+              <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    activeTab === 'profile' 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Profile Setup
+                </button>
+                <button
+                  onClick={() => setActiveTab('analytics')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    activeTab === 'analytics' 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Enhanced Analytics
+                </button>
+                <button
+                  onClick={() => setActiveTab('social')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    activeTab === 'social' 
+                      ? 'bg-purple-500 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Social Sharing
+                </button>
+                <button
+                  onClick={() => setActiveTab('goals')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    activeTab === 'goals' 
+                      ? 'bg-orange-500 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Goals & Streaks
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              {activeTab === 'profile' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <BMICalculator
+                    userProfile={userProfile}
+                    onBMIUpdate={handleBMIUpdate}
+                  />
+                  <MedicalConditionsSelector
+                    selectedConditions={userProfile?.medicalConditions || []}
+                    onConditionsChange={handleConditionsUpdate}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'analytics' && (
+                <EnhancedAnalytics 
+                  mealHistory={mealHistory}
+                  userProfile={userProfile}
+                />
+              )}
+
+              {activeTab === 'social' && (
+                <SocialSharing 
+                  mealHistory={mealHistory}
+                  userProfile={userProfile}
+                />
+              )}
+
+              {activeTab === 'goals' && (
+                <StreakGoals
+                  userProfile={userProfile}
+                  onGoalsUpdate={handleGoalsUpdate}
+                  onStreakUpdate={handleStreakUpdate}
+                />
+              )}
+            </div>
+            
             <div>
                 <FirebaseSync onSyncComplete={handleSyncComplete} />
             </div>
             
             <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Meal History</h2>
-                <MealHistory meals={mealHistory} onDeleteMeal={handleDeleteMeal} />
+                <MealHistory 
+                  meals={mealHistory} 
+                  onDeleteMeal={handleDeleteMeal}
+                  onExportPDF={() => {
+                    if (userProfile) {
+                      const exportData = {
+                        user: userProfile,
+                        meals: mealHistory,
+                        analytics: {
+                          totalMeals: mealHistory.length,
+                          avgCalories: mealHistory.reduce((acc, meal) => acc + meal.analysis.estimatedCalories, 0) / mealHistory.length || 0,
+                          avgHealthScore: mealHistory.reduce((acc, meal) => acc + meal.healthScore, 0) / mealHistory.length || 0,
+                          streak: userProfile.streak?.current || 0,
+                          goalProgress: 0 // TODO: Calculate based on goals
+                        },
+                        exportDate: new Date().toISOString()
+                      };
+                      ExportService.exportToPDF(exportData);
+                    }
+                  }}
+                  onExportCSV={() => {
+                    if (userProfile) {
+                      ExportService.exportToCSV(mealHistory, userProfile);
+                    }
+                  }}
+                />
             </div>
             
             <div>

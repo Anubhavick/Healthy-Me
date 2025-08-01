@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
-import { Diet, AnalysisResult } from '../types';
+import { Diet, AnalysisResult, MedicalCondition, UserProfile } from '../types';
 
 if (!import.meta.env.VITE_GEMINI_API_KEY) {
   throw new Error("VITE_GEMINI_API_KEY environment variable is not set.");
@@ -19,7 +19,7 @@ function base64ToGenerativePart(base64: string, mimeType: string) {
 
 export async function analyzeImage(
   imageDataUrl: string,
-  diet: Diet
+  userProfile: UserProfile
 ): Promise<AnalysisResult> {
   const [header, base64Data] = imageDataUrl.split(",");
   if (!header || !base64Data) {
@@ -34,12 +34,29 @@ export async function analyzeImage(
   
   const imagePart = base64ToGenerativePart(base64Data, mimeType);
 
-  const dietInstruction = diet === Diet.None 
+  const dietInstruction = userProfile.diet === Diet.None 
     ? "No specific diet is being followed." 
-    : `The user is following a ${diet} diet. Assess if the meal is compatible.`;
+    : `The user is following a ${userProfile.diet} diet. Assess if the meal is compatible.`;
 
-  const prompt = `You are a nutrition expert. Analyze the food in this image. Based on the visual information, identify the dish, list its primary ingredients, estimate the total calorie count, provide 2-3 concise health tips, and determine its compatibility with the user's diet. ${dietInstruction} Respond ONLY with a JSON object that matches the provided schema. Be realistic with calorie estimations.`;
-  
+  const medicalConditions = userProfile.medicalConditions.filter(c => c !== MedicalCondition.None);
+  const medicalInstruction = medicalConditions.length > 0 
+    ? `IMPORTANT: The user has the following medical conditions: ${medicalConditions.join(', ')}${userProfile.customCondition ? `, ${userProfile.customCondition}` : ''}. Provide specific medical advice, warnings, and recommendations for these conditions.`
+    : "No specific medical conditions reported.";
+
+  const bmiInstruction = userProfile.bmi 
+    ? `The user's BMI is ${userProfile.bmi.value} (${userProfile.bmi.category}). Consider this in your nutritional advice.`
+    : "";
+
+  const prompt = `You are a nutrition expert and medical advisor. Analyze the food in this image comprehensively. 
+
+${dietInstruction}
+${medicalInstruction}
+${bmiInstruction}
+
+Based on the visual information, identify the dish, list primary ingredients, estimate calories and nutritional breakdown, provide health tips, determine diet compatibility, and most importantly - assess safety and provide medical advice for the user's conditions.
+
+Be realistic with estimations and provide actionable, medically-informed advice. Respond ONLY with a JSON object that matches the schema.`;
+
   const responseSchema = {
     type: Type.OBJECT,
     properties: {
@@ -50,6 +67,18 @@ export async function analyzeImage(
       estimatedCalories: {
         type: Type.INTEGER,
         description: "The estimated total calorie count for the meal.",
+      },
+      nutritionalBreakdown: {
+        type: Type.OBJECT,
+        properties: {
+          carbs: { type: Type.NUMBER, description: "Carbohydrates in grams" },
+          protein: { type: Type.NUMBER, description: "Protein in grams" },
+          fat: { type: Type.NUMBER, description: "Fat in grams" },
+          fiber: { type: Type.NUMBER, description: "Fiber in grams" },
+          sugar: { type: Type.NUMBER, description: "Sugar in grams" },
+          sodium: { type: Type.NUMBER, description: "Sodium in milligrams" }
+        },
+        required: ["carbs", "protein", "fat", "fiber", "sugar", "sodium"]
       },
       dietCompatibility: {
         type: Type.OBJECT,
@@ -64,6 +93,26 @@ export async function analyzeImage(
           },
         },
         required: ["isCompatible", "reason"],
+      },
+      medicalAdvice: {
+        type: Type.OBJECT,
+        properties: {
+          isSafeForConditions: {
+            type: Type.BOOLEAN,
+            description: "Whether this meal is safe for the user's medical conditions"
+          },
+          warnings: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description: "Specific warnings related to the user's medical conditions"
+          },
+          recommendations: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description: "Medical recommendations for the user's conditions"
+          }
+        },
+        required: ["isSafeForConditions", "warnings", "recommendations"]
       },
       ingredients: {
         type: Type.ARRAY,
@@ -82,7 +131,7 @@ export async function analyzeImage(
         description: "A list of 2-3 concise and actionable health tips related to the meal.",
       },
     },
-    required: ["dishName", "estimatedCalories", "dietCompatibility", "ingredients", "healthTips"],
+    required: ["dishName", "estimatedCalories", "nutritionalBreakdown", "dietCompatibility", "medicalAdvice", "ingredients", "healthTips"],
   };
 
   try {
@@ -105,5 +154,83 @@ export async function analyzeImage(
         throw new Error(`Failed to analyze image: ${error.message}`);
     }
     throw new Error("An unknown error occurred during image analysis.");
+  }
+}
+
+// BMI Calculator with AI-powered health advice
+export async function calculateBMI(height: number, weight: number, medicalConditions: MedicalCondition[], customCondition?: string): Promise<{
+  bmi: number;
+  category: string;
+  healthAdvice: string[];
+  risks: string[];
+  recommendations: string[];
+}> {
+  const bmi = Number((weight / ((height / 100) ** 2)).toFixed(1));
+  
+  let category = '';
+  if (bmi < 18.5) category = 'Underweight';
+  else if (bmi < 25) category = 'Normal weight';
+  else if (bmi < 30) category = 'Overweight';
+  else category = 'Obese';
+
+  const medicalConditionsText = medicalConditions.filter(c => c !== MedicalCondition.None).join(', ');
+  const conditionsInfo = medicalConditionsText + (customCondition ? `, ${customCondition}` : '');
+
+  const prompt = `As a medical expert, provide personalized health advice for someone with:
+- BMI: ${bmi} (${category})
+- Height: ${height}cm, Weight: ${weight}kg
+- Medical conditions: ${conditionsInfo || 'None reported'}
+
+Provide specific, actionable advice focusing on their BMI category and medical conditions. Be professional and medically accurate.
+
+Respond with a JSON object containing health advice, risk factors, and recommendations.`;
+
+  const responseSchema = {
+    type: Type.OBJECT,
+    properties: {
+      healthAdvice: {
+        type: Type.ARRAY,
+        items: { type: Type.STRING },
+        description: "General health advice based on BMI and conditions"
+      },
+      risks: {
+        type: Type.ARRAY,
+        items: { type: Type.STRING },
+        description: "Health risks associated with current BMI and conditions"
+      },
+      recommendations: {
+        type: Type.ARRAY,
+        items: { type: Type.STRING },
+        description: "Specific actionable recommendations"
+      }
+    },
+    required: ["healthAdvice", "risks", "recommendations"]
+  };
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: { parts: [{ text: prompt }] },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema
+      },
+    });
+
+    const result = JSON.parse(response.text);
+    return {
+      bmi,
+      category,
+      ...result
+    };
+  } catch (error) {
+    console.error("Error getting BMI advice:", error);
+    return {
+      bmi,
+      category,
+      healthAdvice: [`Your BMI is ${bmi}, which is classified as ${category}.`],
+      risks: [],
+      recommendations: ["Consult with a healthcare professional for personalized advice."]
+    };
   }
 }
