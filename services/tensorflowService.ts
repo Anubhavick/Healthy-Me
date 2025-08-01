@@ -55,7 +55,7 @@ export class TensorFlowService {
       const confidence = isFood ? foodPredictions[0].probability : 0;
 
       return {
-        predictions: predictions.slice(0, 3), // Top 3 predictions
+        predictions: predictions.slice(0, 3), 
         isFood,
         confidence
       };
@@ -85,14 +85,14 @@ export class TensorFlowService {
       const imageElement = await this.preprocessImage(imageDataUrl);
       const tfResults = await this.classifyImage(imageElement);
 
-      // Enhanced calorie estimation based on TensorFlow predictions
+      
       let estimatedCalories = 0;
       const nutritionalInsights: string[] = [];
 
       if (tfResults.isFood) {
         const topPrediction = tfResults.predictions[0];
         
-        // Simple calorie mapping (in a real app, you'd use a comprehensive database)
+        
         const calorieMap: { [key: string]: number } = {
           'pizza': 285,
           'burger': 540,
@@ -108,7 +108,7 @@ export class TensorFlowService {
           'ice_cream': 207
         };
 
-        // Find matching calorie estimate
+        
         for (const [food, calories] of Object.entries(calorieMap)) {
           if (topPrediction.className.toLowerCase().includes(food)) {
             estimatedCalories = calories;
@@ -116,7 +116,7 @@ export class TensorFlowService {
           }
         }
 
-        // Generate insights
+        
         if (estimatedCalories > 400) {
           nutritionalInsights.push("High-calorie meal - consider portion control");
         }
@@ -132,7 +132,7 @@ export class TensorFlowService {
 
       return {
         tensorflowPredictions: tfResults,
-        estimatedCalories: estimatedCalories || 200, // Default estimate
+        estimatedCalories: estimatedCalories || 200, 
         nutritionalInsights
       };
     } catch (error) {
