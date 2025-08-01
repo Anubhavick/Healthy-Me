@@ -1,5 +1,4 @@
-// Cloud Vision API Service (for demonstration)
-// Note: In production, this would run on your backend for security
+
 
 export interface CloudVisionResult {
   labels: Array<{
@@ -21,12 +20,10 @@ export class CloudVisionService {
   }
 
   async analyzeImage(imageBase64: string): Promise<CloudVisionResult> {
-    // Note: In a production app, this API call would be made from your backend
-    // for security reasons. This is for demo purposes only.
+
     
     console.log('🔍 Cloud Vision analysis would run here...');
-    
-    // Mock response for demo (replace with actual API call in production)
+   
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
@@ -45,7 +42,6 @@ export class CloudVisionService {
     });
   }
 
-  // Enhanced food detection combining Cloud Vision + TensorFlow
   async enhancedFoodDetection(imageBase64: string): Promise<{
     isFood: boolean;
     confidence: number;
@@ -55,7 +51,7 @@ export class CloudVisionService {
     try {
       const visionResults = await this.analyzeImage(imageBase64);
       
-      // Analyze Vision API results for food content
+      
       const foodLabels = visionResults.labels.filter(label => 
         ['food', 'dish', 'meal', 'cuisine', 'restaurant'].some(keyword =>
           label.description.toLowerCase().includes(keyword)
@@ -88,7 +84,7 @@ export class CloudVisionService {
   }
 }
 
-// Export a configured instance (using the same API key as Gemini for demo)
+
 export const cloudVisionService = new CloudVisionService(
   process.env.API_KEY || 'demo-key'
 );
