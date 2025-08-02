@@ -1,4 +1,6 @@
 
+import { TensorFlowAnalysis } from './services/tensorflowService';
+
 export enum Diet {
   None = 'None',
   Keto = 'Keto',
@@ -94,6 +96,7 @@ export interface AnalysisResult {
     sodium: number;
   };
   chemicalAnalysis?: ChemicalAnalysis;
+  tensorflowAnalysis?: TensorFlowAnalysis;
 }
 
 export interface Meal {

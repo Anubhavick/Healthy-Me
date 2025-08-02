@@ -1,6 +1,7 @@
 
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { Diet, AnalysisResult, MedicalCondition, UserProfile } from '../types';
+import { tensorflowService, TensorFlowAnalysis } from './tensorflowService';
 
 if (!import.meta.env.VITE_GEMINI_API_KEY) {
   throw new Error("VITE_GEMINI_API_KEY environment variable is not set.");
@@ -34,6 +35,24 @@ export async function analyzeImage(
   
   const imagePart = base64ToGenerativePart(base64Data, mimeType);
 
+  // Step 1: Pre-validate with TensorFlow
+  let tensorflowAnalysis: TensorFlowAnalysis | undefined;
+  let tensorflowValidation;
+  
+  try {
+    console.log('Step 1: TensorFlow pre-analysis...');
+    tensorflowValidation = await tensorflowService.validateFoodImage(imageDataUrl);
+    
+    if (tensorflowValidation.isValidFood) {
+      tensorflowAnalysis = await tensorflowService.enhancedFoodAnalysis(imageDataUrl);
+      console.log('TensorFlow analysis completed successfully');
+    } else {
+      console.warn('TensorFlow validation suggests this may not be a food image');
+    }
+  } catch (tfError) {
+    console.warn('TensorFlow analysis failed, proceeding with Gemini only:', tfError);
+  }
+
   const dietInstruction = userProfile.diet === Diet.None 
     ? "No specific diet is being followed." 
     : `The user is following a ${userProfile.diet} diet. Assess if the meal is compatible.`;
@@ -47,6 +66,21 @@ export async function analyzeImage(
     ? `The user's BMI is ${userProfile.bmi.value} (${userProfile.bmi.category}). Consider this in your nutritional advice.`
     : "";
 
+  // Add TensorFlow insights to the prompt if available
+  const tensorflowInsights = tensorflowAnalysis ? `
+  
+TENSORFLOW ANALYSIS INSIGHTS:
+- Primary food type identified: ${tensorflowAnalysis.foodIdentification.primaryFoodType}
+- TensorFlow calorie estimate: ${tensorflowAnalysis.nutritionalEstimation.estimatedCalories} kcal
+- Estimated macros: ${tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs}g carbs, ${tensorflowAnalysis.nutritionalEstimation.macronutrients.protein}g protein, ${tensorflowAnalysis.nutritionalEstimation.macronutrients.fat}g fat
+- Portion size: ${tensorflowAnalysis.visualAnalysis.portionSize}
+- Freshness score: ${tensorflowAnalysis.visualAnalysis.freshnessScore}/10
+- Processing level: ${tensorflowAnalysis.qualityAssessment.processingLevel}
+- Cooking method: ${tensorflowAnalysis.visualAnalysis.cookingMethod}
+
+Please use these insights to enhance your analysis, but prioritize your own visual assessment. Cross-reference the TensorFlow estimates with your analysis.` 
+    : "";
+
   const prompt = `You are a nutrition expert, food scientist, and medical advisor. Analyze the food or food product packaging in this image comprehensively. 
 
 IMPORTANT: If this is a packaged food product with ingredient labels, focus heavily on chemical analysis including harmful additives, preservatives, artificial chemicals, allergens, and E-numbers.
@@ -54,6 +88,7 @@ IMPORTANT: If this is a packaged food product with ingredient labels, focus heav
 ${dietInstruction}
 ${medicalInstruction}
 ${bmiInstruction}
+${tensorflowInsights}
 
 For packaged foods, perform detailed ingredient label analysis:
 1. Identify all chemicals, additives, preservatives, and artificial ingredients
@@ -214,6 +249,7 @@ Be realistic with estimations and provide actionable, medically-informed advice.
   };
 
   try {
+    console.log('Step 2: Gemini AI analysis...');
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: { parts: [imagePart, { text: prompt }] },
@@ -224,11 +260,69 @@ Be realistic with estimations and provide actionable, medically-informed advice.
     });
 
     const jsonText = response.text;
-    const result = JSON.parse(jsonText);
-    return result as AnalysisResult;
+    const result = JSON.parse(jsonText) as AnalysisResult;
+    
+    // Merge TensorFlow analysis with Gemini results
+    if (tensorflowAnalysis) {
+      result.tensorflowAnalysis = tensorflowAnalysis;
+      
+      // Enhance nutritional breakdown with TensorFlow data if Gemini didn't provide detailed macros
+      if (!result.nutritionalBreakdown || !result.nutritionalBreakdown.carbs) {
+        result.nutritionalBreakdown = {
+          carbs: tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs,
+          protein: tensorflowAnalysis.nutritionalEstimation.macronutrients.protein,
+          fat: tensorflowAnalysis.nutritionalEstimation.macronutrients.fat,
+          fiber: tensorflowAnalysis.nutritionalEstimation.macronutrients.fiber,
+          sugar: result.nutritionalBreakdown?.sugar || 5, // Default if not provided
+          sodium: result.nutritionalBreakdown?.sodium || 300 // Default if not provided
+        };
+      }
+      
+      // Cross-validate calorie estimates
+      const geminiCalories = result.estimatedCalories;
+      const tfCalories = tensorflowAnalysis.nutritionalEstimation.estimatedCalories;
+      const avgCalories = Math.round((geminiCalories + tfCalories) / 2);
+      
+      // Use average if both estimates are reasonable, otherwise prioritize Gemini
+      if (Math.abs(geminiCalories - tfCalories) < 200) {
+        result.estimatedCalories = avgCalories;
+      }
+    }
+    
+    console.log('Analysis completed successfully');
+    return result;
 
   } catch (error) {
     console.error("Error analyzing image with Gemini:", error);
+    
+    // Fallback: if Gemini fails but TensorFlow succeeded, provide basic analysis
+    if (tensorflowAnalysis) {
+      console.log("Gemini failed, providing TensorFlow-based fallback analysis");
+      return {
+        dishName: tensorflowAnalysis.foodIdentification.predictions[0]?.className || 'Unknown Food',
+        estimatedCalories: tensorflowAnalysis.nutritionalEstimation.estimatedCalories,
+        dietCompatibility: {
+          isCompatible: true,
+          reason: 'Basic compatibility assessment based on food type'
+        },
+        ingredients: ['Analysis based on visual identification'],
+        healthTips: [
+          `This appears to be ${tensorflowAnalysis.foodIdentification.primaryFoodType.toLowerCase()} food`,
+          `Processing level: ${tensorflowAnalysis.qualityAssessment.processingLevel.toLowerCase()}`,
+          `Quality score: ${tensorflowAnalysis.qualityAssessment.overallQuality}/10`
+        ],
+        nutritionalBreakdown: {
+          carbs: tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs,
+          protein: tensorflowAnalysis.nutritionalEstimation.macronutrients.protein,
+          fat: tensorflowAnalysis.nutritionalEstimation.macronutrients.fat,
+          fiber: tensorflowAnalysis.nutritionalEstimation.macronutrients.fiber,
+          sugar: 5,
+          sodium: 300
+        },
+        tensorflowAnalysis
+      };
+    }
+    
     if (error instanceof Error) {
         throw new Error(`Failed to analyze image: ${error.message}`);
     }

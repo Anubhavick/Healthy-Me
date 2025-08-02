@@ -102,6 +102,37 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
       score -= harmfulAdditives.length;
     }
     
+    // TensorFlow analysis contribution
+    if (result.tensorflowAnalysis) {
+      // Quality bonus
+      score += Math.floor(result.tensorflowAnalysis.qualityAssessment.overallQuality / 3);
+      
+      // Processing level penalty/bonus
+      switch (result.tensorflowAnalysis.qualityAssessment.processingLevel) {
+        case 'MINIMAL':
+          score += 2;
+          break;
+        case 'MODERATE':
+          // No change
+          break;
+        case 'HIGHLY_PROCESSED':
+          score -= 2;
+          break;
+      }
+      
+      // Freshness bonus
+      if (result.tensorflowAnalysis.visualAnalysis.freshnessScore >= 8) score += 1;
+      else if (result.tensorflowAnalysis.visualAnalysis.freshnessScore <= 5) score -= 1;
+      
+      // Portion size consideration
+      if (result.tensorflowAnalysis.visualAnalysis.portionSize === 'EXTRA_LARGE') score -= 1;
+      else if (result.tensorflowAnalysis.visualAnalysis.portionSize === 'SMALL') score += 1;
+      
+      // Naturalness bonus
+      if (result.tensorflowAnalysis.qualityAssessment.naturalness >= 8) score += 1;
+      else if (result.tensorflowAnalysis.qualityAssessment.naturalness <= 4) score -= 2;
+    }
+    
     // Health tips bonus (more tips = more areas for improvement = lower base health)
     if (result.healthTips.length <= 2) score += 2;
     else if (result.healthTips.length <= 4) score += 1;
@@ -301,6 +332,111 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
               <p className="text-sm text-green-600 mt-1">This product appears to be safe for consumption.</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* TensorFlow Analysis Section */}
+      {result.tensorflowAnalysis && (
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+              🤖 AI Visual Analysis
+            </h3>
+            <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
+              result.tensorflowAnalysis.qualityAssessment.overallQuality >= 8 ? 'bg-green-100 text-green-800' :
+              result.tensorflowAnalysis.qualityAssessment.overallQuality >= 6 ? 'bg-yellow-100 text-yellow-800' :
+              result.tensorflowAnalysis.qualityAssessment.overallQuality >= 4 ? 'bg-orange-100 text-orange-800' :
+              'bg-red-100 text-red-800'
+            }`}>
+              Quality: {result.tensorflowAnalysis.qualityAssessment.overallQuality}/10
+            </div>
+          </div>
+
+          {/* Food Identification */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-semibold text-blue-800 mb-2">🔍 Food Type Detected</h4>
+              <div className="space-y-1">
+                <div className="text-sm">
+                  <span className="font-medium">Primary Type:</span> {result.tensorflowAnalysis.foodIdentification.primaryFoodType}
+                </div>
+                <div className="text-sm">
+                  <span className="font-medium">Confidence:</span> {Math.round(result.tensorflowAnalysis.foodIdentification.confidence * 100)}%
+                </div>
+                <div className="text-xs text-blue-600 mt-2">
+                  <strong>Top Predictions:</strong>
+                  <ul className="mt-1">
+                    {result.tensorflowAnalysis.foodIdentification.predictions.slice(0, 3).map((pred, i) => (
+                      <li key={i}>• {pred.className} ({Math.round(pred.probability * 100)}%)</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+              <h4 className="font-semibold text-purple-800 mb-2">📊 Enhanced Nutrition</h4>
+              <div className="space-y-1 text-sm">
+                <div><span className="font-medium">Calories:</span> {result.tensorflowAnalysis.nutritionalEstimation.estimatedCalories} kcal</div>
+                <div><span className="font-medium">Carbs:</span> {result.tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs}g</div>
+                <div><span className="font-medium">Protein:</span> {result.tensorflowAnalysis.nutritionalEstimation.macronutrients.protein}g</div>
+                <div><span className="font-medium">Fat:</span> {result.tensorflowAnalysis.nutritionalEstimation.macronutrients.fat}g</div>
+                <div><span className="font-medium">Fiber:</span> {result.tensorflowAnalysis.nutritionalEstimation.macronutrients.fiber}g</div>
+                <div className="text-xs text-purple-600 mt-2">
+                  Confidence: {Math.round(result.tensorflowAnalysis.nutritionalEstimation.confidenceLevel * 100)}%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Visual Characteristics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 text-center">
+              <div className="text-2xl mb-1">🍽️</div>
+              <div className="font-semibold text-orange-800">Portion Size</div>
+              <div className="text-sm text-orange-700">{result.tensorflowAnalysis.visualAnalysis.portionSize}</div>
+            </div>
+            
+            <div className="p-3 bg-green-50 rounded-lg border border-green-200 text-center">
+              <div className="text-2xl mb-1">🌿</div>
+              <div className="font-semibold text-green-800">Freshness</div>
+              <div className="text-sm text-green-700">{result.tensorflowAnalysis.visualAnalysis.freshnessScore}/10</div>
+            </div>
+            
+            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-center">
+              <div className="text-2xl mb-1">👨‍🍳</div>
+              <div className="font-semibold text-amber-800">Cooking Method</div>
+              <div className="text-sm text-amber-700 capitalize">{result.tensorflowAnalysis.visualAnalysis.cookingMethod}</div>
+            </div>
+          </div>
+
+          {/* Quality Assessment */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <h4 className="font-semibold text-gray-800 mb-2">🔬 Processing Level</h4>
+              <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                result.tensorflowAnalysis.qualityAssessment.processingLevel === 'MINIMAL' ? 'bg-green-100 text-green-800' :
+                result.tensorflowAnalysis.qualityAssessment.processingLevel === 'MODERATE' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>
+                {result.tensorflowAnalysis.qualityAssessment.processingLevel}
+              </div>
+              <div className="text-sm text-gray-600 mt-2">
+                Naturalness Score: {result.tensorflowAnalysis.qualityAssessment.naturalness}/10
+              </div>
+            </div>
+
+            {result.tensorflowAnalysis.visualAnalysis.colorAnalysis.length > 0 && (
+              <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+                <h4 className="font-semibold text-indigo-800 mb-2">🎨 Color Analysis</h4>
+                <div className="text-sm text-indigo-700">
+                  {result.tensorflowAnalysis.visualAnalysis.colorAnalysis.map((analysis, i) => (
+                    <div key={i}>• {analysis}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

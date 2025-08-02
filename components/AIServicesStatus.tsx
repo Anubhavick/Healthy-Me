@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { tensorflowService } from '../services/tensorflowService';
 
 interface AIServiceStatus {
   gemini: 'loading' | 'ready' | 'error';
@@ -16,26 +17,35 @@ const AIServicesStatus: React.FC = () => {
   });
 
   useEffect(() => {
-    // Simulate service initialization
+    // Initialize Gemini (simulated)
     const timer1 = setTimeout(() => {
       setStatus(prev => ({ ...prev, gemini: 'ready' }));
     }, 1000);
 
-    const timer2 = setTimeout(() => {
-      setStatus(prev => ({ ...prev, tensorflow: 'ready' }));
-    }, 1500);
+    // Initialize TensorFlow.js
+    const initTensorFlow = async () => {
+      try {
+        await tensorflowService.loadModel();
+        setStatus(prev => ({ ...prev, tensorflow: 'ready' }));
+      } catch (error) {
+        console.error('Failed to load TensorFlow model:', error);
+        setStatus(prev => ({ ...prev, tensorflow: 'error' }));
+      }
+    };
+    initTensorFlow();
 
+    // Initialize Firebase (simulated)
     const timer3 = setTimeout(() => {
       setStatus(prev => ({ ...prev, firebase: 'ready' }));
     }, 2000);
 
+    // Initialize Cloud Vision (simulated)
     const timer4 = setTimeout(() => {
       setStatus(prev => ({ ...prev, cloudVision: 'ready' }));
     }, 2500);
 
     return () => {
       clearTimeout(timer1);
-      clearTimeout(timer2);
       clearTimeout(timer3);
       clearTimeout(timer4);
     };

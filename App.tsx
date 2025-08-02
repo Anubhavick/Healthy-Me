@@ -80,6 +80,29 @@ const App: React.FC = () => {
       score -= harmfulAdditives.length;
     }
     
+    // TensorFlow analysis contribution
+    if (analysis.tensorflowAnalysis) {
+      // Quality bonus (0-3 points)
+      score += Math.floor(analysis.tensorflowAnalysis.qualityAssessment.overallQuality / 3);
+      
+      // Processing level adjustment
+      switch (analysis.tensorflowAnalysis.qualityAssessment.processingLevel) {
+        case 'MINIMAL':
+          score += 2;
+          break;
+        case 'HIGHLY_PROCESSED':
+          score -= 2;
+          break;
+      }
+      
+      // Freshness and naturalness bonus
+      if (analysis.tensorflowAnalysis.visualAnalysis.freshnessScore >= 8) score += 1;
+      if (analysis.tensorflowAnalysis.qualityAssessment.naturalness >= 8) score += 1;
+      
+      // Portion size consideration
+      if (analysis.tensorflowAnalysis.visualAnalysis.portionSize === 'EXTRA_LARGE') score -= 1;
+    }
+    
     return Math.max(1, Math.min(20, score));
   };
 
@@ -373,7 +396,7 @@ const App: React.FC = () => {
                         <p className="text-sm text-gray-600 font-medium">
                             Powered by <span className="text-blue-600 font-semibold">Gemini AI</span> • 
                             <span className="text-purple-600 font-semibold"> TensorFlow.js</span> • 
-                            <span className="text-orange-600 font-semibold"> Firebase</span>
+                            <span className="text-orange-600 font-semibold"> Dual-AI Analysis</span>
                         </p>
                     </div>
                 </div>
@@ -427,12 +450,12 @@ const App: React.FC = () => {
                 {isLoading ? (
                   <>
                     <LoadingSpinner className="w-6 h-6 mr-3" />
-                    {isModelLoading ? 'Loading AI Models...' : 'Analyzing with Multi-AI...'}
+                    {isModelLoading ? 'Loading AI Models...' : 'Analyzing with Dual-AI System...'}
                   </>
                 ) : (
                    <>
                     <SparklesIcon className="w-6 h-6 mr-3"/>
-                    Analyze with AI
+                    Analyze with Dual-AI (TensorFlow + Gemini)
                    </>
                 )}
               </button>
