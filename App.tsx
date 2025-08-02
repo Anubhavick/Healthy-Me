@@ -587,32 +587,26 @@ const App: React.FC = () => {
 
         {/* Health Profile Setup Section - Material Design 3 */}
         <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-3xl shadow-lg border overflow-hidden`}>
-          <div className={`p-8 ${isDarkMode ? 'border-gray-700 bg-gradient-to-r from-gray-700 to-gray-800' : 'border-gray-100 bg-gradient-to-r from-gray-50 to-white'} border-b`}>
+          <div className={`p-4 ${isDarkMode ? 'border-gray-700 bg-gradient-to-r from-gray-700 to-gray-800' : 'border-gray-100 bg-gradient-to-r from-gray-50 to-white'} border-b`}>
             <div className="text-center">
-              <h2 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>👤 Health Profile Setup</h2>
-              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-lg`}>Personalize your experience with BMI calculation and health conditions</p>
+              <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-1`}>Health Profile Setup</h2>
+              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm`}>Personalize your experience with BMI calculation and health conditions</p>
             </div>
           </div>
           
           {/* Profile Content */}
-          <div className="p-8">
-            <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h3 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>Set Up Your Health Profile</h3>
-                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Personalize your experience with BMI calculation and health conditions</p>
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <BMICalculator
-                  userProfile={userProfile}
-                  onBMIUpdate={handleBMIUpdate}
-                  isDarkMode={isDarkMode}
-                />
-                <MedicalConditionsSelector
-                  selectedConditions={userProfile?.medicalConditions || []}
-                  onConditionsChange={handleConditionsUpdate}
-                  isDarkMode={isDarkMode}
-                />
-              </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BMICalculator
+                userProfile={userProfile}
+                onBMIUpdate={handleBMIUpdate}
+                isDarkMode={isDarkMode}
+              />
+              <MedicalConditionsSelector
+                selectedConditions={userProfile?.medicalConditions || []}
+                onConditionsChange={handleConditionsUpdate}
+                isDarkMode={isDarkMode}
+              />
             </div>
           </div>
         </div>

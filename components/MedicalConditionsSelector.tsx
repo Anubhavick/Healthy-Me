@@ -52,39 +52,27 @@ const MedicalConditionsSelector: React.FC<MedicalConditionsSelectorProps> = ({
   };
 
   const getConditionIcon = (condition: MedicalCondition) => {
-    switch (condition) {
-      case MedicalCondition.Diabetes: return '🩸';
-      case MedicalCondition.Hypertension: return '💓';
-      case MedicalCondition.Cholesterol: return '🫀';
-      case MedicalCondition.HeartDisease: return '❤️';
-      case MedicalCondition.Obesity: return '⚖️';
-      case MedicalCondition.PCOS: return '👩';
-      case MedicalCondition.ThyroidIssues: return '🦋';
-      case MedicalCondition.KidneyDisease: return '🫘';
-      case MedicalCondition.LiverDisease: return '🟫';
-      case MedicalCondition.Other: return '🩺';
-      default: return '✅';
-    }
+    // Removed emojis for cleaner UI
+    return '';
   };
 
   const conditions = Object.values(MedicalCondition);
 
   return (
-    <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-6 rounded-xl shadow-lg border`}>
-      <div className="flex items-center justify-between mb-6">
-        <h3 className={`text-xl font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Medical Conditions</h3>
-        <span className="text-2xl">🏥</span>
+    <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} p-4 rounded-xl shadow-lg border`}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className={`text-lg font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Medical Conditions</h3>
       </div>
 
-      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`}>
+      <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
         Select any medical conditions you have. This helps provide personalized nutrition advice and safety warnings.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {conditions.map((condition) => (
           <label
             key={condition}
-            className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+            className={`flex items-center p-2 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
               selectedConditions.includes(condition)
                 ? isDarkMode 
                   ? 'border-green-600 bg-green-900/50' 
@@ -100,8 +88,7 @@ const MedicalConditionsSelector: React.FC<MedicalConditionsSelectorProps> = ({
               onChange={() => handleConditionToggle(condition)}
               className="sr-only"
             />
-            <span className="text-2xl mr-3">{getConditionIcon(condition)}</span>
-            <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{condition}</span>
+            <span className={`font-medium text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{condition}</span>
             {selectedConditions.includes(condition) && (
               <span className={`ml-auto ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>✓</span>
             )}
@@ -110,7 +97,7 @@ const MedicalConditionsSelector: React.FC<MedicalConditionsSelectorProps> = ({
       </div>
 
       {showCustomInput && (
-        <div className="mt-6">
+        <div className="mt-4">
           <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
             Please describe your medical condition:
           </label>
@@ -118,7 +105,7 @@ const MedicalConditionsSelector: React.FC<MedicalConditionsSelectorProps> = ({
             value={customText}
             onChange={(e) => handleCustomConditionChange(e.target.value)}
             className={`w-full px-3 py-2 border ${isDarkMode ? 'border-gray-600 bg-gray-700 text-white focus:ring-green-600' : 'border-gray-300 bg-white focus:ring-green-500'} rounded-lg focus:ring-2 focus:border-transparent`}
-            rows={3}
+            rows={2}
             placeholder="e.g., Celiac disease, Food allergies, etc."
           />
         </div>

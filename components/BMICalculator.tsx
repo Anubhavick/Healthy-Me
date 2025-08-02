@@ -67,37 +67,37 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate,
   return (
     <div className={`${isDarkMode ? 'bg-gradient-to-br from-blue-900/30 to-indigo-900/30 border-blue-700' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100'} p-8 rounded-3xl border shadow-lg`}>
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-200/50">
-          <span className="text-2xl text-white">⚖️</span>
+        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg shadow-blue-200/50">
+          <span className="text-xl text-white">⚖️</span>
         </div>
-        <h3 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>BMI Calculator</h3>
-        <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Calculate your Body Mass Index with AI health advice</p>
+        <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-1`}>BMI Calculator</h3>
+        <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm`}>Calculate your Body Mass Index with AI health advice</p>
       </div>
 
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className={`block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>
+            <label className={`block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
               Height (cm)
             </label>
             <input
               type="number"
               value={height}
               onChange={(e) => setHeight(e.target.value)}
-              className={`w-full p-4 border-2 ${isDarkMode ? 'border-blue-600 bg-gray-700 text-white focus:border-blue-400 focus:ring-blue-900/50' : 'border-blue-200 bg-white/80 text-gray-900 focus:border-blue-500 focus:ring-blue-100'} rounded-2xl focus:ring-4 outline-none transition-all duration-200 text-lg font-medium backdrop-blur-sm`}
+              className={`w-full p-3 border-2 ${isDarkMode ? 'border-blue-600 bg-gray-700 text-white focus:border-blue-400 focus:ring-blue-900/50' : 'border-blue-200 bg-white/80 text-gray-900 focus:border-blue-500 focus:ring-blue-100'} rounded-2xl focus:ring-4 outline-none transition-all duration-200 text-lg font-medium backdrop-blur-sm`}
               placeholder="170"
             />
           </div>
           
           <div>
-            <label className={`block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>
+            <label className={`block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
               Weight (kg)
             </label>
             <input
               type="number"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className={`w-full p-4 border-2 ${isDarkMode ? 'border-blue-600 bg-gray-700 text-white focus:border-blue-400 focus:ring-blue-900/50' : 'border-blue-200 bg-white/80 text-gray-900 focus:border-blue-500 focus:ring-blue-100'} rounded-2xl focus:ring-4 outline-none transition-all duration-200 text-lg font-medium backdrop-blur-sm`}
+              className={`w-full p-3 border-2 ${isDarkMode ? 'border-blue-600 bg-gray-700 text-white focus:border-blue-400 focus:ring-blue-900/50' : 'border-blue-200 bg-white/80 text-gray-900 focus:border-blue-500 focus:ring-blue-100'} rounded-2xl focus:ring-4 outline-none transition-all duration-200 text-lg font-medium backdrop-blur-sm`}
               placeholder="70"
             />
           </div>
@@ -106,7 +106,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate,
         <button
           onClick={handleCalculate}
           disabled={!height || !weight || loading}
-          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-4 px-6 rounded-full hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-blue-200/50 disabled:shadow-none flex items-center justify-center gap-3"
+          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-full hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-blue-200/50 disabled:shadow-none flex items-center justify-center gap-3"
         >
           {loading ? (
             <>
@@ -116,7 +116,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate,
           ) : (
             <>
               <span>🧠</span>
-              Calculate BMI & Get AI Health Advice
+              Calculate BMI
             </>
           )}
         </button>
