@@ -499,18 +499,18 @@ const App: React.FC = () => {
         <AIServicesStatus isDarkMode={isDarkMode} />
         
         {/* Main Analysis Section - Material Design Cards */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           
           <div className="xl:col-span-5">
-            <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-8 rounded-3xl shadow-lg border space-y-8`}>
+            <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-6 rounded-3xl shadow-lg border space-y-6`}>
               <div className="text-center">
-                <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>📸 Scan Your Meal</h2>
-                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Upload a photo to get instant nutrition analysis and chemical safety assessment</p>
+                <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>Scan Your Meal</h2>
+                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm`}>Upload a photo to get instant nutrition analysis and chemical safety assessment</p>
               </div>
               <ImageUploader onImageUpload={handleImageUpload} imagePreviewUrl={image} />
               
               <div className="text-center">
-                <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>🥗 Select Your Diet</h3>
+                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-3`}>Select Your Diet</h3>
                 <DietSelector 
                   selectedDiet={userProfile?.diet || Diet.None} 
                   onDietChange={(newDiet) => {
@@ -525,7 +525,7 @@ const App: React.FC = () => {
               <button
                 onClick={handleAnalyzeImage}
                 disabled={isLoading || !image}
-                className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold py-4 px-6 rounded-full hover:from-emerald-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-emerald-200 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center text-lg shadow-lg shadow-emerald-200/50 disabled:shadow-none"
+                className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold py-3 px-6 rounded-full hover:from-emerald-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-emerald-200 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center text-lg shadow-lg shadow-emerald-200/50 disabled:shadow-none"
               >
                 {isLoading ? (
                   <>
@@ -543,25 +543,24 @@ const App: React.FC = () => {
           </div>
           
           <div className="xl:col-span-7">
-            <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-8 rounded-3xl shadow-lg border min-h-[500px] flex flex-col`}>
-              <div className="text-center mb-6">
-                <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>🧠 Analysis Results</h2>
-                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Smart nutrition insights, chemical safety analysis, and health recommendations</p>
+            <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-6 rounded-3xl shadow-lg border min-h-[400px] flex flex-col`}>
+              <div className="text-center mb-4">
+                <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>Analysis Results</h2>
+                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm`}>Smart nutrition insights, chemical safety analysis, and health recommendations</p>
               </div>
               
               <div className="flex-1 flex items-center justify-center">
                 {isLoading && (
-                  <div className="text-center py-12">
-                    <LoadingSpinner className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-                    <p className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'} mb-2`}>Analyzing your meal...</p>
-                    <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>This may take a moment.</p>
+                  <div className="text-center py-8">
+                    <LoadingSpinner className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+                    <p className={`text-lg font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'} mb-1`}>Analyzing your meal...</p>
+                    <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>This may take a moment.</p>
                   </div>
                 )}
                 {error && (
-                  <div className={`text-center py-12 ${isDarkMode ? 'bg-red-900/50 border-red-700' : 'bg-red-50 border-red-200'} p-8 rounded-2xl border w-full`}>
-                    <div className="text-4xl mb-4">❌</div>
+                  <div className={`text-center py-8 ${isDarkMode ? 'bg-red-900/50 border-red-700' : 'bg-red-50 border-red-200'} p-6 rounded-2xl border w-full`}>
                     <h3 className={`${isDarkMode ? 'text-red-300' : 'text-red-700'} font-bold text-lg mb-2`}>Analysis Failed</h3>
-                    <p className={`${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{error}</p>
+                    <p className={`${isDarkMode ? 'text-red-400' : 'text-red-600'} text-sm`}>{error}</p>
                   </div>
                 )}
                 {!isLoading && !error && analysisResult && (
@@ -573,10 +572,14 @@ const App: React.FC = () => {
                   </div>
                 )}
                 {!isLoading && !error && !analysisResult && (
-                   <div className={`text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} py-12`}>
-                      <div className="text-6xl mb-4">🍽️</div>
+                   <div className={`text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} py-8`}>
+                      <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
                       <p className="text-lg font-medium">Your meal analysis will appear here</p>
-                      <p className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} mt-2`}>Upload an image and click analyze to get started</p>
+                      <p className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} mt-1 text-sm`}>Upload an image and click analyze to get started</p>
                   </div>
                 )}
               </div>
