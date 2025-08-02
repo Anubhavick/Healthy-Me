@@ -55,8 +55,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, isDarkMod
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className={`rounded-xl max-w-md w-full p-8 relative backdrop-blur-sm border shadow-2xl ${
         isDarkMode 
-          ? 'bg-gray-900/90 border-white/20 text-white' 
-          : 'bg-white/90 border-white/30 text-gray-900'
+          ? 'bg-gray-900/90 border-slate-600/30 text-white' 
+          : 'bg-white/90 border-cyan-300/30 text-gray-900'
       }`}>
         {/* Close button */}
         <button
@@ -113,8 +113,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, isDarkMod
                 onChange={(e) => setName(e.target.value)}
                 className={`w-full px-4 py-3 border rounded-lg transition-colors focus:ring-2 focus:border-transparent ${
                   isDarkMode 
-                    ? 'border-gray-600 bg-gray-800/50 text-white placeholder-gray-400 focus:ring-purple-500' 
-                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-blue-500'
+                    ? 'border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:ring-slate-500' 
+                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-cyan-500'
                 }`}
                 disabled={loading}
               />
@@ -129,8 +129,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, isDarkMod
               onChange={(e) => setEmail(e.target.value)}
               className={`w-full px-4 py-3 border rounded-lg transition-colors focus:ring-2 focus:border-transparent ${
                 isDarkMode 
-                  ? 'border-gray-600 bg-gray-800/50 text-white placeholder-gray-400 focus:ring-purple-500' 
-                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-blue-500'
+                  ? 'border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:ring-slate-500' 
+                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-cyan-500'
               }`}
               disabled={loading}
             />
@@ -144,8 +144,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, isDarkMod
               onChange={(e) => setPassword(e.target.value)}
               className={`w-full px-4 py-3 border rounded-lg transition-colors focus:ring-2 focus:border-transparent ${
                 isDarkMode 
-                  ? 'border-gray-600 bg-gray-800/50 text-white placeholder-gray-400 focus:ring-purple-500' 
-                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-blue-500'
+                  ? 'border-slate-600 bg-slate-800/50 text-white placeholder-slate-400 focus:ring-slate-500' 
+                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-cyan-500'
               }`}
               disabled={loading}
             />
@@ -157,7 +157,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, isDarkMod
             className={`w-full font-medium py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none ${
               isDarkMode 
                 ? 'bg-white text-gray-900 hover:bg-gray-100 shadow-lg' 
-                : 'bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 shadow-lg'
+                : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:from-emerald-600 hover:to-cyan-600 shadow-lg'
             }`}
           >
             {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
@@ -172,8 +172,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, isDarkMod
               onClick={() => setIsLogin(!isLogin)}
               className={`font-medium transition-colors ${
                 isDarkMode 
-                  ? 'text-purple-300 hover:text-purple-200' 
-                  : 'text-blue-600 hover:text-blue-700'
+                  ? 'text-slate-300 hover:text-slate-200' 
+                  : 'text-cyan-600 hover:text-cyan-700'
               }`}
             >
               {isLogin ? 'Sign up' : 'Sign in'}

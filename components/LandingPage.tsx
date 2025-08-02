@@ -18,17 +18,19 @@ const LandingPage: React.FC<LandingPageProps> = ({
   return (
     <div className={`min-h-screen transition-all duration-500 ${
       isDarkMode 
-        ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900' 
-        : 'bg-gradient-to-br from-green-400 via-blue-500 to-purple-600'
+        ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
+        : 'bg-gradient-to-br from-emerald-400 via-cyan-500 to-blue-600'
     }`}>
       {/* Navigation Header */}
       <nav className="flex items-center justify-between p-6 backdrop-blur-sm bg-white/10 border-b border-white/20">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 flex items-center justify-center">
+          <div className={`w-8 h-8 flex items-center justify-center rounded-lg p-1 ${
+            isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/10'
+          }`}>
             <img 
               src="/logo.svg" 
               alt="Healthy Me Logo" 
-              className={`w-full h-full ${isDarkMode ? 'filter brightness-0 invert' : ''}`} 
+              className={`w-full h-full ${isDarkMode ? '' : 'filter brightness-0 invert'}`} 
             />
           </div>
           <span className="text-white font-semibold text-xl">
@@ -57,14 +59,22 @@ const LandingPage: React.FC<LandingPageProps> = ({
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
             Bring the{' '}
-            <span className="bg-gradient-to-r from-green-300 to-blue-300 bg-clip-text text-transparent">
+            <span className={`bg-clip-text text-transparent ${
+              isDarkMode 
+                ? 'bg-gradient-to-r from-slate-300 to-gray-300' 
+                : 'bg-gradient-to-r from-emerald-300 to-cyan-300'
+            }`}>
               <ShinyText text="Healthy Life" speed={4} />
             </span>{' '}
             to you, with
           </h1>
           <h2 className="text-5xl md:text-7xl font-bold text-white mb-12 leading-tight">
             one line of{' '}
-            <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+            <span className={`bg-clip-text text-transparent ${
+              isDarkMode 
+                ? 'bg-gradient-to-r from-blue-300 to-cyan-300' 
+                : 'bg-gradient-to-r from-purple-300 to-pink-300'
+            }`}>
               <ShinyText text="nutrition" speed={5} />
             </span>
           </h2>
