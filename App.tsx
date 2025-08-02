@@ -19,8 +19,12 @@ import StreakGoals from './components/StreakGoals';
 import ProfileDropdown from './components/ProfileDropdown';
 import SettingsModal from './components/SettingsModal';
 import { SparklesIcon, LoadingSpinner } from './components/icons';
+import ShinyText from './components/ShinyText';
+import LightRays from './components/LightRays';
+import LandingPage from './components/LandingPage';
 
 const App: React.FC = () => {
+  const [showLandingPage, setShowLandingPage] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showProfileSetup, setShowProfileSetup] = useState<boolean>(false);
@@ -342,70 +346,147 @@ const App: React.FC = () => {
     }
   };
 
+  // Show landing page first
+  if (showLandingPage) {
+    return (
+      <LandingPage
+        onGetStarted={() => {
+          setShowLandingPage(false);
+          setShowAuthModal(true);
+        }}
+        onTryDemo={() => {
+          setShowLandingPage(false);
+          const demoUser = {
+            id: 'demo-user',
+            email: 'demo@example.com',
+            displayName: 'Demo User',
+            provider: 'demo'
+          };
+          handleAuthSuccess(demoUser);
+        }}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={handleDarkModeToggle}
+      />
+    );
+  }
+
   // Show authentication modal if not logged in
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 flex items-center justify-center p-4 relative">
-        {/* Animated background elements - Material You style */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-32 -right-32 w-64 h-64 bg-emerald-100/50 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-green-100/50 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-teal-100/30 rounded-full blur-3xl animate-pulse delay-500"></div>
+      <div className={`min-h-screen transition-all duration-500 ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900' 
+          : 'bg-gradient-to-br from-green-400 via-blue-500 to-purple-600'
+      } flex items-center justify-center p-4 relative overflow-hidden`}>
+        
+        {/* Navigation Header - matching landing page */}
+        <nav className="absolute top-0 left-0 right-0 flex items-center justify-between p-6 backdrop-blur-sm bg-white/10 border-b border-white/20 z-20">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 flex items-center justify-center">
+              <img 
+                src="/logo.svg" 
+                alt="Healthy Me Logo" 
+                className={`w-full h-full ${isDarkMode ? 'filter brightness-0 invert' : ''}`} 
+              />
+            </div>
+            <span className="text-white font-semibold text-xl">
+              Healthy Me
+            </span>
+          </div>
+          
+          <div className="flex items-center space-x-6">
+            <button 
+              onClick={() => setShowLandingPage(true)}
+              className="text-white/80 hover:text-white transition-colors duration-200 font-medium"
+            >
+              ← Back to Home
+            </button>
+            <button
+              onClick={handleDarkModeToggle}
+              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm"
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+          </div>
+        </nav>
+
+        {/* Animated Light Rays Background */}
+        <div className="absolute inset-0 z-0">
+          <LightRays
+            raysOrigin="top-center"
+            raysColor={isDarkMode ? "#8b5cf6" : "#10b981"}
+            raysSpeed={0.8}
+            lightSpread={1.2}
+            rayLength={1.5}
+            followMouse={true}
+            mouseInfluence={0.15}
+            noiseAmount={0.05}
+            distortion={0.03}
+            fadeDistance={1.2}
+            saturation={0.7}
+            className="opacity-30"
+          />
         </div>
 
-        {/* Main content card - Material Design 3 */}
-        <div className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl max-w-md w-full relative z-10 border border-emerald-100/50">
+        {/* Main content card - Enhanced with theme matching */}
+        <div className="bg-white/10 backdrop-blur-xl p-8 rounded-3xl shadow-2xl max-w-md w-full relative z-10 border border-white/20 mt-20">
           {/* Header section */}
           <div className="text-center mb-8">
             <div className="relative mb-6">
               <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                <img src="/logo.svg" alt="Healthy Me Logo" className="w-full h-full" />
+                <img 
+                  src="/logo.svg" 
+                  alt="Healthy Me Logo" 
+                  className={`w-full h-full ${isDarkMode ? 'filter brightness-0 invert' : ''}`} 
+                />
               </div>
-              <div className="absolute -top-2 -right-12 w-6 h-6 bg-amber-400 rounded-full animate-bounce shadow-lg"></div>
             </div>
             
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-emerald-700 to-green-600 bg-clip-text text-transparent mb-4 tracking-tight">
-              Healthy Me
+            <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">
+              Welcome Back
             </h1>
-            <p className="text-gray-600 text-lg leading-relaxed font-medium">
-              Your intelligent nutrition companion with smart analytics
+            <p className="text-white/80 text-lg leading-relaxed font-medium">
+              Sign in to continue your healthy journey
             </p>
-          </div>
-
-          {/* Art Picture Showcase */}
-          <div className="mb-6 flex justify-center">
-            <img src="/artpicture.png" alt="Healthy Food" className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white" />
           </div>
 
           {/* Features preview - Material Design cards */}
           <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="text-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100/50 hover:shadow-lg transition-all duration-300">
+            <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
               <div className="flex justify-center mb-2">
-                <img src="/analytics-svgrepo-com.svg" alt="Smart Analysis" className="w-8 h-8" />
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm5-18v4h3V3h-3z"/>
+                </svg>
               </div>
-              <div className="text-xs font-semibold text-emerald-800">Smart Analysis</div>
+              <div className="text-xs font-semibold text-white">Smart Analysis</div>
             </div>
-            <div className="text-center p-4 bg-blue-50 rounded-2xl border border-blue-100/50 hover:shadow-lg transition-all duration-300">
+            <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
               <div className="flex justify-center mb-2">
-                <img src="/body-mass-index-svgrepo-com.svg" alt="Health Scoring" className="w-8 h-8" />
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
               </div>
-              <div className="text-xs font-semibold text-blue-800">Health Scoring</div>
+              <div className="text-xs font-semibold text-white">Health Scoring</div>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded-2xl border border-purple-100/50 hover:shadow-lg transition-all duration-300">
+            <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
               <div className="flex justify-center mb-2">
-                <img src="/goals and streak.svg" alt="Smart Tracking" className="w-8 h-8" />
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                </svg>
               </div>
-              <div className="text-xs font-semibold text-purple-800">Smart Tracking</div>
+              <div className="text-xs font-semibold text-white">Smart Tracking</div>
             </div>
           </div>
           
-          {/* Action buttons - Material You style */}
+          {/* Action buttons - Enhanced theme */}
           <div className="space-y-4 mb-8">
             <button
               onClick={() => setShowAuthModal(true)}
-              className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold py-4 px-6 rounded-full hover:from-emerald-600 hover:to-green-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-emerald-200/50 flex items-center justify-center group"
+              className="w-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold py-4 px-6 rounded-full hover:bg-white/30 transition-all duration-300 transform hover:scale-[1.02] shadow-lg flex items-center justify-center group"
             >
-              <img src="/profile-round-1342-svgrepo-com.svg" alt="Sign In" className="w-5 h-5 mr-3 filter brightness-0 invert group-hover:animate-pulse" />
+              <svg className="w-5 h-5 mr-3 group-hover:animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
               <span className="text-lg">Sign In / Create Account</span>
             </button>
             
@@ -419,49 +500,52 @@ const App: React.FC = () => {
                 };
                 handleAuthSuccess(demoUser);
               }}
-              className="w-full bg-gray-100 text-gray-800 font-semibold py-4 px-6 rounded-full hover:bg-gray-200 transition-all duration-300 transform hover:scale-[1.02] shadow-md flex items-center justify-center group border border-gray-200"
+              className="w-full bg-transparent border-2 border-white/50 text-white font-semibold py-4 px-6 rounded-full hover:bg-white/10 transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center group"
             >
-              <img src="/analytics-svgrepo-com.svg" alt="Demo" className="w-5 h-5 mr-3 group-hover:animate-bounce" />
+              <svg className="w-5 h-5 mr-3 group-hover:animate-bounce" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+              </svg>
               <span>Try Demo Mode</span>
             </button>
           </div>
 
-          {/* Benefits section - Material Design surface */}
-          <div className="bg-gray-50 rounded-2xl p-6 mb-6 border border-gray-100">
+          {/* Benefits section - Enhanced theme */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/20">
             <div className="text-center">
-              <div className="text-sm font-bold text-gray-800 mb-4">✨ Why Choose Healthy Me?</div>
+              <div className="text-sm font-bold text-white mb-4">✨ Why Choose Healthy Me?</div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center text-gray-700">
-                  <img src="/analytics-svgrepo-com.svg" alt="Analysis" className="w-4 h-4 mr-2 text-emerald-500" />
+                <div className="flex items-center text-white/80">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm5-18v4h3V3h-3z"/>
+                  </svg>
                   Instant Analysis
                 </div>
-                <div className="flex items-center text-gray-700">
-                  <img src="/body-mass-index-svgrepo-com.svg" alt="Health" className="w-4 h-4 mr-2 text-emerald-500" />
+                <div className="flex items-center text-white/80">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
                   Health Scoring
                 </div>
-                <div className="flex items-center text-gray-700">
-                  <img src="/goals and streak.svg" alt="Progress" className="w-4 h-4 mr-2 text-emerald-500" />
+                <div className="flex items-center text-white/80">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                  </svg>
                   Progress Tracking
                 </div>
-                <div className="flex items-center text-gray-700">
-                  <img src="/setting-1-svgrepo-com.svg" alt="Sync" className="w-4 h-4 mr-2 text-emerald-500" />
+                <div className="flex items-center text-white/80">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                  </svg>
                   Cloud Sync
                 </div>
               </div>
             </div>
           </div>
           
-          <p className="text-sm text-gray-500 text-center leading-relaxed">
+          <p className="text-sm text-white/60 text-center leading-relaxed">
             Join thousands of users improving their nutrition with smart insights
           </p>
         </div>
-        
-        {showAuthModal && (
-          <AuthModal 
-            onClose={() => setShowAuthModal(false)}
-            onAuthSuccess={handleAuthSuccess}
-          />
-        )}
       </div>
     );
   }
@@ -703,6 +787,15 @@ const App: React.FC = () => {
             setShowShareCard(false);
             setMealToShare(null);
           }}
+        />
+      )}
+
+      {/* Auth Modal - shown from landing page or auth flow */}
+      {showAuthModal && (
+        <AuthModal 
+          onClose={() => setShowAuthModal(false)}
+          onAuthSuccess={handleAuthSuccess}
+          isDarkMode={isDarkMode}
         />
       )}
     </div>

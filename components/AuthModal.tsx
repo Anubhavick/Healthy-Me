@@ -5,9 +5,10 @@ import { auth } from '../services/firebase';
 interface AuthModalProps {
   onClose: () => void;
   onAuthSuccess: (userData: any) => void;
+  isDarkMode?: boolean;
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, isDarkMode = false }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -51,12 +52,20 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full p-8 relative">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className={`rounded-xl max-w-md w-full p-8 relative backdrop-blur-sm border shadow-2xl ${
+        isDarkMode 
+          ? 'bg-gray-900/90 border-white/20 text-white' 
+          : 'bg-white/90 border-white/30 text-gray-900'
+      }`}>
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          className={`absolute top-4 right-4 transition-colors ${
+            isDarkMode 
+              ? 'text-gray-400 hover:text-white' 
+              : 'text-gray-400 hover:text-gray-600'
+          }`}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -65,18 +74,30 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess }) => {
 
         <div className="text-center mb-8">
           <div className="mb-6">
-            <img src="/artpicture.png" alt="Healthy Food" className="w-32 h-32 mx-auto rounded-full object-cover shadow-lg" />
+            <img 
+              src="/artpicture.png" 
+              alt="Healthy Food" 
+              className="w-32 h-32 mx-auto rounded-full object-cover shadow-lg" 
+            />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className={`text-2xl font-bold ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
-          <p className="text-gray-600 mt-2">
+          <p className={`mt-2 ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`}>
             {isLogin ? 'Sign in to access your nutrition history' : 'Join us to start tracking your nutrition'}
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className={`border px-4 py-3 rounded-lg mb-6 ${
+            isDarkMode 
+              ? 'bg-red-900/50 border-red-500/50 text-red-300' 
+              : 'bg-red-50 border-red-200 text-red-700'
+          }`}>
             {error}
           </div>
         )}
@@ -90,7 +111,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess }) => {
                 placeholder="Full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg transition-colors focus:ring-2 focus:border-transparent ${
+                  isDarkMode 
+                    ? 'border-gray-600 bg-gray-800/50 text-white placeholder-gray-400 focus:ring-purple-500' 
+                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-blue-500'
+                }`}
                 disabled={loading}
               />
             </div>
@@ -102,7 +127,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess }) => {
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className={`w-full px-4 py-3 border rounded-lg transition-colors focus:ring-2 focus:border-transparent ${
+                isDarkMode 
+                  ? 'border-gray-600 bg-gray-800/50 text-white placeholder-gray-400 focus:ring-purple-500' 
+                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-blue-500'
+              }`}
               disabled={loading}
             />
           </div>
@@ -113,7 +142,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess }) => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className={`w-full px-4 py-3 border rounded-lg transition-colors focus:ring-2 focus:border-transparent ${
+                isDarkMode 
+                  ? 'border-gray-600 bg-gray-800/50 text-white placeholder-gray-400 focus:ring-purple-500' 
+                  : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:ring-blue-500'
+              }`}
               disabled={loading}
             />
           </div>
@@ -121,7 +154,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 disabled:opacity-50"
+            className={`w-full font-medium py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:transform-none ${
+              isDarkMode 
+                ? 'bg-white text-gray-900 hover:bg-gray-100 shadow-lg' 
+                : 'bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 shadow-lg'
+            }`}
           >
             {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
           </button>
@@ -129,11 +166,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess }) => {
 
         {/* Toggle between login/signup */}
         <div className="mt-6 text-center">
-          <p className="text-gray-600">
+          <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-green-600 hover:text-green-700 font-medium"
+              className={`font-medium transition-colors ${
+                isDarkMode 
+                  ? 'text-purple-300 hover:text-purple-200' 
+                  : 'text-blue-600 hover:text-blue-700'
+              }`}
             >
               {isLogin ? 'Sign up' : 'Sign in'}
             </button>
