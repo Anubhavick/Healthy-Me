@@ -40,7 +40,6 @@ const HealthScoreCard: React.FC<{ score: number }> = ({ score }) => {
       </div>
       <p className="text-sm font-medium mt-1">{getScoreLabel(score)}</p>
       
-      {/* Score bar */}
       <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
         <div 
           className={`h-2 rounded-full transition-all duration-500 ${
@@ -59,86 +58,68 @@ const HealthScoreCard: React.FC<{ score: number }> = ({ score }) => {
 const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
   const { isCompatible, reason } = result.dietCompatibility;
   
-  // Calculate health score based on calories, ingredients, diet compatibility, and chemical safety
   const calculateHealthScore = () => {
-    let score = 10; // Base score
+    let score = 10;
     
-    // Calorie assessment (adjust based on reasonable ranges)
     const calories = result.estimatedCalories;
-    if (calories <= 400) score += 3; // Light meal
-    else if (calories <= 600) score += 4; // Moderate meal
-    else if (calories <= 800) score += 2; // Heavy meal
-    else score -= 2; // Very heavy meal
+    if (calories <= 400) score += 3;
+    else if (calories <= 600) score += 4;
+    else if (calories <= 800) score += 2;
+    else score -= 2;
     
-    // Ingredient quality (more ingredients often means more complex/nutritious)
     const ingredientCount = result.ingredients.length;
     if (ingredientCount >= 5) score += 3;
     else if (ingredientCount >= 3) score += 2;
     else score += 1;
     
-    // Diet compatibility
     if (isCompatible) score += 3;
     else score -= 1;
     
-    // Chemical safety analysis
     if (result.chemicalAnalysis) {
-      // Safety score contribution (0-2 points)
       score += Math.floor(result.chemicalAnalysis.overallSafetyScore / 5);
       
-      // Penalty for harmful chemicals
       if (result.chemicalAnalysis.harmfulChemicals.length > 0) {
         const severeChemicals = result.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'SEVERE');
         const highRiskChemicals = result.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'HIGH');
         score -= (severeChemicals.length * 3 + highRiskChemicals.length * 2);
       }
       
-      // Bonus for organic certification
       if (result.chemicalAnalysis.isOrganicCertified) score += 2;
-      
-      // Penalty for artificial ingredients
       if (result.chemicalAnalysis.hasArtificialIngredients) score -= 1;
       
-      // Penalty for harmful additives
       const harmfulAdditives = result.chemicalAnalysis.additives.filter(a => a.safetyRating === 'AVOID');
       score -= harmfulAdditives.length;
     }
     
-    // TensorFlow analysis contribution
     if (result.tensorflowAnalysis) {
-      // Quality bonus
       score += Math.floor(result.tensorflowAnalysis.qualityAssessment.overallQuality / 3);
       
-      // Processing level penalty/bonus
       switch (result.tensorflowAnalysis.qualityAssessment.processingLevel) {
         case 'MINIMAL':
           score += 2;
           break;
         case 'MODERATE':
-          // No change
           break;
         case 'HIGHLY_PROCESSED':
           score -= 2;
           break;
       }
       
-      // Freshness bonus
       if (result.tensorflowAnalysis.visualAnalysis.freshnessScore >= 8) score += 1;
       else if (result.tensorflowAnalysis.visualAnalysis.freshnessScore <= 5) score -= 1;
       
-      // Portion size consideration
       if (result.tensorflowAnalysis.visualAnalysis.portionSize === 'EXTRA_LARGE') score -= 1;
       else if (result.tensorflowAnalysis.visualAnalysis.portionSize === 'SMALL') score += 1;
       
-      // Naturalness bonus
       if (result.tensorflowAnalysis.qualityAssessment.naturalness >= 8) score += 1;
       else if (result.tensorflowAnalysis.qualityAssessment.naturalness <= 4) score -= 2;
     }
     
-    // Health tips bonus (more tips = more areas for improvement = lower base health)
+    // Fewer health tips = better overall health
     if (result.healthTips.length <= 2) score += 2;
     else if (result.healthTips.length <= 4) score += 1;
     
-    return Math.max(1, Math.min(20, score)); // Ensure score is between 1-20
+    return Math.max(1, Math.min(20, score));
   };
 
   const healthScore = calculateHealthScore();
@@ -189,7 +170,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
         </ul>
       </div>
 
-      {/* Chemical Analysis Section */}
       {result.chemicalAnalysis && (
         <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
@@ -206,7 +186,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
             </div>
           </div>
 
-          {/* Safety Indicators */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className={`p-3 rounded-lg border ${
               result.chemicalAnalysis.isOrganicCertified ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
@@ -230,7 +209,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
             </div>
           </div>
 
-          {/* Harmful Chemicals */}
           {result.chemicalAnalysis.harmfulChemicals.length > 0 && (
             <div className="mb-4">
               <h4 className="font-semibold text-red-800 mb-2 flex items-center">
@@ -269,7 +247,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
             </div>
           )}
 
-          {/* Additives */}
           {result.chemicalAnalysis.additives.length > 0 && (
             <div className="mb-4">
               <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
@@ -302,7 +279,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
             </div>
           )}
 
-          {/* Allergens */}
           {result.chemicalAnalysis.allergens.length > 0 && (
             <div className="mb-4">
               <h4 className="font-semibold text-purple-800 mb-2 flex items-center">
@@ -334,7 +310,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
             </div>
           )}
 
-          {/* No Issues Found */}
           {result.chemicalAnalysis.harmfulChemicals.length === 0 && 
            result.chemicalAnalysis.additives.filter(a => a.safetyRating !== 'SAFE').length === 0 && 
            result.chemicalAnalysis.allergens.length === 0 && (
@@ -347,7 +322,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
         </div>
       )}
 
-      {/* TensorFlow Analysis Section */}
       {result.tensorflowAnalysis && (
         <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
@@ -364,7 +338,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
             </div>
           </div>
 
-          {/* Food Identification */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
               <h4 className="font-semibold text-blue-800 mb-2">🔍 Food Type Detected</h4>
@@ -401,7 +374,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
             </div>
           </div>
 
-          {/* Visual Characteristics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 text-center">
               <div className="text-2xl mb-1">🍽️</div>
@@ -422,7 +394,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
             </div>
           </div>
 
-          {/* Quality Assessment */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="font-semibold text-gray-800 mb-2">🔬 Processing Level</h4>
