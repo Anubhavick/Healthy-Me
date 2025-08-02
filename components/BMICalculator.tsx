@@ -5,9 +5,10 @@ import { calculateBMI } from '../services/geminiService';
 interface BMICalculatorProps {
   userProfile: UserProfile;
   onBMIUpdate: (bmiData: any) => void;
+  isDarkMode?: boolean;
 }
 
-const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate }) => {
+const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate, isDarkMode = false }) => {
   const [height, setHeight] = useState(userProfile.bmi?.height || '');
   const [weight, setWeight] = useState(userProfile.bmi?.weight || '');
   const [loading, setLoading] = useState(false);
@@ -44,49 +45,59 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate 
   };
 
   const getBMIColor = (category: string) => {
-    switch (category) {
-      case 'Normal weight': return 'text-green-600 bg-green-50';
-      case 'Underweight': return 'text-blue-600 bg-blue-50';
-      case 'Overweight': return 'text-yellow-600 bg-yellow-50';
-      case 'Obese': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
+    if (isDarkMode) {
+      switch (category) {
+        case 'Normal weight': return 'text-green-400 bg-green-900/50';
+        case 'Underweight': return 'text-blue-400 bg-blue-900/50';
+        case 'Overweight': return 'text-yellow-400 bg-yellow-900/50';
+        case 'Obese': return 'text-red-400 bg-red-900/50';
+        default: return 'text-gray-400 bg-gray-800';
+      }
+    } else {
+      switch (category) {
+        case 'Normal weight': return 'text-green-600 bg-green-50';
+        case 'Underweight': return 'text-blue-600 bg-blue-50';
+        case 'Overweight': return 'text-yellow-600 bg-yellow-50';
+        case 'Obese': return 'text-red-600 bg-red-50';
+        default: return 'text-gray-600 bg-gray-50';
+      }
     }
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-3xl border border-blue-100 shadow-lg">
+    <div className={`${isDarkMode ? 'bg-gradient-to-br from-blue-900/30 to-indigo-900/30 border-blue-700' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100'} p-8 rounded-3xl border shadow-lg`}>
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-200/50">
           <span className="text-2xl text-white">⚖️</span>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">BMI Calculator</h3>
-        <p className="text-gray-600">Calculate your Body Mass Index with AI health advice</p>
+        <h3 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>BMI Calculator</h3>
+        <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Calculate your Body Mass Index with AI health advice</p>
       </div>
 
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+            <label className={`block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>
               Height (cm)
             </label>
             <input
               type="number"
               value={height}
               onChange={(e) => setHeight(e.target.value)}
-              className="w-full p-4 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-200 text-lg font-medium bg-white/80 backdrop-blur-sm"
+              className={`w-full p-4 border-2 ${isDarkMode ? 'border-blue-600 bg-gray-700 text-white focus:border-blue-400 focus:ring-blue-900/50' : 'border-blue-200 bg-white/80 text-gray-900 focus:border-blue-500 focus:ring-blue-100'} rounded-2xl focus:ring-4 outline-none transition-all duration-200 text-lg font-medium backdrop-blur-sm`}
               placeholder="170"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+            <label className={`block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>
               Weight (kg)
             </label>
             <input
               type="number"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className="w-full p-4 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-200 text-lg font-medium bg-white/80 backdrop-blur-sm"
+              className={`w-full p-4 border-2 ${isDarkMode ? 'border-blue-600 bg-gray-700 text-white focus:border-blue-400 focus:ring-blue-900/50' : 'border-blue-200 bg-white/80 text-gray-900 focus:border-blue-500 focus:ring-blue-100'} rounded-2xl focus:ring-4 outline-none transition-all duration-200 text-lg font-medium backdrop-blur-sm`}
               placeholder="70"
             />
           </div>
@@ -121,16 +132,16 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate 
             </div>
 
             {/* Health Advice */}
-            <div className="bg-white/70 backdrop-blur-sm p-6 rounded-2xl border border-blue-200 shadow-lg">
-              <h4 className="font-bold text-blue-800 mb-4 flex items-center gap-2 text-lg">
+            <div className={`${isDarkMode ? 'bg-gray-700/70 border-blue-600' : 'bg-white/70 border-blue-200'} backdrop-blur-sm p-6 rounded-2xl border shadow-lg`}>
+              <h4 className={`font-bold ${isDarkMode ? 'text-blue-300' : 'text-blue-800'} mb-4 flex items-center gap-2 text-lg`}>
                 <span>🩺</span>
                 AI Health Advice
               </h4>
               <div className="space-y-3">
                 {results.healthAdvice.map((advice: string, index: number) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-xl">
-                    <span className="text-blue-500 mt-0.5 text-lg">•</span>
-                    <span className="text-blue-700 text-sm font-medium">{advice}</span>
+                  <div key={index} className={`flex items-start gap-3 p-3 ${isDarkMode ? 'bg-blue-900/50' : 'bg-blue-50'} rounded-xl`}>
+                    <span className={`${isDarkMode ? 'text-blue-400' : 'text-blue-500'} mt-0.5 text-lg`}>•</span>
+                    <span className={`${isDarkMode ? 'text-blue-300' : 'text-blue-700'} text-sm font-medium`}>{advice}</span>
                   </div>
                 ))}
               </div>
@@ -138,16 +149,16 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate 
 
             {/* Risk Factors */}
             {results.risks.length > 0 && (
-              <div className="bg-white/70 backdrop-blur-sm p-6 rounded-2xl border border-orange-200 shadow-lg">
-                <h4 className="font-bold text-orange-800 mb-4 flex items-center gap-2 text-lg">
+              <div className={`${isDarkMode ? 'bg-gray-700/70 border-orange-600' : 'bg-white/70 border-orange-200'} backdrop-blur-sm p-6 rounded-2xl border shadow-lg`}>
+                <h4 className={`font-bold ${isDarkMode ? 'text-orange-300' : 'text-orange-800'} mb-4 flex items-center gap-2 text-lg`}>
                   <span>⚠️</span>
                   Risk Factors
                 </h4>
                 <div className="space-y-3">
                   {results.risks.map((risk: string, index: number) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-orange-50 rounded-xl">
-                      <span className="text-orange-500 mt-0.5 text-lg">•</span>
-                      <span className="text-orange-700 text-sm font-medium">{risk}</span>
+                    <div key={index} className={`flex items-start gap-3 p-3 ${isDarkMode ? 'bg-orange-900/50' : 'bg-orange-50'} rounded-xl`}>
+                      <span className={`${isDarkMode ? 'text-orange-400' : 'text-orange-500'} mt-0.5 text-lg`}>•</span>
+                      <span className={`${isDarkMode ? 'text-orange-300' : 'text-orange-700'} text-sm font-medium`}>{risk}</span>
                     </div>
                   ))}
                 </div>
@@ -155,16 +166,16 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate 
             )}
 
             {/* Recommendations */}
-            <div className="bg-white/70 backdrop-blur-sm p-6 rounded-2xl border border-emerald-200 shadow-lg">
-              <h4 className="font-bold text-emerald-800 mb-4 flex items-center gap-2 text-lg">
+            <div className={`${isDarkMode ? 'bg-gray-700/70 border-emerald-600' : 'bg-white/70 border-emerald-200'} backdrop-blur-sm p-6 rounded-2xl border shadow-lg`}>
+              <h4 className={`font-bold ${isDarkMode ? 'text-emerald-300' : 'text-emerald-800'} mb-4 flex items-center gap-2 text-lg`}>
                 <span>💡</span>
                 Recommendations
               </h4>
               <div className="space-y-3">
                 {results.recommendations.map((rec: string, index: number) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-emerald-50 rounded-xl">
-                    <span className="text-emerald-500 mt-0.5 text-lg">•</span>
-                    <span className="text-emerald-700 text-sm font-medium">{rec}</span>
+                  <div key={index} className={`flex items-start gap-3 p-3 ${isDarkMode ? 'bg-emerald-900/50' : 'bg-emerald-50'} rounded-xl`}>
+                    <span className={`${isDarkMode ? 'text-emerald-400' : 'text-emerald-500'} mt-0.5 text-lg`}>•</span>
+                    <span className={`${isDarkMode ? 'text-emerald-300' : 'text-emerald-700'} text-sm font-medium`}>{rec}</span>
                   </div>
                 ))}
               </div>

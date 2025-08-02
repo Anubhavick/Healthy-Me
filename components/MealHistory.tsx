@@ -8,16 +8,17 @@ interface MealHistoryProps {
   meals: Meal[];
   onDeleteMeal: (mealId: string) => void;
   onShareMeal?: (meal: Meal) => void;
+  isDarkMode?: boolean;
 }
 
-const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal, onShareMeal }) => {
+const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal, onShareMeal, isDarkMode = false }) => {
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
 
   if (meals.length === 0) {
     return (
-        <div className="text-center py-10 px-4 bg-gray-100 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800">No Meals Logged Yet</h3>
-            <p className="text-gray-500 mt-1">Start by analyzing a meal to see your history here.</p>
+        <div className={`text-center py-10 px-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg`}>
+            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>No Meals Logged Yet</h3>
+            <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>Start by analyzing a meal to see your history here.</p>
         </div>
     );
   }
@@ -27,15 +28,15 @@ const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal, onShareM
       {meals.map((meal) => (
         <div 
           key={meal.id} 
-          className="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex items-center space-x-4 transition-all hover:shadow-lg cursor-pointer"
+          className={`${isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : 'bg-white border-gray-200 hover:shadow-lg'} p-4 rounded-lg shadow-md border flex items-center space-x-4 transition-all cursor-pointer`}
           onClick={() => setSelectedMeal(meal)}
         >
           <img src={meal.imageDataUrl} alt={meal.analysis.dishName} className="w-20 h-20 object-cover rounded-md flex-shrink-0" />
           <div className="flex-grow">
-            <h4 className="font-bold text-lg text-gray-800">{meal.analysis.dishName}</h4>
-            <p className="text-sm text-gray-600">{meal.analysis.estimatedCalories} kcal • Health Score: {meal.healthScore}/20</p>
-            <p className="text-xs text-gray-400">{new Date(meal.timestamp).toLocaleString()}</p>
-            <p className="text-xs text-blue-600 mt-1">Click to view details</p>
+            <h4 className={`font-bold text-lg ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{meal.analysis.dishName}</h4>
+            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{meal.analysis.estimatedCalories} kcal • Health Score: {meal.healthScore}/20</p>
+            <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{new Date(meal.timestamp).toLocaleString()}</p>
+            <p className={`text-xs ${isDarkMode ? 'text-blue-400' : 'text-blue-600'} mt-1`}>Click to view details</p>
           </div>
           <div className="flex items-center space-x-2">
             {onShareMeal && (
@@ -44,7 +45,7 @@ const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal, onShareM
                   e.stopPropagation();
                   onShareMeal(meal);
                 }}
-                className="p-2 rounded-full text-gray-400 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                className={`p-2 rounded-full ${isDarkMode ? 'text-gray-400 hover:bg-blue-900 hover:text-blue-400' : 'text-gray-400 hover:bg-blue-100 hover:text-blue-600'} transition-colors`}
                 aria-label={`Share ${meal.analysis.dishName}`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,7 +58,7 @@ const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal, onShareM
                 e.stopPropagation();
                 onDeleteMeal(meal.id);
               }}
-              className="p-2 rounded-full text-gray-400 hover:bg-red-100 hover:text-red-600 transition-colors"
+              className={`p-2 rounded-full ${isDarkMode ? 'text-gray-400 hover:bg-red-900 hover:text-red-400' : 'text-gray-400 hover:bg-red-100 hover:text-red-600'} transition-colors`}
               aria-label={`Delete ${meal.analysis.dishName}`}
             >
               <TrashIcon className="w-5 h-5" />
@@ -69,12 +70,12 @@ const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal, onShareM
       {/* Meal Detail Modal */}
       {selectedMeal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white p-6 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-800">Meal Details</h3>
+          <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
+            <div className={`sticky top-0 ${isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'} p-6 border-b flex justify-between items-center`}>
+              <h3 className={`text-xl font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Meal Details</h3>
               <button
                 onClick={() => setSelectedMeal(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className={`${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -89,7 +90,7 @@ const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal, onShareM
                   alt={selectedMeal.analysis.dishName}
                   className="w-full h-48 object-cover rounded-lg"
                 />
-                <p className="text-sm text-gray-500 mt-2">
+                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mt-2`}>
                   Analyzed on {new Date(selectedMeal.timestamp).toLocaleString()}
                 </p>
               </div>

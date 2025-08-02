@@ -27,6 +27,12 @@ export interface UserProfile {
   id: string;
   email: string;
   displayName: string;
+  name?: string; // Full name
+  age?: number;
+  gender?: string;
+  height?: number; // cm
+  weight?: number; // kg
+  activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
   diet: Diet;
   medicalConditions: MedicalCondition[];
   customCondition?: string;
@@ -47,6 +53,7 @@ export interface UserProfile {
     best: number;
     lastMealDate?: string;
   };
+  currentStreak?: number; // Alias for easier access
 }
 
 export interface ChemicalAnalysis {

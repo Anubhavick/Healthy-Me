@@ -28,10 +28,8 @@ export class FirebaseService {
       };
 
       const docRef = await addDoc(collection(db, this.mealsCollection), mealData);
-      console.log('✅ Meal saved to Firebase with ID:', docRef.id);
       return docRef.id;
     } catch (error) {
-      console.error('❌ Error saving meal to Firebase:', error);
       throw error;
     }
   }
@@ -55,10 +53,8 @@ export class FirebaseService {
         } as Meal);
       });
 
-      console.log('✅ Retrieved', meals.length, 'meals from Firebase');
       return meals;
     } catch (error) {
-      console.error('❌ Error getting meals from Firebase:', error);
       throw error;
     }
   }
@@ -67,9 +63,7 @@ export class FirebaseService {
   async deleteMeal(mealId: string): Promise<void> {
     try {
       await deleteDoc(doc(db, this.mealsCollection, mealId));
-      console.log('✅ Meal deleted from Firebase:', mealId);
     } catch (error) {
-      console.error('❌ Error deleting meal from Firebase:', error);
       throw error;
     }
   }
@@ -126,7 +120,6 @@ export class FirebaseService {
       localStorage.setItem('mealHistory', JSON.stringify(mergedMeals));
       result.downloaded = firebaseMeals.length;
 
-      console.log('🔄 Sync complete:', result);
       return result;
     } catch (error) {
       result.errors.push(`Sync failed: ${error}`);

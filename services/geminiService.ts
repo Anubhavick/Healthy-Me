@@ -40,14 +40,10 @@ export async function analyzeImage(
   let tensorflowValidation;
   
   try {
-    console.log('Step 1: TensorFlow pre-analysis...');
     tensorflowValidation = await tensorflowService.validateFoodImage(imageDataUrl);
     
     if (tensorflowValidation.isValidFood) {
       tensorflowAnalysis = await tensorflowService.enhancedFoodAnalysis(imageDataUrl);
-      console.log('TensorFlow analysis completed successfully');
-    } else {
-      console.warn('TensorFlow validation suggests this may not be a food image');
     }
   } catch (tfError) {
     console.warn('TensorFlow analysis failed, proceeding with Gemini only:', tfError);
@@ -249,7 +245,6 @@ Be realistic with estimations and provide actionable, medically-informed advice.
   };
 
   try {
-    console.log('Step 2: Gemini AI analysis...');
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: { parts: [imagePart, { text: prompt }] },
@@ -289,15 +284,12 @@ Be realistic with estimations and provide actionable, medically-informed advice.
       }
     }
     
-    console.log('Analysis completed successfully');
     return result;
 
   } catch (error) {
-    console.error("Error analyzing image with Gemini:", error);
     
     // Fallback: if Gemini fails but TensorFlow succeeded, provide basic analysis
     if (tensorflowAnalysis) {
-      console.log("Gemini failed, providing TensorFlow-based fallback analysis");
       return {
         dishName: tensorflowAnalysis.foodIdentification.predictions[0]?.className || 'Unknown Food',
         estimatedCalories: tensorflowAnalysis.nutritionalEstimation.estimatedCalories,
@@ -397,7 +389,6 @@ Respond with a JSON object containing health advice, risk factors, and recommend
       ...result
     };
   } catch (error) {
-    console.error("Error getting BMI advice:", error);
     return {
       bmi,
       category,

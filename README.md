@@ -216,7 +216,6 @@ ai-diet-scanner/
 │   ├── AIServicesStatus.tsx        # AI service monitoring component
 │   ├── AnalysisResult.tsx          # Nutritional analysis display
 │   ├── AnalyticsDashboard.tsx      # Data visualization dashboard
-│   ├── AuthContext.tsx             # Authentication context provider
 │   ├── AuthModal.tsx               # User authentication interface
 │   ├── BMICalculator.tsx           # Body Mass Index calculator
 │   ├── DietSelector.tsx            # Dietary preference selector
@@ -229,13 +228,11 @@ ai-diet-scanner/
 │   ├── MealHistory.tsx             # Historical meal tracking
 │   ├── MealHistoryModal.tsx        # Detailed meal history view
 │   ├── MedicalConditionsSelector.tsx # Health condition selection
+│   ├── ProfileDropdown.tsx         # User profile dropdown menu
+│   ├── SettingsModal.tsx           # Application settings interface
 │   ├── ShareCardGenerator.tsx      # Social sharing card creation
-│   ├── SocialSharing.tsx           # Social media integration
-│   ├── StreakGoals.tsx             # Goal tracking and streaks
-│   └── UserProfileSetup.tsx        # User profile configuration
+│   └── StreakGoals.tsx             # Goal tracking and streaks
 ├── services/                        # Backend service integrations
-│   ├── cloudVisionService.ts       # Google Cloud Vision API service
-│   ├── enhancedGeminiService.ts    # Advanced Gemini AI integration
 │   ├── exportService.ts            # Data export functionality
 │   ├── firebase.ts                 # Firebase configuration
 │   ├── firebaseService.ts          # Firebase database operations

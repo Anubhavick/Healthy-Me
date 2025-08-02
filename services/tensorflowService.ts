@@ -42,8 +42,6 @@ export class TensorFlowService {
     if (this.isLoaded) return;
 
     try {
-      console.log('Loading TensorFlow.js MobileNet model...');
-      
       // Add a timeout to prevent hanging
       const loadPromise = mobilenet.load();
       const timeoutPromise = new Promise((_, reject) => 
@@ -52,9 +50,7 @@ export class TensorFlowService {
       
       this.model = await Promise.race([loadPromise, timeoutPromise]) as mobilenet.MobileNet;
       this.isLoaded = true;
-      console.log('TensorFlow.js model loaded successfully!');
     } catch (error) {
-      console.error('Error loading TensorFlow.js model:', error);
       this.isLoaded = false;
       // Don't throw error, just log it so the app continues working
       console.warn('TensorFlow.js will be disabled for this session');
@@ -114,7 +110,6 @@ export class TensorFlowService {
         primaryFoodType
       };
     } catch (error) {
-      console.error('Error classifying image:', error);
       throw error;
     }
   }
@@ -382,7 +377,6 @@ export class TensorFlowService {
         qualityAssessment
       };
     } catch (error) {
-      console.error('Error in enhanced TensorFlow food analysis:', error);
       throw error;
     }
   }
@@ -430,7 +424,6 @@ export class TensorFlowService {
         suggestions
       };
     } catch (error) {
-      console.error('Error validating food image:', error);
       return {
         isValidFood: true,
         confidence: 0.8,

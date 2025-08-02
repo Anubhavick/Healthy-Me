@@ -8,7 +8,7 @@ interface AIServiceStatus {
   cloudVision: 'loading' | 'ready' | 'error';
 }
 
-const AIServicesStatus: React.FC = () => {
+const AIServicesStatus: React.FC<{ isDarkMode?: boolean }> = ({ isDarkMode = false }) => {
   const [status, setStatus] = useState<AIServiceStatus>({
     gemini: 'loading',
     tensorflow: 'loading',
@@ -81,11 +81,11 @@ const AIServicesStatus: React.FC = () => {
   const allReady = Object.values(status).every(s => s === 'ready');
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200 p-4 mb-6">
+    <div className={`${isDarkMode ? 'bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-blue-700' : 'bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200'} rounded-lg border p-4 mb-6`}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-bold text-gray-700">🤖 AI Services Status</h3>
+        <h3 className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>🤖 AI Services Status</h3>
         {allReady && (
-          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
+          <span className={`${isDarkMode ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-800'} px-2 py-1 rounded-full text-xs font-semibold`}>
             All Systems Ready
           </span>
         )}
@@ -126,7 +126,7 @@ const AIServicesStatus: React.FC = () => {
       </div>
 
       {allReady && (
-        <div className="mt-3 text-xs text-center text-gray-600">
+        <div className={`mt-3 text-xs text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
           🚀 <strong>Multi-Cloud AI Platform Active</strong> - Ready for production scaling
         </div>
       )}

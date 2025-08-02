@@ -18,6 +18,8 @@ import BMICalculator from './components/BMICalculator';
 import MedicalConditionsSelector from './components/MedicalConditionsSelector';
 import StreakGoals from './components/StreakGoals';
 import EnhancedAnalytics from './components/EnhancedAnalytics';
+import ProfileDropdown from './components/ProfileDropdown';
+import SettingsModal from './components/SettingsModal';
 import { SparklesIcon, LoadingSpinner } from './components/icons';
 
 const App: React.FC = () => {
@@ -27,9 +29,11 @@ const App: React.FC = () => {
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState<boolean>(false);
   const [showGoalsModal, setShowGoalsModal] = useState<boolean>(false);
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [showShareCard, setShowShareCard] = useState<boolean>(false);
   const [mealToShare, setMealToShare] = useState<Meal | null>(null);
   const [activeTab, setActiveTab] = useState<'analyze' | 'profile' | 'analytics' | 'social' | 'goals'>('profile');
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [image, setImage] = useState<string | null>(null);
@@ -147,7 +151,9 @@ const App: React.FC = () => {
             }
         }
     } catch (e) {
-        console.error("Failed to parse stored data from localStorage", e);
+        // Clear potentially corrupted data
+        localStorage.removeItem('mealHistory');
+        localStorage.removeItem('userProfile'); 
         setMealHistory([]);
     }
   }, []);
@@ -178,7 +184,6 @@ const App: React.FC = () => {
       setMealHistory(updatedHistory);
       localStorage.setItem('mealHistory', JSON.stringify(updatedHistory));
     } catch (err) {
-      console.error('Error analyzing image:', err);
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
@@ -269,6 +274,50 @@ const App: React.FC = () => {
     setMealHistory([]);
     localStorage.removeItem('mealHistory');
   };
+
+  const handleDarkModeToggle = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', JSON.stringify(newDarkMode));
+    // Apply dark mode to document root
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  const handleProfileUpdateExtended = (updatedFields: Partial<UserProfile>) => {
+    if (userProfile) {
+      const updatedProfile = { ...userProfile, ...updatedFields };
+      handleProfileUpdate(updatedProfile);
+    }
+  };
+
+  // Load dark mode preference on component mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode) {
+      const darkMode = JSON.parse(savedDarkMode);
+      setIsDarkMode(darkMode);
+      if (darkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, []);
+
+  // Sync dark mode changes with document class
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark:bg-gray-900');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark:bg-gray-900');
+    }
+  }, [isDarkMode]);
 
   const handleImageUpload = (imageDataUrl: string) => {
       setImage(imageDataUrl);
@@ -409,9 +458,9 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       {/* Material Design 3 Header */}
-      <header className="bg-white shadow-sm border-b border-gray-100">
+      <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-100'}`}>
         <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -419,63 +468,49 @@ const App: React.FC = () => {
                       <SparklesIcon className="w-7 h-7 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Healthy Me</h1>
-                        <p className="text-sm text-gray-600 font-medium">
-                            Powered by <span className="text-blue-600 font-semibold">Advanced Analytics</span> • 
-                            <span className="text-purple-600 font-semibold"> Machine Learning</span> • 
-                            <span className="text-orange-600 font-semibold"> Smart Analysis</span>
+                        <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} tracking-tight`}>Healthy Me</h1>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} font-medium`}>
+                            Powered by <span className="text-blue-500 font-semibold">Advanced Analytics</span> • 
+                            <span className="text-purple-500 font-semibold"> Machine Learning</span> • 
+                            <span className="text-orange-500 font-semibold"> Smart Analysis</span>
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => setShowHistoryModal(true)}
-                        className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 transition-all duration-200 text-sm font-semibold border border-blue-200 hover:border-blue-300"
-                    >
-                        📚 History ({mealHistory.length})
-                    </button>
-                    <button
-                        onClick={() => setShowAnalyticsModal(true)}
-                        className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full hover:bg-emerald-100 transition-all duration-200 text-sm font-semibold border border-emerald-200 hover:border-emerald-300"
-                    >
-                        📈 Analytics
-                    </button>
-                    <button
-                        onClick={() => setShowGoalsModal(true)}
-                        className="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full hover:bg-orange-100 transition-all duration-200 text-sm font-semibold border border-orange-200 hover:border-orange-300"
-                    >
-                        🎯 Goals
-                    </button>
-                    <div className="hidden sm:block text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
-                        👋 Welcome, {user?.email || user?.displayName || 'User'}!
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="bg-red-50 text-red-600 px-4 py-2 rounded-full hover:bg-red-100 transition-all duration-200 text-sm font-semibold border border-red-200 hover:border-red-300"
-                    >
-                        Logout
-                    </button>
+                <div className="flex items-center">
+                    <ProfileDropdown
+                      user={user}
+                      userProfile={userProfile}
+                      mealHistoryCount={mealHistory.length}
+                      isDarkMode={isDarkMode}
+                      onShowHistory={() => setShowHistoryModal(true)}
+                      onShowAnalytics={() => setShowAnalyticsModal(true)}
+                      onShowGoals={() => setShowGoalsModal(true)}
+                      onShowSettings={() => setShowSettingsModal(true)}
+                      onShowProfileEdit={() => setShowSettingsModal(true)}
+                      onToggleDarkMode={handleDarkModeToggle}
+                      onLogout={handleLogout}
+                    />
                 </div>
             </div>
         </div>
       </header>
       
       <main className="container mx-auto p-6 space-y-8">
-        <AIServicesStatus />
+        <AIServicesStatus isDarkMode={isDarkMode} />
         
         {/* Main Analysis Section - Material Design Cards */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
           
           <div className="xl:col-span-5">
-            <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 space-y-8">
+            <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-8 rounded-3xl shadow-lg border space-y-8`}>
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">📸 Scan Your Meal</h2>
-                <p className="text-gray-600">Upload a photo to get instant nutrition analysis and chemical safety assessment</p>
+                <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>📸 Scan Your Meal</h2>
+                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Upload a photo to get instant nutrition analysis and chemical safety assessment</p>
               </div>
               <ImageUploader onImageUpload={handleImageUpload} imagePreviewUrl={image} />
               
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">🥗 Select Your Diet</h3>
+                <h3 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-4`}>🥗 Select Your Diet</h3>
                 <DietSelector 
                   selectedDiet={userProfile?.diet || Diet.None} 
                   onDietChange={(newDiet) => {
@@ -508,25 +543,25 @@ const App: React.FC = () => {
           </div>
           
           <div className="xl:col-span-7">
-            <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 min-h-[500px] flex flex-col">
+            <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-8 rounded-3xl shadow-lg border min-h-[500px] flex flex-col`}>
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">🧠 Analysis Results</h2>
-                <p className="text-gray-600">Smart nutrition insights, chemical safety analysis, and health recommendations</p>
+                <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>🧠 Analysis Results</h2>
+                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Smart nutrition insights, chemical safety analysis, and health recommendations</p>
               </div>
               
               <div className="flex-1 flex items-center justify-center">
                 {isLoading && (
                   <div className="text-center py-12">
                     <LoadingSpinner className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-                    <p className="text-xl font-semibold text-gray-700 mb-2">Analyzing your meal...</p>
-                    <p className="text-gray-500">This may take a moment.</p>
+                    <p className={`text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'} mb-2`}>Analyzing your meal...</p>
+                    <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>This may take a moment.</p>
                   </div>
                 )}
                 {error && (
-                  <div className="text-center py-12 bg-red-50 p-8 rounded-2xl border border-red-200 w-full">
+                  <div className={`text-center py-12 ${isDarkMode ? 'bg-red-900/50 border-red-700' : 'bg-red-50 border-red-200'} p-8 rounded-2xl border w-full`}>
                     <div className="text-4xl mb-4">❌</div>
-                    <h3 className="text-red-700 font-bold text-lg mb-2">Analysis Failed</h3>
-                    <p className="text-red-600">{error}</p>
+                    <h3 className={`${isDarkMode ? 'text-red-300' : 'text-red-700'} font-bold text-lg mb-2`}>Analysis Failed</h3>
+                    <p className={`${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{error}</p>
                   </div>
                 )}
                 {!isLoading && !error && analysisResult && (
@@ -538,10 +573,10 @@ const App: React.FC = () => {
                   </div>
                 )}
                 {!isLoading && !error && !analysisResult && (
-                   <div className="text-center text-gray-500 py-12">
+                   <div className={`text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} py-12`}>
                       <div className="text-6xl mb-4">🍽️</div>
                       <p className="text-lg font-medium">Your meal analysis will appear here</p>
-                      <p className="text-gray-400 mt-2">Upload an image and click analyze to get started</p>
+                      <p className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} mt-2`}>Upload an image and click analyze to get started</p>
                   </div>
                 )}
               </div>
@@ -551,11 +586,11 @@ const App: React.FC = () => {
         </div>
 
         {/* Health Profile Setup Section - Material Design 3 */}
-        <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+        <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-3xl shadow-lg border overflow-hidden`}>
+          <div className={`p-8 ${isDarkMode ? 'border-gray-700 bg-gradient-to-r from-gray-700 to-gray-800' : 'border-gray-100 bg-gradient-to-r from-gray-50 to-white'} border-b`}>
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">👤 Health Profile Setup</h2>
-              <p className="text-gray-600 text-lg">Personalize your experience with BMI calculation and health conditions</p>
+              <h2 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>👤 Health Profile Setup</h2>
+              <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-lg`}>Personalize your experience with BMI calculation and health conditions</p>
             </div>
           </div>
           
@@ -563,17 +598,19 @@ const App: React.FC = () => {
           <div className="p-8">
             <div className="space-y-8">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Set Up Your Health Profile</h3>
-                <p className="text-gray-600">Personalize your experience with BMI calculation and health conditions</p>
+                <h3 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>Set Up Your Health Profile</h3>
+                <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Personalize your experience with BMI calculation and health conditions</p>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <BMICalculator
                   userProfile={userProfile}
                   onBMIUpdate={handleBMIUpdate}
+                  isDarkMode={isDarkMode}
                 />
                 <MedicalConditionsSelector
                   selectedConditions={userProfile?.medicalConditions || []}
                   onConditionsChange={handleConditionsUpdate}
+                  isDarkMode={isDarkMode}
                 />
               </div>
             </div>
@@ -581,10 +618,10 @@ const App: React.FC = () => {
         </div>
         
         {/* Firebase Sync Section - Always available */}
-        <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
+        <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} p-8 rounded-3xl shadow-lg border`}>
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">☁️ Firebase Sync</h2>
-            <p className="text-gray-600">Sync your data across devices</p>
+            <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>☁️ Firebase Sync</h2>
+            <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Sync your data across devices</p>
           </div>
           <FirebaseSync onSyncComplete={handleSyncComplete} />
         </div>
@@ -596,6 +633,7 @@ const App: React.FC = () => {
         onClose={() => setShowHistoryModal(false)}
         meals={mealHistory}
         userProfile={userProfile}
+        isDarkMode={isDarkMode}
         onDeleteMeal={handleDeleteMeal}
         onShareMeal={handleShareMeal}
       />
@@ -606,6 +644,7 @@ const App: React.FC = () => {
         onClose={() => setShowAnalyticsModal(false)}
         mealHistory={mealHistory}
         userProfile={userProfile}
+        isDarkMode={isDarkMode}
       />
 
       {/* Goals & Streaks Modal */}
@@ -613,8 +652,19 @@ const App: React.FC = () => {
         isOpen={showGoalsModal}
         onClose={() => setShowGoalsModal(false)}
         userProfile={userProfile}
+        isDarkMode={isDarkMode}
         onGoalsUpdate={handleGoalsUpdate}
         onStreakUpdate={handleStreakUpdate}
+      />
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        userProfile={userProfile}
+        isDarkMode={isDarkMode}
+        onProfileUpdate={handleProfileUpdateExtended}
+        onDarkModeToggle={handleDarkModeToggle}
       />
 
       {/* Share Card Generator */}
