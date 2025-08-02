@@ -47,6 +47,30 @@ export interface UserProfile {
   };
 }
 
+export interface ChemicalAnalysis {
+  harmfulChemicals: {
+    name: string;
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'SEVERE';
+    description: string;
+    healthEffects: string[];
+  }[];
+  additives: {
+    name: string;
+    eNumber?: string;
+    type: 'PRESERVATIVE' | 'COLORANT' | 'FLAVOR_ENHANCER' | 'EMULSIFIER' | 'SWEETENER' | 'OTHER';
+    safetyRating: 'SAFE' | 'CAUTION' | 'AVOID';
+    description: string;
+  }[];
+  allergens: {
+    name: string;
+    severity: 'MILD' | 'MODERATE' | 'SEVERE';
+    commonReactions: string[];
+  }[];
+  overallSafetyScore: number; // 1-10 scale
+  isOrganicCertified: boolean;
+  hasArtificialIngredients: boolean;
+}
+
 export interface AnalysisResult {
   estimatedCalories: number;
   dietCompatibility: {
@@ -69,6 +93,7 @@ export interface AnalysisResult {
     sugar: number;
     sodium: number;
   };
+  chemicalAnalysis?: ChemicalAnalysis;
 }
 
 export interface Meal {

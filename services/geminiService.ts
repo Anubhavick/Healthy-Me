@@ -47,13 +47,23 @@ export async function analyzeImage(
     ? `The user's BMI is ${userProfile.bmi.value} (${userProfile.bmi.category}). Consider this in your nutritional advice.`
     : "";
 
-  const prompt = `You are a nutrition expert and medical advisor. Analyze the food in this image comprehensively. 
+  const prompt = `You are a nutrition expert, food scientist, and medical advisor. Analyze the food or food product packaging in this image comprehensively. 
+
+IMPORTANT: If this is a packaged food product with ingredient labels, focus heavily on chemical analysis including harmful additives, preservatives, artificial chemicals, allergens, and E-numbers.
 
 ${dietInstruction}
 ${medicalInstruction}
 ${bmiInstruction}
 
-Based on the visual information, identify the dish, list primary ingredients, estimate calories and nutritional breakdown, provide health tips, determine diet compatibility, and most importantly - assess safety and provide medical advice for the user's conditions.
+For packaged foods, perform detailed ingredient label analysis:
+1. Identify all chemicals, additives, preservatives, and artificial ingredients
+2. Assess their safety levels and potential health impacts
+3. Check for harmful substances like trans fats, high fructose corn syrup, artificial colors, MSG, etc.
+4. Evaluate E-numbers and their safety ratings
+5. Identify allergens and their severity levels
+6. Determine if the product is organic or contains artificial ingredients
+
+For prepared meals, provide general nutrition analysis but also flag any visible processed ingredients that might contain harmful chemicals.
 
 Be realistic with estimations and provide actionable, medically-informed advice. Respond ONLY with a JSON object that matches the schema.`;
 
@@ -130,8 +140,77 @@ Be realistic with estimations and provide actionable, medically-informed advice.
         },
         description: "A list of 2-3 concise and actionable health tips related to the meal.",
       },
+      chemicalAnalysis: {
+        type: Type.OBJECT,
+        properties: {
+          harmfulChemicals: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING, description: "Name of the harmful chemical" },
+                riskLevel: { type: Type.STRING, description: "Risk level: LOW, MEDIUM, HIGH, or SEVERE" },
+                description: { type: Type.STRING, description: "Description of the chemical" },
+                healthEffects: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                  description: "List of potential health effects"
+                }
+              },
+              required: ["name", "riskLevel", "description", "healthEffects"]
+            },
+            description: "List of harmful chemicals found in the product"
+          },
+          additives: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING, description: "Name of the additive" },
+                eNumber: { type: Type.STRING, description: "E-number if applicable" },
+                type: { type: Type.STRING, description: "Type: PRESERVATIVE, COLORANT, FLAVOR_ENHANCER, EMULSIFIER, SWEETENER, or OTHER" },
+                safetyRating: { type: Type.STRING, description: "Safety rating: SAFE, CAUTION, or AVOID" },
+                description: { type: Type.STRING, description: "Description of the additive" }
+              },
+              required: ["name", "type", "safetyRating", "description"]
+            },
+            description: "List of additives found in the product"
+          },
+          allergens: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING, description: "Name of the allergen" },
+                severity: { type: Type.STRING, description: "Severity: MILD, MODERATE, or SEVERE" },
+                commonReactions: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                  description: "Common allergic reactions"
+                }
+              },
+              required: ["name", "severity", "commonReactions"]
+            },
+            description: "List of allergens found in the product"
+          },
+          overallSafetyScore: {
+            type: Type.INTEGER,
+            description: "Overall safety score from 1-10 (10 being safest)"
+          },
+          isOrganicCertified: {
+            type: Type.BOOLEAN,
+            description: "Whether the product has organic certification"
+          },
+          hasArtificialIngredients: {
+            type: Type.BOOLEAN,
+            description: "Whether the product contains artificial ingredients"
+          }
+        },
+        required: ["harmfulChemicals", "additives", "allergens", "overallSafetyScore", "isOrganicCertified", "hasArtificialIngredients"],
+        description: "Chemical analysis of the food product"
+      },
     },
-    required: ["dishName", "estimatedCalories", "nutritionalBreakdown", "dietCompatibility", "medicalAdvice", "ingredients", "healthTips"],
+    required: ["dishName", "estimatedCalories", "nutritionalBreakdown", "dietCompatibility", "medicalAdvice", "ingredients", "healthTips", "chemicalAnalysis"],
   };
 
   try {

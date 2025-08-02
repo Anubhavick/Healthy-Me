@@ -57,6 +57,29 @@ const App: React.FC = () => {
     if (analysis.medicalAdvice?.isSafeForConditions) score += 2;
     else score -= 2;
     
+    // Chemical safety analysis
+    if (analysis.chemicalAnalysis) {
+      // Safety score contribution (0-2 points)
+      score += Math.floor(analysis.chemicalAnalysis.overallSafetyScore / 5);
+      
+      // Penalty for harmful chemicals
+      if (analysis.chemicalAnalysis.harmfulChemicals.length > 0) {
+        const severeChemicals = analysis.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'SEVERE');
+        const highRiskChemicals = analysis.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'HIGH');
+        score -= (severeChemicals.length * 3 + highRiskChemicals.length * 2);
+      }
+      
+      // Bonus for organic certification
+      if (analysis.chemicalAnalysis.isOrganicCertified) score += 2;
+      
+      // Penalty for artificial ingredients
+      if (analysis.chemicalAnalysis.hasArtificialIngredients) score -= 1;
+      
+      // Penalty for harmful additives
+      const harmfulAdditives = analysis.chemicalAnalysis.additives.filter(a => a.safetyRating === 'AVOID');
+      score -= harmfulAdditives.length;
+    }
+    
     return Math.max(1, Math.min(20, score));
   };
 
@@ -379,7 +402,7 @@ const App: React.FC = () => {
             <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 space-y-8">
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">📸 Scan Your Meal</h2>
-                <p className="text-gray-600">Upload a photo to get instant AI-powered nutrition analysis</p>
+                <p className="text-gray-600">Upload a photo to get instant AI-powered nutrition analysis and chemical safety assessment</p>
               </div>
               <ImageUploader onImageUpload={handleImageUpload} imagePreviewUrl={image} />
               
@@ -419,8 +442,8 @@ const App: React.FC = () => {
           <div className="xl:col-span-7">
             <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 min-h-[500px] flex flex-col">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">🧠 Analysis Results</h2>
-                <p className="text-gray-600">AI-powered nutrition insights and health recommendations</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">🧠 AI Analysis Results</h2>
+                <p className="text-gray-600">AI-powered nutrition insights, chemical safety analysis, and health recommendations</p>
               </div>
               
               <div className="flex-1 flex items-center justify-center">

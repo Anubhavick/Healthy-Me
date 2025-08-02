@@ -58,7 +58,7 @@ const HealthScoreCard: React.FC<{ score: number }> = ({ score }) => {
 const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
   const { isCompatible, reason } = result.dietCompatibility;
   
-  // Calculate health score based on calories, ingredients, and diet compatibility
+  // Calculate health score based on calories, ingredients, diet compatibility, and chemical safety
   const calculateHealthScore = () => {
     let score = 10; // Base score
     
@@ -78,6 +78,29 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
     // Diet compatibility
     if (isCompatible) score += 3;
     else score -= 1;
+    
+    // Chemical safety analysis
+    if (result.chemicalAnalysis) {
+      // Safety score contribution (0-2 points)
+      score += Math.floor(result.chemicalAnalysis.overallSafetyScore / 5);
+      
+      // Penalty for harmful chemicals
+      if (result.chemicalAnalysis.harmfulChemicals.length > 0) {
+        const severeChemicals = result.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'SEVERE');
+        const highRiskChemicals = result.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'HIGH');
+        score -= (severeChemicals.length * 3 + highRiskChemicals.length * 2);
+      }
+      
+      // Bonus for organic certification
+      if (result.chemicalAnalysis.isOrganicCertified) score += 2;
+      
+      // Penalty for artificial ingredients
+      if (result.chemicalAnalysis.hasArtificialIngredients) score -= 1;
+      
+      // Penalty for harmful additives
+      const harmfulAdditives = result.chemicalAnalysis.additives.filter(a => a.safetyRating === 'AVOID');
+      score -= harmfulAdditives.length;
+    }
     
     // Health tips bonus (more tips = more areas for improvement = lower base health)
     if (result.healthTips.length <= 2) score += 2;
@@ -122,6 +145,164 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
           ))}
         </ul>
       </div>
+
+      {/* Chemical Analysis Section */}
+      {result.chemicalAnalysis && (
+        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+              🧪 Chemical & Safety Analysis
+            </h3>
+            <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
+              result.chemicalAnalysis.overallSafetyScore >= 8 ? 'bg-green-100 text-green-800' :
+              result.chemicalAnalysis.overallSafetyScore >= 6 ? 'bg-yellow-100 text-yellow-800' :
+              result.chemicalAnalysis.overallSafetyScore >= 4 ? 'bg-orange-100 text-orange-800' :
+              'bg-red-100 text-red-800'
+            }`}>
+              Safety Score: {result.chemicalAnalysis.overallSafetyScore}/10
+            </div>
+          </div>
+
+          {/* Safety Indicators */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className={`p-3 rounded-lg border ${
+              result.chemicalAnalysis.isOrganicCertified ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+            }`}>
+              <div className="flex items-center">
+                <span className="text-xl mr-2">{result.chemicalAnalysis.isOrganicCertified ? '🌱' : '🏭'}</span>
+                <span className={`font-medium ${result.chemicalAnalysis.isOrganicCertified ? 'text-green-800' : 'text-gray-600'}`}>
+                  {result.chemicalAnalysis.isOrganicCertified ? 'Organic Certified' : 'Conventional'}
+                </span>
+              </div>
+            </div>
+            <div className={`p-3 rounded-lg border ${
+              !result.chemicalAnalysis.hasArtificialIngredients ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'
+            }`}>
+              <div className="flex items-center">
+                <span className="text-xl mr-2">{!result.chemicalAnalysis.hasArtificialIngredients ? '✅' : '⚠️'}</span>
+                <span className={`font-medium ${!result.chemicalAnalysis.hasArtificialIngredients ? 'text-green-800' : 'text-orange-800'}`}>
+                  {!result.chemicalAnalysis.hasArtificialIngredients ? 'No Artificial Ingredients' : 'Contains Artificial Ingredients'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Harmful Chemicals */}
+          {result.chemicalAnalysis.harmfulChemicals.length > 0 && (
+            <div className="mb-4">
+              <h4 className="font-semibold text-red-800 mb-2 flex items-center">
+                ⚠️ Harmful Chemicals Detected
+              </h4>
+              <div className="space-y-2">
+                {result.chemicalAnalysis.harmfulChemicals.map((chemical, index) => (
+                  <div key={index} className={`p-3 rounded-lg border ${
+                    chemical.riskLevel === 'SEVERE' ? 'bg-red-50 border-red-300' :
+                    chemical.riskLevel === 'HIGH' ? 'bg-red-50 border-red-200' :
+                    chemical.riskLevel === 'MEDIUM' ? 'bg-orange-50 border-orange-200' :
+                    'bg-yellow-50 border-yellow-200'
+                  }`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center mb-1">
+                          <span className="font-semibold text-gray-900">{chemical.name}</span>
+                          <span className={`ml-2 px-2 py-1 text-xs font-bold rounded ${
+                            chemical.riskLevel === 'SEVERE' ? 'bg-red-600 text-white' :
+                            chemical.riskLevel === 'HIGH' ? 'bg-red-500 text-white' :
+                            chemical.riskLevel === 'MEDIUM' ? 'bg-orange-500 text-white' :
+                            'bg-yellow-500 text-white'
+                          }`}>
+                            {chemical.riskLevel}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{chemical.description}</p>
+                        <div className="text-xs text-gray-500">
+                          <strong>Health Effects:</strong> {chemical.healthEffects.join(', ')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Additives */}
+          {result.chemicalAnalysis.additives.length > 0 && (
+            <div className="mb-4">
+              <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
+                🧬 Food Additives
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {result.chemicalAnalysis.additives.map((additive, index) => (
+                  <div key={index} className={`p-2 rounded border text-sm ${
+                    additive.safetyRating === 'AVOID' ? 'bg-red-50 border-red-200' :
+                    additive.safetyRating === 'CAUTION' ? 'bg-yellow-50 border-yellow-200' :
+                    'bg-green-50 border-green-200'
+                  }`}>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="font-medium">{additive.name}</span>
+                        {additive.eNumber && <span className="text-gray-500 ml-1">({additive.eNumber})</span>}
+                        <div className="text-xs text-gray-600">{additive.type.replace(/_/g, ' ')}</div>
+                      </div>
+                      <span className={`px-1 py-0.5 text-xs font-bold rounded ${
+                        additive.safetyRating === 'AVOID' ? 'bg-red-600 text-white' :
+                        additive.safetyRating === 'CAUTION' ? 'bg-yellow-600 text-white' :
+                        'bg-green-600 text-white'
+                      }`}>
+                        {additive.safetyRating}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Allergens */}
+          {result.chemicalAnalysis.allergens.length > 0 && (
+            <div className="mb-4">
+              <h4 className="font-semibold text-purple-800 mb-2 flex items-center">
+                🚫 Allergen Warning
+              </h4>
+              <div className="space-y-2">
+                {result.chemicalAnalysis.allergens.map((allergen, index) => (
+                  <div key={index} className={`p-3 rounded-lg border ${
+                    allergen.severity === 'SEVERE' ? 'bg-red-50 border-red-300' :
+                    allergen.severity === 'MODERATE' ? 'bg-orange-50 border-orange-200' :
+                    'bg-yellow-50 border-yellow-200'
+                  }`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-gray-900">{allergen.name}</span>
+                      <span className={`px-2 py-1 text-xs font-bold rounded ${
+                        allergen.severity === 'SEVERE' ? 'bg-red-600 text-white' :
+                        allergen.severity === 'MODERATE' ? 'bg-orange-600 text-white' :
+                        'bg-yellow-600 text-white'
+                      }`}>
+                        {allergen.severity}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      <strong>Common Reactions:</strong> {allergen.commonReactions.join(', ')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* No Issues Found */}
+          {result.chemicalAnalysis.harmfulChemicals.length === 0 && 
+           result.chemicalAnalysis.additives.filter(a => a.safetyRating !== 'SAFE').length === 0 && 
+           result.chemicalAnalysis.allergens.length === 0 && (
+            <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-center">
+              <span className="text-4xl mb-2 block">✅</span>
+              <p className="font-semibold text-green-800">No harmful chemicals or major allergens detected!</p>
+              <p className="text-sm text-green-600 mt-1">This product appears to be safe for consumption.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
         <h3 className="font-semibold text-lg text-gray-800 mb-3 flex items-center">
