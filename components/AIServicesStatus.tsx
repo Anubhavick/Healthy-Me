@@ -32,7 +32,11 @@ const AIServicesStatus: React.FC = () => {
         setStatus(prev => ({ ...prev, tensorflow: 'error' }));
       }
     };
-    initTensorFlow();
+    
+    // Delay TensorFlow initialization to allow other services to load first
+    const timer2 = setTimeout(() => {
+      initTensorFlow();
+    }, 2000);
 
     // Initialize Firebase (simulated)
     const timer3 = setTimeout(() => {
@@ -46,6 +50,7 @@ const AIServicesStatus: React.FC = () => {
 
     return () => {
       clearTimeout(timer1);
+      clearTimeout(timer2);
       clearTimeout(timer3);
       clearTimeout(timer4);
     };

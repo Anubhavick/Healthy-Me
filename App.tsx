@@ -6,6 +6,10 @@ import ImageUploader from './components/ImageUploader';
 import DietSelector from './components/DietSelector';
 import AnalysisResultComponent from './components/AnalysisResult';
 import MealHistory from './components/MealHistory';
+import MealHistoryModal from './components/MealHistoryModal';
+import EnhancedAnalyticsModal from './components/EnhancedAnalyticsModal';
+import GoalsStreaksModal from './components/GoalsStreaksModal';
+import ShareCardGenerator from './components/ShareCardGenerator';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import FirebaseSync from './components/FirebaseSync';
 import AIServicesStatus from './components/AIServicesStatus';
@@ -13,7 +17,6 @@ import AuthModal from './components/AuthModal';
 import BMICalculator from './components/BMICalculator';
 import MedicalConditionsSelector from './components/MedicalConditionsSelector';
 import StreakGoals from './components/StreakGoals';
-import SocialSharing from './components/SocialSharing';
 import EnhancedAnalytics from './components/EnhancedAnalytics';
 import { SparklesIcon, LoadingSpinner } from './components/icons';
 
@@ -21,6 +24,11 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showProfileSetup, setShowProfileSetup] = useState<boolean>(false);
+  const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState<boolean>(false);
+  const [showGoalsModal, setShowGoalsModal] = useState<boolean>(false);
+  const [showShareCard, setShowShareCard] = useState<boolean>(false);
+  const [mealToShare, setMealToShare] = useState<Meal | null>(null);
   const [activeTab, setActiveTab] = useState<'analyze' | 'profile' | 'analytics' | 'social' | 'goals'>('profile');
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -268,6 +276,25 @@ const App: React.FC = () => {
       setError(null);
   }
 
+  const handleShareMeal = (meal: Meal) => {
+    setMealToShare(meal);
+    setShowShareCard(true);
+  };
+
+  const handleShareCurrentAnalysis = () => {
+    if (analysisResult && image) {
+      const currentMeal: Meal = {
+        id: Date.now().toString(),
+        timestamp: new Date().toISOString(),
+        imageDataUrl: image,
+        analysis: analysisResult,
+        healthScore: calculateHealthScore(analysisResult)
+      };
+      setMealToShare(currentMeal);
+      setShowShareCard(true);
+    }
+  };
+
   // Show authentication modal if not logged in
   if (!isAuthenticated) {
     return (
@@ -294,7 +321,7 @@ const App: React.FC = () => {
               Healthy Me
             </h1>
             <p className="text-gray-600 text-lg leading-relaxed font-medium">
-              Your intelligent nutrition companion powered by advanced AI
+              Your intelligent nutrition companion powered by advanced analytics
             </p>
           </div>
 
@@ -302,7 +329,7 @@ const App: React.FC = () => {
           <div className="grid grid-cols-3 gap-4 mb-8">
             <div className="text-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100/50 hover:shadow-lg transition-all duration-300">
               <div className="text-3xl mb-2">🤖</div>
-              <div className="text-xs font-semibold text-emerald-800">AI Analysis</div>
+              <div className="text-xs font-semibold text-emerald-800">Smart Analysis</div>
             </div>
             <div className="text-center p-4 bg-blue-50 rounded-2xl border border-blue-100/50 hover:shadow-lg transition-all duration-300">
               <div className="text-3xl mb-2">📊</div>
@@ -348,7 +375,7 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center text-gray-700">
                   <span className="text-emerald-500 mr-2 text-base">✓</span>
-                  Instant AI Analysis
+                  Instant Analysis
                 </div>
                 <div className="flex items-center text-gray-700">
                   <span className="text-emerald-500 mr-2 text-base">✓</span>
@@ -367,7 +394,7 @@ const App: React.FC = () => {
           </div>
           
           <p className="text-sm text-gray-500 text-center leading-relaxed">
-            Join thousands of users improving their nutrition with AI-powered insights
+            Join thousands of users improving their nutrition with smart insights
           </p>
         </div>
         
@@ -394,13 +421,31 @@ const App: React.FC = () => {
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Healthy Me</h1>
                         <p className="text-sm text-gray-600 font-medium">
-                            Powered by <span className="text-blue-600 font-semibold">Gemini AI</span> • 
-                            <span className="text-purple-600 font-semibold"> TensorFlow.js</span> • 
-                            <span className="text-orange-600 font-semibold"> Dual-AI Analysis</span>
+                            Powered by <span className="text-blue-600 font-semibold">Advanced Analytics</span> • 
+                            <span className="text-purple-600 font-semibold"> Machine Learning</span> • 
+                            <span className="text-orange-600 font-semibold"> Smart Analysis</span>
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => setShowHistoryModal(true)}
+                        className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 transition-all duration-200 text-sm font-semibold border border-blue-200 hover:border-blue-300"
+                    >
+                        📚 History ({mealHistory.length})
+                    </button>
+                    <button
+                        onClick={() => setShowAnalyticsModal(true)}
+                        className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full hover:bg-emerald-100 transition-all duration-200 text-sm font-semibold border border-emerald-200 hover:border-emerald-300"
+                    >
+                        📈 Analytics
+                    </button>
+                    <button
+                        onClick={() => setShowGoalsModal(true)}
+                        className="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full hover:bg-orange-100 transition-all duration-200 text-sm font-semibold border border-orange-200 hover:border-orange-300"
+                    >
+                        🎯 Goals
+                    </button>
                     <div className="hidden sm:block text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
                         👋 Welcome, {user?.email || user?.displayName || 'User'}!
                     </div>
@@ -425,7 +470,7 @@ const App: React.FC = () => {
             <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 space-y-8">
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">📸 Scan Your Meal</h2>
-                <p className="text-gray-600">Upload a photo to get instant AI-powered nutrition analysis and chemical safety assessment</p>
+                <p className="text-gray-600">Upload a photo to get instant nutrition analysis and chemical safety assessment</p>
               </div>
               <ImageUploader onImageUpload={handleImageUpload} imagePreviewUrl={image} />
               
@@ -450,12 +495,12 @@ const App: React.FC = () => {
                 {isLoading ? (
                   <>
                     <LoadingSpinner className="w-6 h-6 mr-3" />
-                    {isModelLoading ? 'Loading AI Models...' : 'Analyzing with Dual-AI System...'}
+                    {isModelLoading ? 'Loading Models...' : 'Analyzing with Smart Engine...'}
                   </>
                 ) : (
                    <>
                     <SparklesIcon className="w-6 h-6 mr-3"/>
-                    Analyze with Dual-AI (TensorFlow + Gemini)
+                    Analyze Food
                    </>
                 )}
               </button>
@@ -465,15 +510,15 @@ const App: React.FC = () => {
           <div className="xl:col-span-7">
             <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 min-h-[500px] flex flex-col">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">🧠 AI Analysis Results</h2>
-                <p className="text-gray-600">AI-powered nutrition insights, chemical safety analysis, and health recommendations</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">🧠 Analysis Results</h2>
+                <p className="text-gray-600">Smart nutrition insights, chemical safety analysis, and health recommendations</p>
               </div>
               
               <div className="flex-1 flex items-center justify-center">
                 {isLoading && (
                   <div className="text-center py-12">
                     <LoadingSpinner className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-                    <p className="text-xl font-semibold text-gray-700 mb-2">AI is analyzing your meal...</p>
+                    <p className="text-xl font-semibold text-gray-700 mb-2">Analyzing your meal...</p>
                     <p className="text-gray-500">This may take a moment.</p>
                   </div>
                 )}
@@ -486,7 +531,10 @@ const App: React.FC = () => {
                 )}
                 {!isLoading && !error && analysisResult && (
                   <div className="w-full">
-                    <AnalysisResultComponent result={analysisResult} />
+                    <AnalysisResultComponent 
+                      result={analysisResult} 
+                      onShare={handleShareCurrentAnalysis}
+                    />
                   </div>
                 )}
                 {!isLoading && !error && !analysisResult && (
@@ -502,128 +550,37 @@ const App: React.FC = () => {
 
         </div>
 
-        {/* Health Profile & Analytics Section - Material Design 3 */}
+        {/* Health Profile Setup Section - Material Design 3 */}
         <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">🏥 Health Profile & Analytics</h2>
-              <p className="text-gray-600 text-lg">Comprehensive health tracking and personalized insights</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">👤 Health Profile Setup</h2>
+              <p className="text-gray-600 text-lg">Personalize your experience with BMI calculation and health conditions</p>
             </div>
           </div>
           
-          {/* Material Design 3 Navigation Tabs */}
-          <div className="px-8 pt-6">
-            <div className="flex flex-wrap gap-2 border-b border-gray-100 pb-6">
-              <button
-                onClick={() => setActiveTab('profile')}
-                className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
-                  activeTab === 'profile' 
-                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-200/50' 
-                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
-                }`}
-              >
-                <span>👤</span>
-                Profile Setup
-              </button>
-              <button
-                onClick={() => setActiveTab('analytics')}
-                className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
-                  activeTab === 'analytics' 
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200/50' 
-                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
-                }`}
-              >
-                <span>📊</span>
-                Enhanced Analytics
-              </button>
-              <button
-                onClick={() => setActiveTab('social')}
-                className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
-                  activeTab === 'social' 
-                    ? 'bg-purple-500 text-white shadow-lg shadow-purple-200/50' 
-                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
-                }`}
-              >
-                <span>📱</span>
-                Social Sharing
-              </button>
-              <button
-                onClick={() => setActiveTab('goals')}
-                className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 flex items-center gap-2 ${
-                  activeTab === 'goals' 
-                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-200/50' 
-                    : 'bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200'
-                }`}
-              >
-                <span>🎯</span>
-                Goals & Streaks
-              </button>
+          {/* Profile Content */}
+          <div className="p-8">
+            <div className="space-y-8">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Set Up Your Health Profile</h3>
+                <p className="text-gray-600">Personalize your experience with BMI calculation and health conditions</p>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <BMICalculator
+                  userProfile={userProfile}
+                  onBMIUpdate={handleBMIUpdate}
+                />
+                <MedicalConditionsSelector
+                  selectedConditions={userProfile?.medicalConditions || []}
+                  onConditionsChange={handleConditionsUpdate}
+                />
+              </div>
             </div>
           </div>
-
-          {/* Tab Content with improved spacing */}
-          <div className="p-8">
-            {activeTab === 'profile' && (
-              <div className="space-y-8">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Set Up Your Health Profile</h3>
-                  <p className="text-gray-600">Personalize your experience with BMI calculation and health conditions</p>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <BMICalculator
-                    userProfile={userProfile}
-                    onBMIUpdate={handleBMIUpdate}
-                  />
-                  <MedicalConditionsSelector
-                    selectedConditions={userProfile?.medicalConditions || []}
-                    onConditionsChange={handleConditionsUpdate}
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'analytics' && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">📈 Advanced Health Analytics</h3>
-                  <p className="text-gray-600">Track your progress with detailed charts and insights</p>
-                </div>
-                <EnhancedAnalytics 
-                  mealHistory={mealHistory}
-                  userProfile={userProfile}
-                />
-              </div>
-            )}
-
-            {activeTab === 'social' && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">🌟 Share Your Success</h3>
-                  <p className="text-gray-600">Create beautiful meal cards and share your healthy journey</p>
-                </div>
-                <SocialSharing 
-                  mealHistory={mealHistory}
-                  userProfile={userProfile}
-                />
-              </div>
-            )}
-
-            {activeTab === 'goals' && (
-              <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">🚀 Health Goals & Streaks</h3>
-                  <p className="text-gray-600">Set targets and maintain your healthy eating streaks</p>
-                </div>
-                <StreakGoals
-                  userProfile={userProfile}
-                  onGoalsUpdate={handleGoalsUpdate}
-                  onStreakUpdate={handleStreakUpdate}
-                />
-              </div>
-            )}
-          </div>
         </div>
-        {/* Firebase Sync Section */}
+        
+        {/* Firebase Sync Section - Always available */}
         <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">☁️ Firebase Sync</h2>
@@ -631,54 +588,46 @@ const App: React.FC = () => {
           </div>
           <FirebaseSync onSyncComplete={handleSyncComplete} />
         </div>
-        
-        {/* Meal History Section */}
-        <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">📚 Meal History</h2>
-              <p className="text-gray-600 text-lg">Track and export your nutrition journey</p>
-            </div>
-          </div>
-          <div className="p-8">
-            <MealHistory 
-              meals={mealHistory} 
-              onDeleteMeal={handleDeleteMeal}
-              onExportPDF={() => {
-                if (userProfile) {
-                  const exportData = {
-                    user: userProfile,
-                    meals: mealHistory,
-                    analytics: {
-                      totalMeals: mealHistory.length,
-                      avgCalories: mealHistory.reduce((acc, meal) => acc + meal.analysis.estimatedCalories, 0) / mealHistory.length || 0,
-                      avgHealthScore: mealHistory.reduce((acc, meal) => acc + meal.healthScore, 0) / mealHistory.length || 0,
-                      streak: userProfile.streak?.current || 0,
-                      goalProgress: 0 // TODO: Calculate based on goals
-                    },
-                    exportDate: new Date().toISOString()
-                  };
-                  ExportService.exportToPDF(exportData);
-                }
-              }}
-              onExportCSV={() => {
-                if (userProfile) {
-                  ExportService.exportToCSV(mealHistory, userProfile);
-                }
-              }}
-            />
-          </div>
-        </div>
-        
-        {/* Analytics Dashboard */}
-        <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">📊 Analytics Dashboard</h2>
-            <p className="text-gray-600">Overview of your nutrition patterns</p>
-          </div>
-          <AnalyticsDashboard mealHistory={mealHistory} />
-        </div>
       </main>
+
+      {/* Meal History Modal */}
+      <MealHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        meals={mealHistory}
+        userProfile={userProfile}
+        onDeleteMeal={handleDeleteMeal}
+        onShareMeal={handleShareMeal}
+      />
+
+      {/* Enhanced Analytics Modal */}
+      <EnhancedAnalyticsModal
+        isOpen={showAnalyticsModal}
+        onClose={() => setShowAnalyticsModal(false)}
+        mealHistory={mealHistory}
+        userProfile={userProfile}
+      />
+
+      {/* Goals & Streaks Modal */}
+      <GoalsStreaksModal
+        isOpen={showGoalsModal}
+        onClose={() => setShowGoalsModal(false)}
+        userProfile={userProfile}
+        onGoalsUpdate={handleGoalsUpdate}
+        onStreakUpdate={handleStreakUpdate}
+      />
+
+      {/* Share Card Generator */}
+      {showShareCard && mealToShare && (
+        <ShareCardGenerator
+          meal={mealToShare}
+          userProfile={userProfile}
+          onClose={() => {
+            setShowShareCard(false);
+            setMealToShare(null);
+          }}
+        />
+      )}
     </div>
   );
 };

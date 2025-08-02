@@ -5,6 +5,7 @@ import { CheckCircleIcon, XCircleIcon, SparklesIcon } from './icons';
 
 interface AnalysisResultProps {
   result: AnalysisResultType;
+  onShare?: () => void;
 }
 
 const StatCard: React.FC<{ title: string; value: string | number; children?: React.ReactNode }> = ({ title, value, children }) => (
@@ -55,7 +56,7 @@ const HealthScoreCard: React.FC<{ score: number }> = ({ score }) => {
 };
 
 
-const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
+const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
   const { isCompatible, reason } = result.dietCompatibility;
   
   // Calculate health score based on calories, ingredients, diet compatibility, and chemical safety
@@ -146,6 +147,17 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-800">{result.dishName}</h2>
+        {onShare && (
+          <button
+            onClick={onShare}
+            className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-blue-200/50"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+            </svg>
+            Share Your Success
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -340,7 +352,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result }) => {
         <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-              🤖 AI Visual Analysis
+              🤖 Visual Analysis
             </h3>
             <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
               result.tensorflowAnalysis.qualityAssessment.overallQuality >= 8 ? 'bg-green-100 text-green-800' :

@@ -7,9 +7,10 @@ import AnalysisResultComponent from './AnalysisResult';
 interface MealHistoryProps {
   meals: Meal[];
   onDeleteMeal: (mealId: string) => void;
+  onShareMeal?: (meal: Meal) => void;
 }
 
-const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal }) => {
+const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal, onShareMeal }) => {
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
 
   if (meals.length === 0) {
@@ -32,20 +33,36 @@ const MealHistory: React.FC<MealHistoryProps> = ({ meals, onDeleteMeal }) => {
           <img src={meal.imageDataUrl} alt={meal.analysis.dishName} className="w-20 h-20 object-cover rounded-md flex-shrink-0" />
           <div className="flex-grow">
             <h4 className="font-bold text-lg text-gray-800">{meal.analysis.dishName}</h4>
-            <p className="text-sm text-gray-600">{meal.analysis.estimatedCalories} kcal</p>
+            <p className="text-sm text-gray-600">{meal.analysis.estimatedCalories} kcal • Health Score: {meal.healthScore}/20</p>
             <p className="text-xs text-gray-400">{new Date(meal.timestamp).toLocaleString()}</p>
             <p className="text-xs text-blue-600 mt-1">Click to view details</p>
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteMeal(meal.id);
-            }}
-            className="p-2 rounded-full text-gray-400 hover:bg-red-100 hover:text-red-600 transition-colors"
-            aria-label={`Delete ${meal.analysis.dishName}`}
-          >
-            <TrashIcon className="w-5 h-5" />
-          </button>
+          <div className="flex items-center space-x-2">
+            {onShareMeal && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShareMeal(meal);
+                }}
+                className="p-2 rounded-full text-gray-400 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                aria-label={`Share ${meal.analysis.dishName}`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                </svg>
+              </button>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteMeal(meal.id);
+              }}
+              className="p-2 rounded-full text-gray-400 hover:bg-red-100 hover:text-red-600 transition-colors"
+              aria-label={`Delete ${meal.analysis.dishName}`}
+            >
+              <TrashIcon className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       ))}
 
