@@ -59,7 +59,7 @@ const UserProfileSetup: React.FC<UserProfileSetupProps> = ({ userProfile, onProf
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">Complete Your Profile</h2>
-              <p className="text-green-100 mt-1">Set up your health information for personalized AI advice</p>
+              <p className="text-green-100 mt-1">Set up your health information for personalized recommendations</p>
             </div>
             <button
               onClick={onClose}
