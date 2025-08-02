@@ -1,91 +1,146 @@
-# 🥗 Healthy Me - AI-Powered Nutrition Assistant
+# Healthy Me - AI-Powered Nutrition Assistant
 
 <div align="center">
-  <img src="https://img.shields.io/badge/React-18.0+-blue?style=for-the-badge&logo=react" />
-  <img src="https://img.shields.io/badge/TypeScript-5.0+-blue?style=for-the-badge&logo=typescript" />
-  <img src="https://img.shields.io/badge/Firebase-9.0+-orange?style=for-the-badge&logo=firebase" />
+  <img src="https://img.shields.io/badge/React-19.0+-blue?style=for-the-badge&logo=react" />
+  <img src="https://img.shields.io/badge/TypeScript-5.8+-blue?style=for-the-badge&logo=typescript" />
+  <img src="https://img.shields.io/badge/Firebase-12.0+-orange?style=for-the-badge&logo=firebase" />
   <img src="https://img.shields.io/badge/Gemini_AI-Latest-green?style=for-the-badge&logo=google" />
-  <img src="https://img.shields.io/badge/TensorFlow.js-4.0+-yellow?style=for-the-badge&logo=tensorflow" />
+  <img src="https://img.shields.io/badge/TensorFlow.js-4.22+-yellow?style=for-the-badge&logo=tensorflow" />
+  <img src="https://img.shields.io/badge/Vite-6.2+-purple?style=for-the-badge&logo=vite" />
 </div>
 
-## 🚀 Overview
+## Overview
 
-Healthy Me is an intelligent nutrition companion that leverages cutting-edge AI technology to help users track their meals, analyze nutritional content, and improve their dietary habits with personalized insights. Built as a modern web application using React + TypeScript with a focus on user experience and real-time data processing.
+Healthy Me is an intelligent nutrition analysis platform that combines advanced artificial intelligence technologies to provide comprehensive dietary insights. The application leverages Google's Gemini AI for natural language processing and image analysis, TensorFlow.js for client-side machine learning, and Firebase for robust backend infrastructure. Built with modern web technologies, it delivers real-time nutritional analysis, personalized health recommendations, and comprehensive meal tracking capabilities.
 
-## ✨ Key Features
+## System Architecture
 
-### 🤖 AI-Powered Analysis
-- **Gemini AI Integration**: Advanced image recognition and nutritional analysis
-- **TensorFlow.js**: Client-side machine learning for enhanced food detection
-- **Real-time Processing**: Instant meal analysis with detailed nutritional breakdown
+```mermaid
+graph TD
+    A[User Interface - React + TypeScript] --> B[Image Upload Component]
+    B --> C[TensorFlow.js Pre-Processing]
+    C --> D{Food Validation}
+    D -->|Valid Food| E[Gemini AI Analysis]
+    D -->|Invalid| F[Error Handling]
+    
+    E --> G[Nutritional Analysis]
+    G --> H[Health Score Calculation]
+    H --> I[Personalized Recommendations]
+    
+    C --> J[MobileNet Food Classification]
+    J --> K[Nutritional Estimation]
+    K --> L[Portion Size Analysis]
+    
+    I --> M[Firebase Firestore]
+    M --> N[User Profile Storage]
+    N --> O[Meal History Tracking]
+    
+    P[Firebase Authentication] --> Q[Google OAuth]
+    P --> R[Email/Password Auth]
+    Q --> S[User Session Management]
+    R --> S
+    
+    T[Cloud Vision API] --> U[Advanced Image Processing]
+    U --> V[Text Extraction from Images]
+    
+    W[Analytics Dashboard] --> X[Chart.js Visualizations]
+    X --> Y[Export Functionality - PDF/CSV]
+    
+    Z[Real-time Sync] --> AA[Cross-device Data Access]
+    
+    style A fill:#61dafb
+    style E fill:#4285f4
+    style C fill:#ff6f00
+    style M fill:#ffca28
+    style P fill:#ff5722
+```
 
-### 📊 Health Scoring System
-- **Smart Scoring Algorithm**: 1-20 scale health ratings for every meal
-- **Color-coded Results**: Visual indicators (Excellent/Good/Fair/Poor)
-- **Personalized Recommendations**: AI-driven suggestions for healthier choices
+## Key Features
 
-### 🔐 User Authentication & Data Management
-- **Firebase Authentication**: Secure Google OAuth and email/password login
-- **Cloud Firestore**: Real-time database for user profiles and meal history
-- **Cross-device Sync**: Access your data anywhere with automatic cloud synchronization
+### AI-Powered Analysis Engine
+- **Gemini AI Integration**: Advanced natural language processing for food identification and nutritional content extraction
+- **TensorFlow.js Models**: Client-side machine learning using MobileNet for real-time food classification
+- **Dual Validation System**: Combined AI validation ensures accurate food recognition and analysis
+- **Real-time Processing**: Instant analysis with optimized performance for web browsers
 
-### 📱 Modern User Experience
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
-- **Interactive Analytics**: Clickable meal history with detailed modal views
-- **Professional UI**: Clean, modern interface with smooth animations
+### Comprehensive Health Assessment
+- **Intelligent Scoring Algorithm**: Proprietary 1-20 scale health rating system based on nutritional content
+- **Color-coded Classification**: Visual health indicators (Excellent, Good, Fair, Poor) for quick assessment
+- **Personalized Recommendations**: Context-aware suggestions based on user health profile and dietary restrictions
+- **Medical Condition Awareness**: Tailored advice for users with specific health conditions
 
-## 🛠 Technology Stack
+### Advanced Data Management
+- **Firebase Authentication**: Secure multi-provider authentication system supporting Google OAuth and email/password
+- **Cloud Firestore Database**: Real-time NoSQL database with automatic synchronization across devices
+- **Comprehensive User Profiles**: Storage of dietary preferences, medical conditions, BMI data, and health goals
+- **Historical Tracking**: Complete meal history with searchable and filterable analytics
 
-### Frontend Framework
-- **React 18+** with TypeScript for type-safe development
-- **Vite** for lightning-fast development and optimized builds
-- **Tailwind CSS** for utility-first styling and responsive design
+### Professional User Interface
+- **Responsive Design**: Optimized experience across desktop, tablet, and mobile devices
+- **Interactive Analytics Dashboard**: Dynamic charts and visualizations using Chart.js
+- **Export Capabilities**: PDF and CSV export functionality for meal data and reports
+- **Modern Design System**: Clean, accessible interface built with Tailwind CSS
 
-### AI & Machine Learning
-- **Google Gemini AI** for advanced natural language processing and image analysis
-- **TensorFlow.js** for client-side machine learning capabilities
-- **Custom ML Models** for food recognition and nutritional estimation
+## Technology Stack
 
-### Backend & Database
-- **Firebase Authentication** for secure user management
-- **Cloud Firestore** for real-time NoSQL database
-- **Firebase Storage** for image storage and management
-- **Firebase Hosting** for scalable web hosting
+### Frontend Architecture
+- **React 19+**: Modern functional components with hooks and concurrent features
+- **TypeScript 5.8+**: Static type checking for enhanced development experience and code reliability
+- **Vite 6.2+**: Next-generation build tool providing fast development server and optimized production builds
+- **Tailwind CSS**: Utility-first CSS framework for responsive and maintainable styling
 
-### Development Tools
-- **ESLint & Prettier** for code quality and formatting
-- **Husky** for Git hooks and automated testing
-- **TypeScript** for enhanced developer experience and type safety
+### Artificial Intelligence & Machine Learning
+- **Google Gemini AI**: State-of-the-art multimodal AI for image analysis and natural language processing
+- **TensorFlow.js 4.22+**: Client-side machine learning framework for real-time food classification
+- **MobileNet Model**: Pre-trained convolutional neural network optimized for mobile and web deployment
+- **Custom ML Pipeline**: Integrated validation and analysis workflow combining multiple AI services
 
-## 📋 Prerequisites
+### Backend Infrastructure
+- **Firebase Authentication**: Comprehensive authentication service supporting multiple providers
+- **Cloud Firestore**: Scalable NoSQL document database with real-time synchronization
+- **Firebase Storage**: Secure file storage solution for image assets and user uploads
+- **Firebase Hosting**: Global CDN and hosting platform for web applications
 
-Before setting up the project, ensure you have the following installed:
+### Data Visualization & Export
+- **Chart.js 4.5+**: Flexible charting library for interactive data visualization
+- **React Chart.js 2**: React wrapper for Chart.js with TypeScript support
+- **jsPDF 3.0+**: Client-side PDF generation for report exports
+- **html2canvas 1.4+**: HTML to canvas conversion for visual content capture
 
-- **Node.js** (v18.0 or higher) - [Download here](https://nodejs.org/)
-- **npm** or **yarn** package manager
+### Development & Build Tools
+- **Vite**: Fast development server with hot module replacement and optimized bundling
+- **TypeScript Compiler**: Advanced type checking and code transformation
+- **ES Modules**: Modern JavaScript module system for efficient code organization
+
+## Installation and Setup
+
+### Prerequisites
+
+Ensure the following software is installed on your development machine:
+
+- **Node.js** (version 18.0 or higher) - [Download](https://nodejs.org/)
+- **npm** (comes with Node.js) or **yarn** package manager
 - **Git** for version control
-- **Google Account** for Firebase and Gemini AI setup
+- **Google Account** for Firebase console access and Gemini AI API key
 
-## 🚀 Quick Start
+### Quick Start Guide
 
-### 1. Clone the Repository
+#### 1. Repository Setup
 
 ```bash
 git clone https://github.com/Anubhavick/Healthy-Me.git
-cd Healthy-Me
+cd ai-diet-scanner
 ```
 
-### 2. Install Dependencies
+#### 2. Dependency Installation
 
 ```bash
 npm install
-# or
-yarn install
 ```
 
-### 3. Environment Setup
+#### 3. Environment Configuration
 
-Create a `.env` file in the root directory (copy from `.env.example`):
+Create a `.env.local` file in the project root directory with the following variables:
 
 ```env
 # Firebase Configuration
@@ -98,148 +153,146 @@ VITE_FIREBASE_APP_ID=your_app_id
 VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
 # Gemini AI Configuration
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
+VITE_GEMINI_API_KEY=your_gemini_api_key
+
+# Cloud Vision API (Optional)
+VITE_GOOGLE_CLOUD_VISION_API_KEY=your_cloud_vision_api_key
 ```
 
-**⚠️ Important:** Never commit your `.env` file to version control. Use `.env.example` as a template.
+**Security Note**: Never commit environment files to version control. The `.env.local` file is automatically ignored by git.
 
-### 4. Run Development Server
+#### 4. Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
 The application will be available at `http://localhost:5173`
 
-## 🔧 Detailed Setup Instructions
+## Configuration Guide
 
-### Firebase Configuration
+### Firebase Setup
 
 1. **Create Firebase Project**
-   - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Click "Create a project" and follow the setup wizard
-   - Enable Google Analytics (recommended)
+   - Navigate to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project with Google Analytics enabled
+   - Note the project configuration details
 
-2. **Setup Authentication**
-   ```bash
-   # In Firebase Console:
-   # 1. Go to Authentication > Sign-in method
-   # 2. Enable Google and Email/Password providers
-   # 3. Add your domain to authorized domains
-   ```
+2. **Authentication Configuration**
+   - Enable Google and Email/Password authentication providers
+   - Configure OAuth consent screen for Google authentication
+   - Add authorized domains for production deployment
 
-3. **Configure Firestore Database**
-   ```bash
-   # In Firebase Console:
-   # 1. Go to Firestore Database
-   # 2. Create database in production mode
-   # 3. Set up security rules (see firebase.rules)
-   ```
+3. **Firestore Database Setup**
+   - Create Firestore database in production mode
+   - Configure security rules for user data protection
+   - Set up collections for user profiles and meal history
 
-4. **Setup Storage**
-   ```bash
-   # In Firebase Console:
-   # 1. Go to Storage
-   # 2. Get started and set up security rules
-   # 3. Configure CORS for web access
-   ```
+4. **Storage Configuration**
+   - Initialize Firebase Storage for image uploads
+   - Configure CORS settings for web access
+   - Set up security rules for file access control
 
-### Gemini AI Setup
+### Gemini AI Configuration
 
-1. **Get API Key**
+1. **API Key Generation**
    - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Create a new API key
-   - Copy the key to your `.env.local` file
+   - Generate a new API key for Gemini AI access
+   - Configure usage quotas and rate limiting
 
-2. **Configure API Usage**
-   ```javascript
-   // The app automatically configures Gemini AI with:
-   // - Image analysis capabilities
-   // - Nutritional data extraction
-   // - Personalized recommendations
-   ```
+2. **Service Integration**
+   - The application automatically configures Gemini AI services
+   - Image analysis and text generation capabilities are enabled by default
+   - Custom prompts are optimized for nutritional analysis
 
-### TensorFlow.js Integration
-
-The application uses TensorFlow.js for:
-- **Client-side Food Recognition**: Real-time image preprocessing
-- **Nutritional Estimation**: ML models for calorie and nutrient prediction
-- **Performance Optimization**: Efficient model loading and caching
-
-```javascript
-// TensorFlow.js is automatically loaded via CDN
-// Models are cached for improved performance
-// No additional setup required
-```
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-Healthy-Me/
-├── public/                 # Static assets
+ai-diet-scanner/
+├── public/                          # Static assets and public files
 ├── src/
-│   ├── components/        # React components
-│   │   ├── AnalysisResult.tsx
-│   │   ├── AuthModal.tsx
-│   │   ├── MealHistory.tsx
-│   │   └── ...
-│   ├── services/          # API services
-│   │   ├── geminiService.ts
-│   │   ├── firebaseConfig.ts
-│   │   └── ...
-│   ├── types/             # TypeScript type definitions
-│   ├── utils/             # Utility functions
-│   └── App.tsx            # Main application component
-├── .env.local             # Environment variables
-├── firebase.json          # Firebase configuration
-├── package.json           # Dependencies and scripts
-└── README.md             # This file
+│   └── vite-env.d.ts               # Vite environment type definitions
+├── components/                      # React component library
+│   ├── AIServicesStatus.tsx        # AI service monitoring component
+│   ├── AnalysisResult.tsx          # Nutritional analysis display
+│   ├── AnalyticsDashboard.tsx      # Data visualization dashboard
+│   ├── AuthContext.tsx             # Authentication context provider
+│   ├── AuthModal.tsx               # User authentication interface
+│   ├── BMICalculator.tsx           # Body Mass Index calculator
+│   ├── DietSelector.tsx            # Dietary preference selector
+│   ├── EnhancedAnalytics.tsx       # Advanced analytics features
+│   ├── EnhancedAnalyticsModal.tsx  # Modal for detailed analytics
+│   ├── FirebaseSync.tsx            # Firebase synchronization component
+│   ├── GoalsStreaksModal.tsx       # Goals and streaks management
+│   ├── icons.tsx                   # Icon component library
+│   ├── ImageUploader.tsx           # Image upload and processing
+│   ├── MealHistory.tsx             # Historical meal tracking
+│   ├── MealHistoryModal.tsx        # Detailed meal history view
+│   ├── MedicalConditionsSelector.tsx # Health condition selection
+│   ├── ShareCardGenerator.tsx      # Social sharing card creation
+│   ├── SocialSharing.tsx           # Social media integration
+│   ├── StreakGoals.tsx             # Goal tracking and streaks
+│   └── UserProfileSetup.tsx        # User profile configuration
+├── services/                        # Backend service integrations
+│   ├── cloudVisionService.ts       # Google Cloud Vision API service
+│   ├── enhancedGeminiService.ts    # Advanced Gemini AI integration
+│   ├── exportService.ts            # Data export functionality
+│   ├── firebase.ts                 # Firebase configuration
+│   ├── firebaseService.ts          # Firebase database operations
+│   ├── geminiService.ts            # Gemini AI service integration
+│   └── tensorflowService.ts        # TensorFlow.js model management
+├── App.tsx                         # Main application component
+├── constants.ts                    # Application constants and configuration
+├── index.html                      # HTML entry point
+├── index.tsx                       # React application entry point
+├── metadata.json                   # Application metadata
+├── package.json                    # Project dependencies and scripts
+├── tsconfig.json                   # TypeScript configuration
+├── types.ts                        # TypeScript type definitions
+├── vite.config.ts                  # Vite build configuration
+└── README.md                       # Project documentation
 ```
 
-## 🎯 Core Functionality
+## Core Functionality
 
-### Meal Analysis Workflow
+### AI Analysis Workflow
 
-1. **Image Upload**: User uploads or captures meal photo
-2. **AI Processing**: Gemini AI analyzes image for food identification
-3. **Nutritional Analysis**: TensorFlow.js models estimate calories and nutrients
-4. **Health Scoring**: Custom algorithm generates 1-20 health score
-5. **Data Storage**: Results saved to Firestore with user authentication
-6. **Analytics**: Interactive dashboard shows trends and insights
+1. **Image Preprocessing**: TensorFlow.js validates and preprocesses uploaded images
+2. **Dual AI Analysis**: Parallel processing with Gemini AI and TensorFlow models
+3. **Food Classification**: MobileNet model identifies food items with confidence scores
+4. **Nutritional Analysis**: Gemini AI extracts detailed nutritional information
+5. **Health Assessment**: Custom algorithm calculates comprehensive health scores
+6. **Data Persistence**: Results stored in Firestore with user authentication
+7. **Real-time Sync**: Automatic synchronization across all user devices
 
-### Authentication Flow
+### Authentication and User Management
 
-1. **Landing Page**: Modern login interface with Google OAuth option
-2. **User Registration**: Email/password or Google sign-in
-3. **Profile Creation**: Automatic user profile setup in Firestore
-4. **Session Management**: Persistent login with automatic token refresh
-5. **Data Sync**: Real-time synchronization across all user devices
+1. **Multi-provider Authentication**: Support for Google OAuth and email/password
+2. **Profile Creation**: Comprehensive user profile setup including health information
+3. **Session Management**: Persistent authentication with automatic token refresh
+4. **Data Security**: Firestore security rules ensure user data privacy
+5. **Cross-device Synchronization**: Real-time data sync across multiple devices
 
-## 🧪 Development Commands
+## Development Commands
 
 ```bash
-# Start development server
+# Development server with hot module replacement
 npm run dev
 
-# Build for production
+# Production build with optimization
 npm run build
 
-# Preview production build
+# Preview production build locally
 npm run preview
 
-# Type checking
-npm run type-check
+# TypeScript type checking
+npx tsc --noEmit
 
-# Linting
-npm run lint
-
-# Format code
-npm run format
+# Project dependency analysis
+npm audit
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Firebase Hosting
 
@@ -249,73 +302,160 @@ npm run format
    firebase login
    ```
 
-2. **Initialize Firebase**
+2. **Initialize and Configure**
    ```bash
    firebase init hosting
-   # Select your Firebase project
-   # Set build directory to 'dist'
+   # Select existing Firebase project
+   # Configure build directory as 'dist'
+   # Configure as single-page application
    ```
 
-3. **Deploy**
+3. **Build and Deploy**
    ```bash
    npm run build
    firebase deploy
    ```
 
-### Alternative Deployment Options
+### Alternative Deployment Platforms
 
-- **Vercel**: Connect GitHub repository for automatic deployments
-- **Netlify**: Drag and drop `dist` folder after build
-- **GitHub Pages**: Use GitHub Actions for automated deployment
+- **Vercel**: Automatic deployment from GitHub repository with zero configuration
+- **Netlify**: Drag-and-drop deployment or Git integration with build automation
+- **GitHub Pages**: Static site hosting with GitHub Actions for CI/CD
 
-## 🔐 Security Features
+## Security and Performance
 
-- **Environment Variables**: All sensitive credentials stored in `.env` files (not committed to repo)
-- **Firebase Security Rules**: Restrict data access to authenticated users
-- **API Key Protection**: Environment variables for sensitive credentials with TypeScript validation
-- **Input Validation**: Sanitization of user inputs and file uploads
-- **HTTPS Enforcement**: Secure data transmission
-- **Authentication Tokens**: JWT-based session management
-- **Gitignore Protection**: Automatic exclusion of environment files from version control
+### Security Implementation
+- **Environment Variable Protection**: All sensitive credentials stored securely in environment files
+- **Firebase Security Rules**: Granular access control for user data and file storage
+- **Input Validation**: Comprehensive sanitization of user inputs and file uploads
+- **HTTPS Enforcement**: Secure data transmission with SSL/TLS encryption
+- **Authentication Token Management**: JWT-based session handling with automatic renewal
+- **CORS Configuration**: Proper cross-origin resource sharing for API access
 
-## 📊 Performance Optimizations
+### Performance Optimizations
+- **Code Splitting**: Dynamic imports for reduced initial bundle size
+- **Image Optimization**: Automatic compression and format conversion for uploaded images
+- **Model Caching**: TensorFlow.js model caching for improved subsequent load times
+- **CDN Integration**: Firebase CDN for global asset delivery
+- **Lazy Loading**: Component-level lazy loading for enhanced user experience
+- **Build Optimization**: Vite-powered bundling with tree shaking and minification
 
-- **Code Splitting**: Lazy loading of components for faster initial load
-- **Image Optimization**: Automatic compression and format conversion
-- **Caching Strategy**: Service worker for offline functionality
-- **Bundle Analysis**: Optimized build size with tree shaking
-- **CDN Integration**: Fast asset delivery via Firebase CDN
+## Contributing
 
-## 🤝 Contributing
+We welcome contributions from the community. Please follow these guidelines:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Development Workflow
 
-## 📄 License
+1. **Fork the Repository**
+   ```bash
+   # Fork the repository on GitHub
+   git clone https://github.com/YOUR_USERNAME/ai-diet-scanner.git
+   cd ai-diet-scanner
+   ```
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+2. **Create Feature Branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-## 🆘 Support
+3. **Development Setup**
+   ```bash
+   npm install
+   # Configure environment variables
+   npm run dev
+   ```
 
-If you encounter any issues or have questions:
+4. **Code Standards**
+   - Follow TypeScript best practices
+   - Maintain consistent code formatting
+   - Write comprehensive component documentation
+   - Include unit tests for new functionality
 
-1. Check the [Issues](https://github.com/Anubhavick/Healthy-Me/issues) page
-2. Create a new issue with detailed description
-3. Join our [Discord Community](https://discord.gg/healthy-me) for support
+5. **Commit and Push**
+   ```bash
+   git add .
+   git commit -m "feat: add your feature description"
+   git push origin feature/your-feature-name
+   ```
 
-## 🙏 Acknowledgments
+6. **Create Pull Request**
+   - Provide detailed description of changes
+   - Include screenshots for UI modifications
+   - Reference related issues if applicable
 
-- **Google AI Team** for Gemini API access
-- **Firebase Team** for robust backend infrastructure
-- **TensorFlow.js** for powerful ML capabilities
-- **React Community** for excellent documentation and support
+### Code Review Process
+
+- All pull requests require review before merging
+- Automated testing must pass before approval
+- Code coverage requirements must be maintained
+- Documentation updates required for API changes
+
+## Contributors
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Anubhavick">
+        <img src="https://github.com/Anubhavick.png" width="100px;" alt="Anubhav Mishra"/>
+        <br />
+        <sub><b>Anubhav Mishra</b></sub>
+      </a>
+      <br />
+      <sub>Project Lead & Full-stack Developer</sub>
+    </td>
+  </tr>
+</table>
+
+*We appreciate all contributors who help improve this project. If you'd like to contribute, please see our contributing guidelines above.*
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for complete details.
+
+**MIT License Summary**: You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, subject to the following conditions:
+- Include the original copyright notice and license in all copies
+- The software is provided "as is" without warranty of any kind
+
+## Support and Documentation
+
+### Getting Help
+
+- **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/Anubhavick/ai-diet-scanner/issues)
+- **Discussions**: Join community discussions for general questions and feature requests
+- **Documentation**: Comprehensive API documentation available in the `/docs` directory
+
+### Troubleshooting
+
+Common issues and solutions:
+
+1. **Environment Variables Not Loading**
+   - Ensure `.env.local` file exists in project root
+   - Verify all required variables are defined
+   - Restart development server after changes
+
+2. **Firebase Configuration Errors**
+   - Check Firebase project settings and API keys
+   - Verify authentication providers are enabled
+   - Ensure Firestore rules are properly configured
+
+3. **TensorFlow.js Model Loading Issues**
+   - Check internet connection for CDN access
+   - Clear browser cache and local storage
+   - Verify compatible browser version
+
+## Acknowledgments
+
+This project leverages several outstanding technologies and services:
+
+- **Google AI Team** for Gemini API and advanced AI capabilities
+- **Firebase Team** for comprehensive backend infrastructure
+- **TensorFlow Team** for machine learning framework and models
+- **React Team** for the robust frontend framework
+- **Open Source Community** for countless libraries and tools that make this project possible
 
 ---
 
 <div align="center">
-  <p>Built with ❤️ by <a href="https://github.com/Anubhavick">Anubhavick</a></p>
-  <p>⭐ Star this repo if you found it helpful!</p>
+  <p><strong>Built with modern web technologies by <a href="https://github.com/Anubhavick">Anubhav Mishra</a></strong></p>
+  <p>If this project helps you, please consider giving it a star on GitHub</p>
 </div>
