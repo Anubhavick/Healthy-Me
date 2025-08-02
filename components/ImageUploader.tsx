@@ -1,6 +1,7 @@
 
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { CameraIcon } from './icons';
+import DarkModeIcon from './DarkModeIcon';
 
 interface ImageUploaderProps {
   onImageUpload: (dataUrl: string) => void;
@@ -210,11 +211,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, imagePrevi
           
           {/* Action buttons */}
           <div className="flex justify-center gap-4 mt-4">
-            <button
+                        <button
               onClick={triggerFileInput}
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold flex items-center gap-2"
             >
-              📁 Upload File
+              <DarkModeIcon src="/file-upload-svgrepo-com.svg" alt="Upload" className="w-5 h-5" isDarkMode={false} invertInDarkMode={true} />
+              Upload File
             </button>
             <button
               onClick={startCamera}

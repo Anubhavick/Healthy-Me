@@ -358,8 +358,8 @@ const App: React.FC = () => {
           {/* Header section */}
           <div className="text-center mb-8">
             <div className="relative mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg shadow-emerald-200/50">
-                <SparklesIcon className="w-12 h-12 text-white" />
+              <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                <img src="/logo.svg" alt="Healthy Me Logo" className="w-full h-full" />
               </div>
               <div className="absolute -top-2 -right-12 w-6 h-6 bg-amber-400 rounded-full animate-bounce shadow-lg"></div>
             </div>
@@ -368,22 +368,33 @@ const App: React.FC = () => {
               Healthy Me
             </h1>
             <p className="text-gray-600 text-lg leading-relaxed font-medium">
-              Your intelligent nutrition companion powered by advanced analytics
+              Your intelligent nutrition companion with smart analytics
             </p>
+          </div>
+
+          {/* Art Picture Showcase */}
+          <div className="mb-6 flex justify-center">
+            <img src="/artpicture.png" alt="Healthy Food" className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white" />
           </div>
 
           {/* Features preview - Material Design cards */}
           <div className="grid grid-cols-3 gap-4 mb-8">
             <div className="text-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100/50 hover:shadow-lg transition-all duration-300">
-              <div className="text-3xl mb-2">🤖</div>
+              <div className="flex justify-center mb-2">
+                <img src="/analytics-svgrepo-com.svg" alt="Smart Analysis" className="w-8 h-8" />
+              </div>
               <div className="text-xs font-semibold text-emerald-800">Smart Analysis</div>
             </div>
             <div className="text-center p-4 bg-blue-50 rounded-2xl border border-blue-100/50 hover:shadow-lg transition-all duration-300">
-              <div className="text-3xl mb-2">📊</div>
+              <div className="flex justify-center mb-2">
+                <img src="/body-mass-index-svgrepo-com.svg" alt="Health Scoring" className="w-8 h-8" />
+              </div>
               <div className="text-xs font-semibold text-blue-800">Health Scoring</div>
             </div>
             <div className="text-center p-4 bg-purple-50 rounded-2xl border border-purple-100/50 hover:shadow-lg transition-all duration-300">
-              <div className="text-3xl mb-2">📱</div>
+              <div className="flex justify-center mb-2">
+                <img src="/goals and streak.svg" alt="Smart Tracking" className="w-8 h-8" />
+              </div>
               <div className="text-xs font-semibold text-purple-800">Smart Tracking</div>
             </div>
           </div>
@@ -394,7 +405,7 @@ const App: React.FC = () => {
               onClick={() => setShowAuthModal(true)}
               className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold py-4 px-6 rounded-full hover:from-emerald-600 hover:to-green-700 transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-emerald-200/50 flex items-center justify-center group"
             >
-              <div className="mr-3 text-xl group-hover:animate-pulse">🔐</div>
+              <img src="/profile-round-1342-svgrepo-com.svg" alt="Sign In" className="w-5 h-5 mr-3 filter brightness-0 invert group-hover:animate-pulse" />
               <span className="text-lg">Sign In / Create Account</span>
             </button>
             
@@ -410,7 +421,7 @@ const App: React.FC = () => {
               }}
               className="w-full bg-gray-100 text-gray-800 font-semibold py-4 px-6 rounded-full hover:bg-gray-200 transition-all duration-300 transform hover:scale-[1.02] shadow-md flex items-center justify-center group border border-gray-200"
             >
-              <div className="mr-3 text-lg group-hover:animate-bounce">🚀</div>
+              <img src="/analytics-svgrepo-com.svg" alt="Demo" className="w-5 h-5 mr-3 group-hover:animate-bounce" />
               <span>Try Demo Mode</span>
             </button>
           </div>
@@ -421,19 +432,19 @@ const App: React.FC = () => {
               <div className="text-sm font-bold text-gray-800 mb-4">✨ Why Choose Healthy Me?</div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center text-gray-700">
-                  <span className="text-emerald-500 mr-2 text-base">✓</span>
+                  <img src="/analytics-svgrepo-com.svg" alt="Analysis" className="w-4 h-4 mr-2 text-emerald-500" />
                   Instant Analysis
                 </div>
                 <div className="flex items-center text-gray-700">
-                  <span className="text-emerald-500 mr-2 text-base">✓</span>
+                  <img src="/body-mass-index-svgrepo-com.svg" alt="Health" className="w-4 h-4 mr-2 text-emerald-500" />
                   Health Scoring
                 </div>
                 <div className="flex items-center text-gray-700">
-                  <span className="text-emerald-500 mr-2 text-base">✓</span>
+                  <img src="/goals and streak.svg" alt="Progress" className="w-4 h-4 mr-2 text-emerald-500" />
                   Progress Tracking
                 </div>
                 <div className="flex items-center text-gray-700">
-                  <span className="text-emerald-500 mr-2 text-base">✓</span>
+                  <img src="/setting-1-svgrepo-com.svg" alt="Sync" className="w-4 h-4 mr-2 text-emerald-500" />
                   Cloud Sync
                 </div>
               </div>
@@ -462,15 +473,13 @@ const App: React.FC = () => {
         <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center mr-4 shadow-lg shadow-emerald-200/50">
-                      <SparklesIcon className="w-7 h-7 text-white" />
+                    <div className="w-12 h-12 mr-4">
+                      <img src="/logo.svg" alt="Healthy Me Logo" className="w-full h-full" />
                     </div>
                     <div>
                         <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} tracking-tight`}>Healthy Me</h1>
                         <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'} font-medium`}>
-                            Powered by <span className="text-blue-500 font-semibold">Advanced Analytics</span> • 
-                            <span className="text-purple-500 font-semibold"> Machine Learning</span> • 
-                            <span className="text-orange-500 font-semibold"> Smart Analysis</span>
+                            Smart Nutrition Analysis
                         </p>
                     </div>
                 </div>

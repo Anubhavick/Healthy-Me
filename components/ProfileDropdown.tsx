@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile } from '../types';
+import DarkModeIcon from './DarkModeIcon';
 
 interface ProfileDropdownProps {
   user: any;
@@ -156,7 +157,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               }}
               className={`w-full px-4 py-2 text-left ${isDarkMode ? 'hover:bg-blue-900/50' : 'hover:bg-blue-50'} transition-colors duration-150 flex items-center space-x-3 text-sm`}
             >
-              <span className="text-blue-500">📚</span>
+              <DarkModeIcon src="/history-svgrepo-com.svg" alt="History" className="w-5 h-5" isDarkMode={isDarkMode} />
               <span className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Meal History</span>
               <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
                 {mealHistoryCount}
@@ -170,7 +171,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               }}
               className={`w-full px-4 py-2 text-left ${isDarkMode ? 'hover:bg-emerald-900/50' : 'hover:bg-emerald-50'} transition-colors duration-150 flex items-center space-x-3 text-sm`}
             >
-              <span className="text-emerald-500">📈</span>
+              <DarkModeIcon src="/analytics-svgrepo-com.svg" alt="Analytics" className="w-5 h-5" isDarkMode={isDarkMode} />
               <span className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Analytics</span>
             </button>
 
@@ -181,7 +182,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               }}
               className={`w-full px-4 py-2 text-left ${isDarkMode ? 'hover:bg-orange-900/50' : 'hover:bg-orange-50'} transition-colors duration-150 flex items-center space-x-3 text-sm`}
             >
-              <span className="text-orange-500">🎯</span>
+              <DarkModeIcon src="/goals and streak.svg" alt="Goals" className="w-5 h-5" isDarkMode={isDarkMode} />
               <span className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Goals & Streaks</span>
             </button>
 
@@ -195,7 +196,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               }}
               className={`w-full px-4 py-2 text-left ${isDarkMode ? 'hover:bg-purple-900/50' : 'hover:bg-purple-50'} transition-colors duration-150 flex items-center space-x-3 text-sm`}
             >
-              <span className="text-purple-500">👤</span>
+              <DarkModeIcon src="/profile-round-1342-svgrepo-com.svg" alt="Profile" className="w-5 h-5" isDarkMode={isDarkMode} />
               <span className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Edit Profile</span>
             </button>
 
@@ -206,7 +207,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               }}
               className={`w-full px-4 py-2 text-left ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition-colors duration-150 flex items-center space-x-3 text-sm`}
             >
-              <span className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>⚙️</span>
+              <DarkModeIcon src="/setting-1-svgrepo-com.svg" alt="Settings" className="w-5 h-5" isDarkMode={isDarkMode} />
               <span className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Settings</span>
             </button>
 
@@ -243,7 +244,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               }}
               className={`w-full px-4 py-2 text-left ${isDarkMode ? 'hover:bg-red-900/50' : 'hover:bg-red-50'} transition-colors duration-150 flex items-center space-x-3 text-sm ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}
             >
-              <span>🚪</span>
+              <DarkModeIcon src="/sign-out-svgrepo-com.svg" alt="Sign Out" className="w-5 h-5" isDarkMode={isDarkMode} />
               <span>Sign Out</span>
             </button>
           </div>

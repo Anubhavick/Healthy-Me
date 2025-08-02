@@ -64,6 +64,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess }) => {
         </button>
 
         <div className="text-center mb-8">
+          <div className="mb-6">
+            <img src="/artpicture.png" alt="Healthy Food" className="w-32 h-32 mx-auto rounded-full object-cover shadow-lg" />
+          </div>
           <h2 className="text-2xl font-bold text-gray-800">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>

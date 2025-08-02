@@ -110,8 +110,8 @@ const ShareCardGenerator: React.FC<ShareCardGeneratorProps> = ({ meal, userProfi
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
-                    <span className="text-2xl">✨</span>
+                  <div className="w-16 h-16">
+                    <img src="/logo.svg" alt="Healthy Me Logo" className="w-full h-full" />
                   </div>
                 </div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-700 to-green-600 bg-clip-text text-transparent mb-2">

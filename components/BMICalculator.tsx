@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MedicalCondition, UserProfile } from '../types';
 import { calculateBMI } from '../services/geminiService';
+import DarkModeIcon from './DarkModeIcon';
 
 interface BMICalculatorProps {
   userProfile: UserProfile;
@@ -68,9 +69,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate,
     <div className={`${isDarkMode ? 'bg-gradient-to-br from-blue-900/30 to-indigo-900/30 border-blue-700' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100'} p-6 rounded-3xl border shadow-lg`}>
       <div className="text-center mb-6">
         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg shadow-blue-200/50">
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a4 4 0 000-8z" />
-          </svg>
+          <DarkModeIcon src="/body-mass-index-svgrepo-com.svg" alt="BMI" className="w-6 h-6" isDarkMode={false} invertInDarkMode={true} />
         </div>
         <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-1`}>BMI Calculator</h3>
         <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm`}>Calculate your Body Mass Index with AI health advice</p>
