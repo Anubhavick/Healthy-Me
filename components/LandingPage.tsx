@@ -135,6 +135,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
             pauseOnHover={true}
             loop={true}
             round={false}
+            isDarkMode={isDarkMode}
           />
         </div>
       </div>
