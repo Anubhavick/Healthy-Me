@@ -376,22 +376,28 @@ const App: React.FC = () => {
       <div className={`min-h-screen transition-all duration-500 ${
         isDarkMode 
           ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
-          : 'bg-gradient-to-br from-emerald-400 via-cyan-500 to-blue-600'
+          : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100'
       } flex items-center justify-center p-4 relative overflow-hidden`}>
         
         {/* Navigation Header - matching landing page */}
-        <nav className="absolute top-0 left-0 right-0 flex items-center justify-between p-6 backdrop-blur-sm bg-white/10 border-b border-white/20 z-20">
+        <nav className={`absolute top-0 left-0 right-0 flex items-center justify-between p-6 backdrop-blur-sm z-20 ${
+          isDarkMode 
+            ? 'bg-white/10 border-b border-white/20' 
+            : 'bg-white/70 border-b border-gray-200/50'
+        }`}>
           <div className="flex items-center space-x-3">
             <div className={`w-8 h-8 flex items-center justify-center rounded-lg p-1 ${
-              isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/10'
+              isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-600/10 backdrop-blur-sm'
             }`}>
               <img 
                 src="/logo.svg" 
                 alt="Healthy Me Logo" 
-                className={`w-full h-full ${isDarkMode ? '' : 'filter brightness-0 invert'}`} 
+                className={`w-full h-full ${isDarkMode ? '' : 'filter hue-rotate-200 saturate-150'}`} 
               />
             </div>
-            <span className="text-white font-semibold text-xl">
+            <span className={`font-semibold text-xl ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
+            }`}>
               Healthy Me
             </span>
           </div>
@@ -399,13 +405,21 @@ const App: React.FC = () => {
           <div className="flex items-center space-x-6">
             <button 
               onClick={() => setShowLandingPage(true)}
-              className="text-white/80 hover:text-white transition-colors duration-200 font-medium"
+              className={`transition-colors duration-200 font-medium ${
+                isDarkMode 
+                  ? 'text-white/80 hover:text-white' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
             >
               ← Back to Home
             </button>
             <button
               onClick={handleDarkModeToggle}
-              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm"
+              className={`p-2 rounded-lg transition-all duration-200 backdrop-blur-sm ${
+                isDarkMode 
+                  ? 'bg-white/10 hover:bg-white/20' 
+                  : 'bg-blue-100/50 hover:bg-blue-200/50'
+              }`}
             >
               {isDarkMode ? '☀️' : '🌙'}
             </button>
@@ -416,7 +430,7 @@ const App: React.FC = () => {
         <div className="absolute inset-0 z-0">
           <LightRays
             raysOrigin="top-center"
-            raysColor={isDarkMode ? "#64748b" : "#06b6d4"}
+            raysColor={isDarkMode ? "#64748b" : "#3b82f6"}
             raysSpeed={0.8}
             lightSpread={1.2}
             rayLength={1.5}
@@ -431,54 +445,76 @@ const App: React.FC = () => {
         </div>
 
         {/* Main content card - Enhanced with theme matching */}
-        <div className="bg-white/10 backdrop-blur-xl p-8 rounded-3xl shadow-2xl max-w-md w-full relative z-10 border border-white/20 mt-20">
+        <div className={`backdrop-blur-xl p-8 rounded-3xl shadow-2xl max-w-md w-full relative z-10 mt-20 border ${
+          isDarkMode 
+            ? 'bg-white/10 border-white/20' 
+            : 'bg-white/80 border-blue-200/50'
+        }`}>
           {/* Header section */}
           <div className="text-center mb-8">
             <div className="relative mb-6">
-              <div className={`w-20 h-20 mx-auto mb-4 flex items-center justify-center rounded-2xl p-3 ${
-                isDarkMode ? 'bg-white/20 backdrop-blur-sm border border-white/30' : 'bg-white/10 backdrop-blur-sm'
+              <div className={`w-20 h-20 mx-auto mb-4 flex items-center justify-center rounded-2xl p-3 border ${
+                isDarkMode 
+                  ? 'bg-white/20 backdrop-blur-sm border-white/30' 
+                  : 'bg-blue-50/80 backdrop-blur-sm border-blue-200/50'
               }`}>
                 <img 
                   src="/logo.svg" 
                   alt="Healthy Me Logo" 
-                  className={`w-full h-full ${isDarkMode ? '' : 'filter brightness-0 invert'}`} 
+                  className={`w-full h-full ${isDarkMode ? '' : 'filter hue-rotate-200 saturate-150'}`} 
                 />
               </div>
             </div>
             
-            <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">
+            <h1 className={`text-4xl font-bold mb-4 tracking-tight ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
+            }`}>
               Welcome Back
             </h1>
-            <p className="text-white/80 text-lg leading-relaxed font-medium">
+            <p className={`text-lg leading-relaxed font-medium ${
+              isDarkMode ? 'text-white/80' : 'text-gray-600'
+            }`}>
               Sign in to continue your healthy journey
             </p>
           </div>
 
           {/* Features preview - Material Design cards */}
           <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+            <div className={`text-center p-4 backdrop-blur-sm rounded-2xl border transition-all duration-300 ${
+              isDarkMode 
+                ? 'bg-white/10 border-white/20 hover:bg-white/20' 
+                : 'bg-blue-50/50 border-blue-200/50 hover:bg-blue-100/50'
+            }`}>
               <div className="flex justify-center mb-2">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-6 h-6 ${isDarkMode ? 'text-white' : 'text-blue-600'}`} fill="currentColor" viewBox="0 0 24 24">
                   <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm5-18v4h3V3h-3z"/>
                 </svg>
               </div>
-              <div className="text-xs font-semibold text-white">Smart Analysis</div>
+              <div className={`text-xs font-semibold ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Smart Analysis</div>
             </div>
-            <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+            <div className={`text-center p-4 backdrop-blur-sm rounded-2xl border transition-all duration-300 ${
+              isDarkMode 
+                ? 'bg-white/10 border-white/20 hover:bg-white/20' 
+                : 'bg-blue-50/50 border-blue-200/50 hover:bg-blue-100/50'
+            }`}>
               <div className="flex justify-center mb-2">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-6 h-6 ${isDarkMode ? 'text-white' : 'text-blue-600'}`} fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
               </div>
-              <div className="text-xs font-semibold text-white">Health Scoring</div>
+              <div className={`text-xs font-semibold ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Health Scoring</div>
             </div>
-            <div className="text-center p-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+            <div className={`text-center p-4 backdrop-blur-sm rounded-2xl border transition-all duration-300 ${
+              isDarkMode 
+                ? 'bg-white/10 border-white/20 hover:bg-white/20' 
+                : 'bg-blue-50/50 border-blue-200/50 hover:bg-blue-100/50'
+            }`}>
               <div className="flex justify-center mb-2">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-6 h-6 ${isDarkMode ? 'text-white' : 'text-blue-600'}`} fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
                 </svg>
               </div>
-              <div className="text-xs font-semibold text-white">Smart Tracking</div>
+              <div className={`text-xs font-semibold ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Smart Tracking</div>
             </div>
           </div>
           
@@ -486,7 +522,11 @@ const App: React.FC = () => {
           <div className="space-y-4 mb-8">
             <button
               onClick={() => setShowAuthModal(true)}
-              className="w-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold py-4 px-6 rounded-full hover:bg-white/30 transition-all duration-300 transform hover:scale-[1.02] shadow-lg flex items-center justify-center group"
+              className={`w-full backdrop-blur-sm border font-semibold py-4 px-6 rounded-full transition-all duration-300 transform hover:scale-[1.02] shadow-lg flex items-center justify-center group ${
+                isDarkMode 
+                  ? 'bg-white/20 border-white/30 text-white hover:bg-white/30' 
+                  : 'bg-blue-600 border-blue-700 text-white hover:bg-blue-700'
+              }`}
             >
               <svg className="w-5 h-5 mr-3 group-hover:animate-pulse" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -504,7 +544,11 @@ const App: React.FC = () => {
                 };
                 handleAuthSuccess(demoUser);
               }}
-              className="w-full bg-transparent border-2 border-white/50 text-white font-semibold py-4 px-6 rounded-full hover:bg-white/10 transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center group"
+              className={`w-full border-2 font-semibold py-4 px-6 rounded-full transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center group ${
+                isDarkMode 
+                  ? 'bg-transparent border-white/50 text-white hover:bg-white/10' 
+                  : 'bg-transparent border-blue-300 text-blue-700 hover:bg-blue-50'
+              }`}
             >
               <svg className="w-5 h-5 mr-3 group-hover:animate-bounce" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
@@ -514,29 +558,33 @@ const App: React.FC = () => {
           </div>
 
           {/* Benefits section - Enhanced theme */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/20">
+          <div className={`backdrop-blur-sm rounded-2xl p-6 mb-6 border ${
+            isDarkMode 
+              ? 'bg-white/10 border-white/20' 
+              : 'bg-blue-50/60 border-blue-200/50'
+          }`}>
             <div className="text-center">
-              <div className="text-sm font-bold text-white mb-4">✨ Why Choose Healthy Me?</div>
+              <div className={`text-sm font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>✨ Why Choose Healthy Me?</div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="flex items-center text-white/80">
+                <div className={`flex items-center ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>
                   <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm5-18v4h3V3h-3z"/>
                   </svg>
                   Instant Analysis
                 </div>
-                <div className="flex items-center text-white/80">
+                <div className={`flex items-center ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>
                   <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
                   Health Scoring
                 </div>
-                <div className="flex items-center text-white/80">
+                <div className={`flex items-center ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>
                   <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
                   </svg>
                   Progress Tracking
                 </div>
-                <div className="flex items-center text-white/80">
+                <div className={`flex items-center ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>
                   <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
                   </svg>
@@ -546,7 +594,7 @@ const App: React.FC = () => {
             </div>
           </div>
           
-          <p className="text-sm text-white/60 text-center leading-relaxed">
+          <p className={`text-sm text-center leading-relaxed ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>
             Join thousands of users improving their nutrition with smart insights
           </p>
         </div>
@@ -558,13 +606,13 @@ const App: React.FC = () => {
     <div className={`min-h-screen transition-all duration-500 relative overflow-hidden ${
       isDarkMode 
         ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
-        : 'bg-gradient-to-br from-emerald-400 via-cyan-500 to-blue-600'
+        : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100'
     }`}>
       {/* Animated Light Rays Background */}
       <div className="absolute inset-0 z-0">
         <LightRays
           raysOrigin="top-center"
-          raysColor={isDarkMode ? "#64748b" : "#06b6d4"}
+          raysColor={isDarkMode ? "#64748b" : "#3b82f6"}
           raysSpeed={0.8}
           lightSpread={1.2}
           rayLength={1.5}
@@ -579,20 +627,24 @@ const App: React.FC = () => {
       </div>
 
       {/* Header - Glass morphism style matching landing page */}
-      <nav className="relative z-20 flex items-center justify-between p-6 backdrop-blur-sm bg-white/10 border-b border-white/20">
+      <nav className={`relative z-20 flex items-center justify-between p-6 backdrop-blur-sm ${
+        isDarkMode 
+          ? 'bg-white/10 border-b border-white/20' 
+          : 'bg-white/70 border-b border-gray-200/50'
+      }`}>
         <div className="flex items-center space-x-3">
           <div className={`w-8 h-8 flex items-center justify-center rounded-lg p-1 ${
-            isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-white/10'
+            isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-600/10 backdrop-blur-sm'
           }`}>
             <img 
               src="/logo.svg" 
               alt="Healthy Me Logo" 
-              className={`w-full h-full ${isDarkMode ? '' : 'filter brightness-0 invert'}`} 
+              className={`w-full h-full ${isDarkMode ? '' : 'filter hue-rotate-200 saturate-150'}`} 
             />
           </div>
           <div>
-            <span className="text-white font-semibold text-xl">Healthy Me</span>
-            <p className="text-white/80 text-sm font-medium">Smart Nutrition Analysis</p>
+            <span className={`font-semibold text-xl ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Healthy Me</span>
+            <p className={`text-sm font-medium ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Smart Nutrition Analysis</p>
           </div>
         </div>
         
@@ -618,15 +670,19 @@ const App: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           
           <div className="xl:col-span-5">
-            <div className="bg-white/10 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-white/20 space-y-6">
+            <div className={`backdrop-blur-xl p-6 rounded-3xl shadow-2xl border space-y-6 ${
+              isDarkMode 
+                ? 'bg-white/10 border-white/20' 
+                : 'bg-white/80 border-blue-200/50'
+            }`}>
               <div className="text-center">
-                <h2 className="text-xl font-bold text-white mb-2">Scan Your Meal</h2>
-                <p className="text-white/80 text-sm">Upload a photo to get instant nutrition analysis and chemical safety assessment</p>
+                <h2 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Scan Your Meal</h2>
+                <p className={`text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Upload a photo to get instant nutrition analysis and chemical safety assessment</p>
               </div>
               <ImageUploader onImageUpload={handleImageUpload} imagePreviewUrl={image} />
               
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-white mb-3">Select Your Diet</h3>
+                <h3 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Select Your Diet</h3>
                 <DietSelector 
                   selectedDiet={userProfile?.diet || Diet.None} 
                   onDietChange={(newDiet) => {
@@ -641,7 +697,11 @@ const App: React.FC = () => {
               <button
                 onClick={handleAnalyzeImage}
                 disabled={isLoading || !image}
-                className="w-full bg-white text-gray-900 font-bold py-3 px-6 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-white/20 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 flex items-center justify-center text-lg shadow-lg disabled:transform-none disabled:shadow-none"
+                className={`w-full font-bold py-3 px-6 rounded-full focus:outline-none focus:ring-4 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:shadow-none flex items-center justify-center text-lg shadow-lg ${
+                  isDarkMode 
+                    ? 'bg-white text-gray-900 hover:bg-gray-100 focus:ring-white/20 disabled:bg-gray-300' 
+                    : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 disabled:bg-gray-300'
+                }`}
               >
                 {isLoading ? (
                   <>
@@ -659,18 +719,22 @@ const App: React.FC = () => {
           </div>
           
           <div className="xl:col-span-7">
-            <div className="bg-white/10 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-white/20 min-h-[400px] flex flex-col">
+            <div className={`backdrop-blur-xl p-6 rounded-3xl shadow-2xl border min-h-[400px] flex flex-col ${
+              isDarkMode 
+                ? 'bg-white/10 border-white/20' 
+                : 'bg-white/80 border-blue-200/50'
+            }`}>
               <div className="text-center mb-4">
-                <h2 className="text-xl font-bold text-white mb-2">Analysis Results</h2>
-                <p className="text-white/80 text-sm">Smart nutrition insights, chemical safety analysis, and health recommendations</p>
+                <h2 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Analysis Results</h2>
+                <p className={`text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Smart nutrition insights, chemical safety analysis, and health recommendations</p>
               </div>
               
               <div className="flex-1 flex items-center justify-center">
                 {isLoading && (
                   <div className="text-center py-8">
-                    <LoadingSpinner className="w-12 h-12 text-white mx-auto mb-3" />
-                    <p className="text-lg font-semibold text-white mb-1">Analyzing your meal...</p>
-                    <p className="text-white/80 text-sm">This may take a moment.</p>
+                    <LoadingSpinner className={`w-12 h-12 mx-auto mb-3 ${isDarkMode ? 'text-white' : 'text-blue-600'}`} />
+                    <p className={`text-lg font-semibold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Analyzing your meal...</p>
+                    <p className={`text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>This may take a moment.</p>
                   </div>
                 )}
                 {error && (
@@ -689,14 +753,16 @@ const App: React.FC = () => {
                   </div>
                 )}
                 {!isLoading && !error && !analysisResult && (
-                   <div className="text-center text-white/60 py-8">
-                      <div className="w-16 h-16 mx-auto mb-3 bg-white/10 rounded-full flex items-center justify-center">
-                        <svg className="w-8 h-8 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <div className={`text-center py-8 ${isDarkMode ? 'text-white/60' : 'text-gray-400'}`}>
+                      <div className={`w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center ${
+                        isDarkMode ? 'bg-white/10' : 'bg-blue-100/50'
+                      }`}>
+                        <svg className={`w-8 h-8 ${isDarkMode ? 'text-white/40' : 'text-blue-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
-                      <p className="text-lg font-medium text-white">Your meal analysis will appear here</p>
-                      <p className="text-white/60 mt-1 text-sm">Upload an image and click analyze to get started</p>
+                      <p className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Your meal analysis will appear here</p>
+                      <p className={`mt-1 text-sm ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>Upload an image and click analyze to get started</p>
                   </div>
                 )}
               </div>
@@ -706,11 +772,19 @@ const App: React.FC = () => {
         </div>
 
         {/* Health Profile Setup Section - Glass morphism style */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-          <div className="p-6 bg-white/5 backdrop-blur-sm border-b border-white/20">
+        <div className={`backdrop-blur-xl rounded-3xl shadow-2xl border overflow-hidden ${
+          isDarkMode 
+            ? 'bg-white/10 border-white/20' 
+            : 'bg-white/80 border-blue-200/50'
+        }`}>
+          <div className={`p-6 backdrop-blur-sm border-b ${
+            isDarkMode 
+              ? 'bg-white/5 border-white/20' 
+              : 'bg-blue-50/50 border-blue-200/50'
+          }`}>
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-1">Health Profile Setup</h2>
-              <p className="text-white/80 text-sm">Personalize your experience with BMI calculation and health conditions</p>
+              <h2 className={`text-2xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Health Profile Setup</h2>
+              <p className={`text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Personalize your experience with BMI calculation and health conditions</p>
             </div>
           </div>
           
