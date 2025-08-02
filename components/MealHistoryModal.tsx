@@ -2,7 +2,6 @@ import React from 'react';
 import { Meal, UserProfile } from '../types';
 import { ExportService } from '../services/exportService';
 import MealHistory from './MealHistory';
-import AnalyticsDashboard from './AnalyticsDashboard';
 
 interface MealHistoryModalProps {
   isOpen: boolean;

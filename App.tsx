@@ -7,7 +7,6 @@ import DietSelector from './components/DietSelector';
 import AnalysisResultComponent from './components/AnalysisResult';
 import MealHistory from './components/MealHistory';
 import MealHistoryModal from './components/MealHistoryModal';
-import EnhancedAnalyticsModal from './components/EnhancedAnalyticsModal';
 import GoalsStreaksModal from './components/GoalsStreaksModal';
 import ShareCardGenerator from './components/ShareCardGenerator';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
@@ -17,7 +16,6 @@ import AuthModal from './components/AuthModal';
 import BMICalculator from './components/BMICalculator';
 import MedicalConditionsSelector from './components/MedicalConditionsSelector';
 import StreakGoals from './components/StreakGoals';
-import EnhancedAnalytics from './components/EnhancedAnalytics';
 import ProfileDropdown from './components/ProfileDropdown';
 import SettingsModal from './components/SettingsModal';
 import { SparklesIcon, LoadingSpinner } from './components/icons';
@@ -636,13 +634,36 @@ const App: React.FC = () => {
       />
 
       {/* Enhanced Analytics Modal */}
-      <EnhancedAnalyticsModal
-        isOpen={showAnalyticsModal}
-        onClose={() => setShowAnalyticsModal(false)}
-        mealHistory={mealHistory}
-        userProfile={userProfile}
-        isDarkMode={isDarkMode}
-      />
+      {showAnalyticsModal && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowAnalyticsModal(false)}
+          />
+          
+          <div className="relative z-10 min-h-screen flex items-start justify-center p-4 pt-8">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 className="text-2xl font-bold text-gray-800">Enhanced Analytics</h2>
+                <button
+                  onClick={() => setShowAnalyticsModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <span className="text-2xl">×</span>
+                </button>
+              </div>
+              
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <AnalyticsDashboard 
+                  mealHistory={mealHistory}
+                  userProfile={userProfile}
+                  mode="enhanced"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Goals & Streaks Modal */}
       <GoalsStreaksModal
