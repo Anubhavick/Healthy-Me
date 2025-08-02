@@ -54,91 +54,124 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate 
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-bold text-gray-800">BMI Calculator</h3>
-        <span className="text-2xl">⚖️</span>
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-3xl border border-blue-100 shadow-lg">
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-200/50">
+          <span className="text-2xl text-white">⚖️</span>
+        </div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">BMI Calculator</h3>
+        <p className="text-gray-600">Calculate your Body Mass Index with AI health advice</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Height (cm)
-          </label>
-          <input
-            type="number"
-            value={height}
-            onChange={(e) => setHeight(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="170"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Weight (kg)
-          </label>
-          <input
-            type="number"
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="70"
-          />
-        </div>
-      </div>
-
-      <button
-        onClick={handleCalculate}
-        disabled={!height || !weight || loading}
-        className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {loading ? 'Calculating with AI...' : 'Calculate BMI & Get AI Health Advice'}
-      </button>
-
-      {results && (
-        <div className="mt-6 space-y-4">
-          {/* BMI Result */}
-          <div className={`p-4 rounded-lg border ${getBMIColor(results.category)}`}>
-            <div className="text-center">
-              <p className="text-3xl font-bold">{results.bmi}</p>
-              <p className="text-lg font-semibold">{results.category}</p>
-            </div>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Height (cm)
+            </label>
+            <input
+              type="number"
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
+              className="w-full p-4 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-200 text-lg font-medium bg-white/80 backdrop-blur-sm"
+              placeholder="170"
+            />
           </div>
-
-          {/* Health Advice */}
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h4 className="font-semibold text-blue-800 mb-2">🩺 AI Health Advice</h4>
-            <ul className="space-y-1">
-              {results.healthAdvice.map((advice: string, index: number) => (
-                <li key={index} className="text-sm text-blue-700">• {advice}</li>
-              ))}
-            </ul>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Weight (kg)
+            </label>
+            <input
+              type="number"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="w-full p-4 border-2 border-blue-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all duration-200 text-lg font-medium bg-white/80 backdrop-blur-sm"
+              placeholder="70"
+            />
           </div>
+        </div>
 
-          {/* Risk Factors */}
-          {results.risks.length > 0 && (
-            <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-              <h4 className="font-semibold text-orange-800 mb-2">⚠️ Risk Factors</h4>
-              <ul className="space-y-1">
-                {results.risks.map((risk: string, index: number) => (
-                  <li key={index} className="text-sm text-orange-700">• {risk}</li>
-                ))}
-              </ul>
-            </div>
+        <button
+          onClick={handleCalculate}
+          disabled={!height || !weight || loading}
+          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-4 px-6 rounded-full hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-blue-200/50 disabled:shadow-none flex items-center justify-center gap-3"
+        >
+          {loading ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              Calculating with AI...
+            </>
+          ) : (
+            <>
+              <span>🧠</span>
+              Calculate BMI & Get AI Health Advice
+            </>
           )}
+        </button>
 
-          {/* Recommendations */}
-          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-            <h4 className="font-semibold text-green-800 mb-2">💡 Recommendations</h4>
-            <ul className="space-y-1">
-              {results.recommendations.map((rec: string, index: number) => (
-                <li key={index} className="text-sm text-green-700">• {rec}</li>
-              ))}
-            </ul>
+        {results && (
+          <div className="space-y-6">
+            {/* BMI Result */}
+            <div className={`p-6 rounded-2xl border-2 ${getBMIColor(results.category)} shadow-inner`}>
+              <div className="text-center">
+                <p className="text-4xl font-bold mb-2">{results.bmi}</p>
+                <p className="text-xl font-semibold">{results.category}</p>
+              </div>
+            </div>
+
+            {/* Health Advice */}
+            <div className="bg-white/70 backdrop-blur-sm p-6 rounded-2xl border border-blue-200 shadow-lg">
+              <h4 className="font-bold text-blue-800 mb-4 flex items-center gap-2 text-lg">
+                <span>🩺</span>
+                AI Health Advice
+              </h4>
+              <div className="space-y-3">
+                {results.healthAdvice.map((advice: string, index: number) => (
+                  <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-xl">
+                    <span className="text-blue-500 mt-0.5 text-lg">•</span>
+                    <span className="text-blue-700 text-sm font-medium">{advice}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Risk Factors */}
+            {results.risks.length > 0 && (
+              <div className="bg-white/70 backdrop-blur-sm p-6 rounded-2xl border border-orange-200 shadow-lg">
+                <h4 className="font-bold text-orange-800 mb-4 flex items-center gap-2 text-lg">
+                  <span>⚠️</span>
+                  Risk Factors
+                </h4>
+                <div className="space-y-3">
+                  {results.risks.map((risk: string, index: number) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-orange-50 rounded-xl">
+                      <span className="text-orange-500 mt-0.5 text-lg">•</span>
+                      <span className="text-orange-700 text-sm font-medium">{risk}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recommendations */}
+            <div className="bg-white/70 backdrop-blur-sm p-6 rounded-2xl border border-emerald-200 shadow-lg">
+              <h4 className="font-bold text-emerald-800 mb-4 flex items-center gap-2 text-lg">
+                <span>💡</span>
+                Recommendations
+              </h4>
+              <div className="space-y-3">
+                {results.recommendations.map((rec: string, index: number) => (
+                  <div key={index} className="flex items-start gap-3 p-3 bg-emerald-50 rounded-xl">
+                    <span className="text-emerald-500 mt-0.5 text-lg">•</span>
+                    <span className="text-emerald-700 text-sm font-medium">{rec}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
