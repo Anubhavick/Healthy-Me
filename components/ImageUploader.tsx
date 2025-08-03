@@ -25,7 +25,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   // Effect to handle video stream assignment
   useEffect(() => {
     if (stream && videoRef.current && isCamera) {
-      console.log('Effect: Assigning stream to video element');
       const video = videoRef.current;
       
       // Clear existing source
@@ -40,9 +39,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       const playVideo = async () => {
         try {
           await video.play();
-          console.log('Effect: Video playing successfully');
         } catch (err) {
-          console.error('Effect: Video play failed:', err);
+          console.error('Video play failed:', err);
         }
       };
       
@@ -81,47 +79,33 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const startCamera = useCallback(async () => {
     try {
       setError(null);
-      console.log('Starting camera...');
       
-      // Check if navigator.mediaDevices is available
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Camera API not supported in this browser');
       }
       
-      console.log('Requesting camera access...');
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: facingMode, // Use the current facing mode
+          facingMode: facingMode,
           width: { ideal: 1280, max: 1920 },
           height: { ideal: 720, max: 1080 }
         }
       });
       
-      console.log('Camera access granted, setting up stream...');
       setStream(mediaStream);
       setIsCamera(true);
       
       if (videoRef.current) {
-        // Clear any existing source first
         videoRef.current.srcObject = null;
         
-        // Wait a bit then assign new stream
         setTimeout(() => {
           if (videoRef.current) {
             videoRef.current.srcObject = mediaStream;
-            console.log('Video stream assigned to video element');
-            
-            // Force video element to load
             videoRef.current.load();
             
-            // Add multiple event listeners for better compatibility
             videoRef.current.onloadedmetadata = () => {
-              console.log('Video metadata loaded');
               if (videoRef.current) {
-                console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
-                videoRef.current.play().then(() => {
-                  console.log('Video playback started successfully');
-                }).catch(err => {
+                videoRef.current.play().catch(err => {
                   console.error('Video play failed:', err);
                   setError('Failed to start video playback. Please try again.');
                 });
@@ -129,35 +113,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             };
             
             videoRef.current.oncanplay = () => {
-              console.log('Video can start playing');
               if (videoRef.current && videoRef.current.paused) {
                 videoRef.current.play().catch(console.error);
               }
             };
             
-            videoRef.current.onplaying = () => {
-              console.log('Video is now playing');
-            };
-            
-            videoRef.current.onerror = (e) => {
-              console.error('Video error:', e);
+            videoRef.current.onerror = () => {
               setError('Video error occurred. Please try again.');
             };
-            
-            // Multiple fallback attempts
-            setTimeout(() => {
-              if (videoRef.current && videoRef.current.readyState >= 2) {
-                console.log('Fallback play attempt 1');
-                videoRef.current.play().catch(console.error);
-              }
-            }, 100);
-            
-            setTimeout(() => {
-              if (videoRef.current && videoRef.current.paused && videoRef.current.readyState >= 1) {
-                console.log('Fallback play attempt 2');
-                videoRef.current.play().catch(console.error);
-              }
-            }, 500);
           }
         }, 50);
       }
@@ -267,7 +230,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           </div>
           
           {/* Camera controls */}
-                    <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mt-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mt-4">
             <button
               onClick={capturePhoto}
               disabled={!stream}
@@ -283,32 +246,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               className="px-3 sm:px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold transition-all duration-200 active:scale-95 text-sm sm:text-base"
             >
               Flip
-            </button>
-            
-            <button
-              onClick={() => {
-                console.log('Manual video refresh triggered');
-                if (videoRef.current && stream) {
-                  console.log('Current video state:', {
-                    readyState: videoRef.current.readyState,
-                    paused: videoRef.current.paused,
-                    videoWidth: videoRef.current.videoWidth,
-                    videoHeight: videoRef.current.videoHeight
-                  });
-                  videoRef.current.srcObject = null;
-                  setTimeout(() => {
-                    if (videoRef.current) {
-                      videoRef.current.srcObject = stream;
-                      videoRef.current.load();
-                      videoRef.current.play().catch(console.error);
-                    }
-                  }, 100);
-                }
-              }}
-              disabled={!stream}
-              className="px-2 sm:px-3 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold transition-all duration-200 active:scale-95 text-xs sm:text-sm"
-            >
-              Refresh
             </button>
             
             <button
@@ -355,19 +292,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             </button>
           </div>
           
-          {/* Debug info */}
-          <div className="mt-2 text-center text-sm text-gray-600">
-            <p>Camera Support: {navigator.mediaDevices ? '✅ Available' : '❌ Not Available'}</p>
-            {error && (
-              <div className="mt-2 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700">
-                <p className="font-semibold">Camera Error:</p>
-                <p>{error}</p>
-                <p className="text-xs mt-1">
-                  💡 Try: Allow camera permissions, use Chrome/Firefox, or check camera isn't used by another app
-                </p>
-              </div>
-            )}
-          </div>
+          {error && (
+            <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700">
+              <p className="font-semibold">Camera Error:</p>
+              <p>{error}</p>
+              <p className="text-xs mt-1">
+                💡 Try: Allow camera permissions, use Chrome/Firefox, or check camera isn't used by another app
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
