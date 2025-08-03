@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Diet, AnalysisResult, Meal, UserProfile, MedicalCondition } from './types';
 import { analyzeImage } from './services/geminiService';
+import { ProductData } from './services/barcodeService';
 import { ExportService } from './services/exportService';
 import ImageUploader from './components/ImageUploader';
 import DietSelector from './components/DietSelector';
@@ -192,6 +193,152 @@ const App: React.FC = () => {
       setIsModelLoading(false);
     }
   }, [image, userProfile, mealHistory]);
+
+  // Helper function to check diet compatibility
+  const checkDietCompatibility = (ingredients: string, diet: Diet): 'compatible' | 'incompatible' | 'unknown' => {
+    const ingredientText = ingredients.toLowerCase();
+    
+    switch (diet) {
+      case Diet.Vegan:
+        if (ingredientText.includes('milk') || ingredientText.includes('egg') || 
+            ingredientText.includes('meat') || ingredientText.includes('fish') ||
+            ingredientText.includes('honey') || ingredientText.includes('gelatin')) {
+          return 'incompatible';
+        }
+        return 'compatible';
+      case Diet.Keto:
+        // Simple check for high-carb ingredients
+        if (ingredientText.includes('sugar') || ingredientText.includes('wheat') ||
+            ingredientText.includes('rice') || ingredientText.includes('potato')) {
+          return 'incompatible';
+        }
+        return 'compatible';
+      case Diet.GlutenFree:
+        if (ingredientText.includes('wheat') || ingredientText.includes('gluten') ||
+            ingredientText.includes('barley') || ingredientText.includes('rye')) {
+          return 'incompatible';
+        }
+        return 'compatible';
+      default:
+        return 'compatible';
+    }
+  };
+
+  // Helper function to generate recommendations
+  const generateRecommendations = (productData: ProductData, diet: Diet): string[] => {
+    const recommendations = [];
+    
+    if (productData.nutrition_grades && ['d', 'e'].includes(productData.nutrition_grades)) {
+      recommendations.push('Consider healthier alternatives with better nutritional profiles');
+    }
+    
+    if (productData.nutriments?.sugars_100g && productData.nutriments.sugars_100g > 15) {
+      recommendations.push('High sugar content - consume in moderation');
+    }
+    
+    if (productData.nutriments?.sodium_100g && productData.nutriments.sodium_100g > 0.6) {
+      recommendations.push('High sodium content - be mindful of daily intake');
+    }
+    
+    const compatibility = checkDietCompatibility(productData.ingredients_text || '', diet);
+    if (compatibility === 'incompatible') {
+      recommendations.push(`Not compatible with ${diet} diet`);
+    }
+    
+    return recommendations;
+  };
+
+  // Helper function to generate medical considerations
+  const generateMedicalConsiderations = (productData: ProductData, conditions: MedicalCondition[]): string[] => {
+    const considerations = [];
+    
+    conditions.forEach(condition => {
+      switch (condition) {
+        case MedicalCondition.Diabetes:
+          if (productData.nutriments?.sugars_100g && productData.nutriments.sugars_100g > 10) {
+            considerations.push('High sugar content - monitor blood glucose levels');
+          }
+          break;
+        case MedicalCondition.Hypertension:
+          if (productData.nutriments?.sodium_100g && productData.nutriments.sodium_100g > 0.4) {
+            considerations.push('High sodium content - may affect blood pressure');
+          }
+          break;
+        case MedicalCondition.HeartDisease:
+          if (productData.nutriments?.fat_100g && productData.nutriments.fat_100g > 20) {
+            considerations.push('High fat content - consider heart-healthy alternatives');
+          }
+          break;
+        case MedicalCondition.Cholesterol:
+          if (productData.nutriments?.['saturated-fat_100g'] && productData.nutriments['saturated-fat_100g'] > 5) {
+            considerations.push('High saturated fat - may affect cholesterol levels');
+          }
+          break;
+      }
+    });
+    
+    return considerations;
+  };
+
+  // Handle barcode detection
+  const handleBarcodeDetection = useCallback(async (productData: ProductData) => {
+    if (!userProfile) return;
+
+    setIsLoading(true);
+    setError(null);
+    setIsModelLoading(true);
+
+    try {
+      // Convert ProductData to AnalysisResult format
+      const result: AnalysisResult = {
+        dishName: productData.product_name || productData.product_name_en || 'Unknown Product',
+        estimatedCalories: Math.round((productData.nutriments?.energy_100g || 0) / 4.184), // Convert kJ to kcal
+        ingredients: productData.ingredients_text ? productData.ingredients_text.split(',').map(i => i.trim()) : [],
+        dietCompatibility: {
+          isCompatible: checkDietCompatibility(productData.ingredients_text || '', userProfile.diet) === 'compatible',
+          reason: checkDietCompatibility(productData.ingredients_text || '', userProfile.diet) === 'compatible' 
+            ? `Compatible with ${userProfile.diet} diet` 
+            : `Not compatible with ${userProfile.diet} diet - check ingredients`
+        },
+        healthTips: generateRecommendations(productData, userProfile.diet),
+        nutritionalBreakdown: {
+          carbs: productData.nutriments?.carbohydrates_100g || 0,
+          protein: productData.nutriments?.proteins_100g || 0,
+          fat: productData.nutriments?.fat_100g || 0,
+          fiber: productData.nutriments?.fiber_100g || 0,
+          sugar: productData.nutriments?.sugars_100g || 0,
+          sodium: productData.nutriments?.sodium_100g || 0
+        },
+        medicalAdvice: {
+          isSafeForConditions: generateMedicalConsiderations(productData, userProfile.medicalConditions).length === 0,
+          warnings: generateMedicalConsiderations(productData, userProfile.medicalConditions),
+          recommendations: generateRecommendations(productData, userProfile.diet)
+        }
+      };
+
+      setAnalysisResult(result);
+      
+      // Calculate health score
+      const healthScore = calculateHealthScore(result);
+      
+      const newMeal: Meal = {
+        id: Date.now().toString(),
+        timestamp: new Date().toISOString(),
+        imageDataUrl: productData.image_front_url || productData.image_url || '/artpicture.png',
+        analysis: result,
+        healthScore
+      };
+      
+      const updatedHistory = [newMeal, ...mealHistory];
+      setMealHistory(updatedHistory);
+      localStorage.setItem('mealHistory', JSON.stringify(updatedHistory));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred processing product data');
+    } finally {
+      setIsLoading(false);
+      setIsModelLoading(false);
+    }
+  }, [userProfile, mealHistory]);
 
   const handleDeleteMeal = (mealId: string) => {
     const updatedHistory = mealHistory.filter(meal => meal.id !== mealId);
@@ -683,7 +830,11 @@ const App: React.FC = () => {
                 <h2 className={`text-lg sm:text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Scan Your Meal</h2>
                 <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Upload a photo to get instant nutrition analysis and chemical safety assessment</p>
               </div>
-              <ImageUploader onImageUpload={handleImageUpload} imagePreviewUrl={image} />
+              <ImageUploader 
+                onImageUpload={handleImageUpload} 
+                imagePreviewUrl={image}
+                onBarcodeDetected={handleBarcodeDetection}
+              />
               
               <div className="text-center">
                 <h3 className={`text-base sm:text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Select Your Diet</h3>

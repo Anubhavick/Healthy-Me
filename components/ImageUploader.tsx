@@ -2,17 +2,27 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { CameraIcon } from './icons';
 import DarkModeIcon from './DarkModeIcon';
+import BarcodeScanner from './BarcodeScanner';
+import { ProductData } from '../services/barcodeService';
 
 interface ImageUploaderProps {
   onImageUpload: (dataUrl: string) => void;
+  onBarcodeDetected?: (barcode: string, productData: ProductData | null) => void;
   imagePreviewUrl: string | null;
+  isDarkMode?: boolean;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, imagePreviewUrl }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ 
+  onImageUpload, 
+  onBarcodeDetected, 
+  imagePreviewUrl, 
+  isDarkMode = false 
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCamera, setIsCamera] = useState(false);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
@@ -135,6 +145,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, imagePrevi
     stopCamera();
   }, [onImageUpload, stopCamera]);
 
+  const handleBarcodeDetected = (barcode: string, productData: ProductData | null) => {
+    if (onBarcodeDetected) {
+      onBarcodeDetected(barcode, productData);
+    }
+    setShowBarcodeScanner(false);
+  };
+
   return (
     <div className="w-full">
       <input
@@ -227,6 +244,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, imagePrevi
               <CameraIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="text-sm sm:text-base">Use Camera</span>
             </button>
+            {onBarcodeDetected && (
+              <button
+                onClick={() => setShowBarcodeScanner(true)}
+                className="px-4 sm:px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 5v4h2V7h2V5H3zm2 10H3v4h4v-2H5v-2zm14 4v-2h-2v4h4v-2h-2zM19 5h-2v2h2v2h2V5h-4zM7 17h10v2H7v-2zm0-4h10v2H7v-2zm0-4h10v2H7V9z"/>
+                </svg>
+                <span className="text-sm sm:text-base">Scan Barcode</span>
+              </button>
+            )}
           </div>
           
           {/* Debug info */}
@@ -243,6 +271,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, imagePrevi
             )}
           </div>
         </div>
+      )}
+
+      {/* Barcode Scanner Modal */}
+      {showBarcodeScanner && onBarcodeDetected && (
+        <BarcodeScanner
+          onBarcodeDetected={handleBarcodeDetected}
+          onClose={() => setShowBarcodeScanner(false)}
+          isDarkMode={isDarkMode}
+        />
       )}
     </div>
   );
