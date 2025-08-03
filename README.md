@@ -518,10 +518,9 @@ console.log(import.meta.env.VITE_FIREBASE_API_KEY);
 2. **Initialize Project**
    ```bash
    firebase init hosting
-   # ✅ Select existing Firebase project
-   # ✅ Set build directory to 'dist'
-   # ✅ Configure as single-page application: Yes
-   # ✅ Set up automatic builds and deploys with GitHub: Optional
+   # Select existing Firebase project
+   # Set build directory to 'dist'
+   # Configure as single-page application: Yes
    ```
 
 3. **Build & Deploy**
@@ -530,72 +529,15 @@ console.log(import.meta.env.VITE_FIREBASE_API_KEY);
    firebase deploy
    ```
 
-4. **Custom Domain (Optional)**
-   ```bash
-   firebase hosting:channel:deploy production --expires 30d
-   # Add custom domain in Firebase Console
-   ```
-
 </details>
 
 ### Alternative Deployment Options
 
-<div align="center">
-
 | Platform | Complexity | Features | Cost |
 |----------|------------|----------|------|
-| ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white) | 🟢 Easy | Auto-deploy, CDN, Analytics | Free tier |
-| ![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=flat-square&logo=netlify&logoColor=white) | 🟢 Easy | Forms, Functions, Split testing | Free tier |
-| ![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-222222?style=flat-square&logo=github&logoColor=white) | 🟡 Medium | GitHub Actions, Custom domains | Free |
-
-</div>
-
-<details>
-<summary><strong>Vercel Deployment</strong></summary>
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy to Vercel
-vercel
-
-# Production deployment
-vercel --prod
-```
-
-**Environment Variables Setup:**
-- Add all `VITE_*` variables in Vercel dashboard
-- Configure build command: `npm run build`
-- Set output directory: `dist`
-
-</details>
-
-<details>
-<summary><strong>Netlify Deployment</strong></summary>
-
-1. **Drag & Drop Method**
-   - Build locally: `npm run build`
-   - Drag `dist` folder to Netlify dashboard
-
-2. **Git Integration**
-   - Connect GitHub repository
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-   - Add environment variables in Netlify settings
-
-</details>
-
-### Production Checklist
-
-- [ ] ✅ Environment variables configured
-- [ ] 🔐 Firebase security rules updated
-- [ ] 🌐 Custom domain configured (optional)
-- [ ] 📊 Analytics enabled
-- [ ] 🔍 Error reporting configured
-- [ ] 🚀 Performance monitoring enabled
-- [ ] 📱 PWA features enabled
-- [ ] 🔒 HTTPS enforced
+| Vercel | Easy | Auto-deploy, CDN, Analytics | Free tier |
+| Netlify | Easy | Forms, Functions, Split testing | Free tier |
+| GitHub Pages | Medium | GitHub Actions, Custom domains | Free |
 
 ---
 
@@ -603,214 +545,29 @@ vercel --prod
 
 ### Security Features
 
-<div align="center">
-
 | Security Layer | Implementation | Status |
 |----------------|----------------|---------|
-| **🔐 Authentication** | Firebase Auth + JWT | ✅ Implemented |
-| **🔒 Data Protection** | Firestore Security Rules | ✅ Implemented |
-| **🌐 HTTPS Enforcement** | Firebase Hosting SSL | ✅ Implemented |
-| **🔑 API Key Security** | Environment Variables | ✅ Implemented |
-| **🚫 CORS Protection** | Firebase Configuration | ✅ Implemented |
-| **🔍 Input Validation** | Client & Server Side | ✅ Implemented |
-
-</div>
-
-<details>
-<summary><strong>Security Best Practices</strong></summary>
-
-#### Environment Security
-```bash
-# ✅ DO: Use environment variables
-VITE_FIREBASE_API_KEY=your_api_key
-
-# ❌ DON'T: Hardcode sensitive data
-const apiKey = "your_api_key_here"  // Never do this!
-```
-
-#### Firestore Security Rules
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Users can only access their own data
-    match /users/{userId} {
-      allow read, write: if request.auth != null 
-        && request.auth.uid == userId;
-    }
-    
-    // Meals are tied to authenticated users
-    match /meals/{mealId} {
-      allow read, write: if request.auth != null 
-        && request.auth.uid == resource.data.userId;
-    }
-  }
-}
-```
-
-</details>
+| Authentication | Firebase Auth + JWT | Implemented |
+| Data Protection | Firestore Security Rules | Implemented |
+| HTTPS Enforcement | Firebase Hosting SSL | Implemented |
+| API Key Security | Environment Variables | Implemented |
+| CORS Protection | Firebase Configuration | Implemented |
+| Input Validation | Client & Server Side | Implemented |
 
 ### Performance Optimizations
 
-<div align="center">
-
 | Optimization | Implementation | Impact |
 |--------------|----------------|---------|
-| **📦 Code Splitting** | Dynamic imports | 🟢 -60% initial bundle |
-| **🖼️ Image Optimization** | Compression + WebP | 🟢 -70% image size |
-| **🧠 Model Caching** | localStorage + CDN | 🟢 -80% load time |
-| **⚡ Lazy Loading** | React.lazy + Suspense | 🟢 Improved LCP |
-| **🔄 Service Worker** | Workbox | 🟢 Offline support |
-| **📊 Bundle Analysis** | Vite analyzer | 🟢 Optimized builds |
-
-</div>
-
-<details>
-<summary><strong>Performance Metrics</strong></summary>
-
-#### Lighthouse Scores
-- 🟢 **Performance**: 95+
-- 🟢 **Accessibility**: 98+
-- 🟢 **Best Practices**: 95+
-- 🟢 **SEO**: 90+
-
-#### Bundle Analysis
-```bash
-# Analyze bundle size
-npm run build -- --analyze
-
-# Performance profiling
-npm run dev -- --profile
-```
-
-#### Optimization Techniques
-```javascript
-// Code splitting example
-const AnalyticsDashboard = React.lazy(() => 
-  import('./components/AnalyticsDashboard')
-);
-
-// Image optimization
-const optimizedImages = {
-  webp: '/images/food.webp',
-  fallback: '/images/food.jpg'
-};
-```
-
-</details>
+| Code Splitting | Dynamic imports | -60% initial bundle |
+| Image Optimization | Compression + WebP | -70% image size |
+| Model Caching | localStorage + CDN | -80% load time |
+| Lazy Loading | React.lazy + Suspense | Improved LCP |
+| Service Worker | Workbox | Offline support |
+| Bundle Analysis | Vite analyzer | Optimized builds |
 
 ---
 
 ## Contributing
-
-We welcome contributions from the community! Whether it's bug fixes, feature requests, or documentation improvements, every contribution helps make Healthy Me better.
-
-### Ways to Contribute
-
-<div align="center">
-
-| Type | Description | Difficulty |
-|------|-------------|------------|
-| **Bug Reports** | Report issues and bugs | Easy |
-| **Feature Requests** | Suggest new features | Easy |
-| **Documentation** | Improve docs and guides | Medium |
-| **Code Contributions** | Add features or fix bugs | Advanced |
-| **UI/UX Improvements** | Enhance user experience | Medium |
-| **Testing** | Add tests and improve coverage | Advanced |
-
-</div>
-
-### Getting Started
-
-<details>
-<summary><strong>Development Workflow</strong></summary>
-
-1. **Fork & Clone**
-   ```bash
-   # Fork the repository on GitHub
-   git clone https://github.com/YOUR_USERNAME/Healthy-Me.git
-   cd ai-diet-scanner
-   ```
-
-2. **Setup Development Environment**
-   ```bash
-   npm install
-   cp .env.example .env.local  # Configure your environment
-   npm run dev
-   ```
-
-3. **Create Feature Branch**
-   ```bash
-   git checkout -b feature/your-amazing-feature
-   # or
-   git checkout -b fix/bug-description
-   ```
-
-4. **Make Your Changes**
-   - Follow our [coding standards](#coding-standards)
-   - Write meaningful commit messages
-   - Add tests if applicable
-   - Update documentation
-
-5. **Test Your Changes**
-   ```bash
-   npm run build    # Test production build
-   npm run preview  # Test locally
-   ```
-
-6. **Submit Pull Request**
-   - Push your branch: `git push origin feature/your-amazing-feature`
-   - Create PR with detailed description
-   - Reference related issues
-
-</details>
-
-### Coding Standards
-
-<details>
-<summary><strong>Code Quality Guidelines</strong></summary>
-
-#### TypeScript Standards
-```typescript
-// ✅ DO: Use proper typing
-interface UserProfile {
-  id: string;
-  name: string;
-  age?: number;
-}
-
-// ❌ DON'T: Use any type
-const userData: any = {...}
-```
-
-#### Component Structure
-```tsx
-// ✅ DO: Functional components with proper props
-interface ComponentProps {
-  title: string;
-  onAction: () => void;
-}
-
-const MyComponent: React.FC<ComponentProps> = ({ title, onAction }) => {
-  return <div>{title}</div>;
-};
-```
-
-#### Naming Conventions
-- **Components**: PascalCase (`UserProfile.tsx`)
-- **Functions**: camelCase (`getUserData`)
-- **Constants**: UPPER_SNAKE_CASE (`API_ENDPOINTS`)
-- **Files**: kebab-case for utilities (`image-utils.ts`)
-
-</details>
-
-### Good First Issues
-
-Looking for a place to start? Check out issues labeled with:
-- `good first issue`
-- `documentation`
-- `bug`
-- `ui/ux`
 
 ### Developer
 
@@ -826,84 +583,9 @@ Looking for a place to start? Check out issues labeled with:
 
 ---
 
-## Support
-
-### Getting Help
-
-<div align="center">
-
-| Need Help With | Where to Go | Response Time |
-|----------------|-------------|---------------|
-| **Bug Reports** | [GitHub Issues](https://github.com/Anubhavick/Healthy-Me/issues) | 24-48 hours |
-| **Feature Requests** | [GitHub Discussions](https://github.com/Anubhavick/Healthy-Me/discussions) | 2-3 days |
-| **General Questions** | [Discussions](https://github.com/Anubhavick/Healthy-Me/discussions) | 1-2 days |
-| **Security Issues** | Email: security@healthyme.dev | Immediate |
-
-</div>
-
-### Troubleshooting
-
-<details>
-<summary><strong>Common Issues & Solutions</strong></summary>
-
-#### Firebase Issues
-```bash
-# Error: Firebase not initialized
-✅ Solution: Check .env.local file exists
-✅ Verify all VITE_FIREBASE_* variables are set
-✅ Restart development server
-
-# Error: Permission denied
-✅ Solution: Check Firestore security rules
-✅ Ensure user is authenticated
-✅ Verify user owns the data
-```
-
-#### AI Service Issues
-```bash
-# Error: Gemini API quota exceeded
-✅ Solution: Check API usage in Google AI Studio
-✅ Upgrade to paid tier if needed
-✅ Implement rate limiting
-
-# Error: TensorFlow.js model failed to load
-✅ Solution: Check internet connection
-✅ Clear browser cache
-✅ Try different browser
-```
-
-#### Image Upload Issues
-```bash
-# Error: Image upload failed
-✅ Solution: Check file size (max 10MB)
-✅ Verify file format (JPG, PNG, WebP)
-✅ Check Firebase Storage rules
-```
-
-</details>
-
-### Documentation
-
-- **API Documentation**: `/docs/api.md`
-- **Component Library**: `/docs/components.md`
-- **Deployment Guide**: `/docs/deployment.md`
-- **Configuration**: `/docs/configuration.md`
-
-### Community
-
-<div align="center">
-
-[![Discord](https://img.shields.io/badge/Discord-Join_Community-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/healthyme)
-[![Twitter](https://img.shields.io/badge/Twitter-Follow_Updates-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/healthyme_ai)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/company/healthyme)
-
-</div>
-
----
-
 ## License
 
-<div align="center">
+This project is licensed under the MIT License.
 
 ```
 MIT License
@@ -929,68 +611,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
-
-</div>
-
-### What This Means
-
-- ✅ **Commercial Use**: Use in commercial projects
-- ✅ **Modification**: Modify the source code
-- ✅ **Distribution**: Distribute the software
-- ✅ **Private Use**: Use for private projects
-- ❗ **Include License**: Must include license in copies
-- ❗ **Include Copyright**: Must include copyright notice
-
----
-
-## Acknowledgments
-
-<div align="center">
-
-### Special Thanks
-
-This project wouldn't be possible without these amazing technologies and communities:
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" width="60px" alt="Google"/>
-      <br />
-      <sub><b>Google AI Team</b></sub>
-      <br />
-      <sub>Gemini AI Platform</sub>
-    </td>
-    <td align="center">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg" width="60px" alt="Firebase"/>
-      <br />
-      <sub><b>Firebase Team</b></sub>
-      <br />
-      <sub>Backend Infrastructure</sub>
-    </td>
-    <td align="center">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg" width="60px" alt="TensorFlow"/>
-      <br />
-      <sub><b>TensorFlow Team</b></sub>
-      <br />
-      <sub>ML Framework</sub>
-    </td>
-    <td align="center">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" width="60px" alt="React"/>
-      <br />
-      <sub><b>React Team</b></sub>
-      <br />
-      <sub>Frontend Framework</sub>
-    </td>
-  </tr>
-</table>
-
-### Open Source Community
-
-*A heartfelt thank you to the countless developers who contribute to open source projects that make applications like this possible.*
-
-</div>
-
 ---
 
 <div align="center">
@@ -1003,8 +623,6 @@ This project wouldn't be possible without these amazing technologies and communi
 [![Star on GitHub](https://img.shields.io/badge/Star_on_GitHub-Support_Project-yellow?style=for-the-badge&color=ffd700)](https://github.com/Anubhavick/Healthy-Me)
 
 **Built with ❤️ by [Anubhav Mishra](https://github.com/Anubhavick)**
-
-*If this project helps you make better food choices, please consider giving it a star on GitHub!*
 
 ---
 
