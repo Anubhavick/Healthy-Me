@@ -20,7 +20,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [isCamera, setIsCamera] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
   // Effect to handle video stream assignment
   useEffect(() => {
@@ -142,22 +142,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   }, [facingMode]);
 
-  const switchCamera = useCallback(async () => {
-    if (stream) {
-      // Stop current stream
-      stream.getTracks().forEach(track => track.stop());
-    }
-    
-    // Switch facing mode
-    const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
-    setFacingMode(newFacingMode);
-    
-    // Restart camera with new facing mode
-    setTimeout(() => {
-      startCamera();
-    }, 100);
-  }, [stream, facingMode, startCamera]);
-
   const stopCamera = useCallback(() => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
@@ -241,7 +225,55 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             </button>
             
             <button
-              onClick={() => setFacingMode(facingMode === 'user' ? 'environment' : 'user')}
+              onClick={async () => {
+                if (stream) {
+                  // Stop current stream
+                  stream.getTracks().forEach(track => track.stop());
+                  setStream(null);
+                }
+                
+                // Switch facing mode
+                const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+                setFacingMode(newFacingMode);
+                
+                // Start camera with new facing mode immediately
+                try {
+                  setError(null);
+                  
+                  const mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                      facingMode: newFacingMode,
+                      width: { ideal: 1280, max: 1920 },
+                      height: { ideal: 720, max: 1080 }
+                    }
+                  });
+                  
+                  setStream(mediaStream);
+                  
+                  if (videoRef.current) {
+                    videoRef.current.srcObject = null;
+                    
+                    setTimeout(() => {
+                      if (videoRef.current) {
+                        videoRef.current.srcObject = mediaStream;
+                        videoRef.current.load();
+                        
+                        videoRef.current.onloadedmetadata = () => {
+                          if (videoRef.current) {
+                            videoRef.current.play().catch(err => {
+                              console.error('Video play failed:', err);
+                              setError('Failed to start video playback. Please try again.');
+                            });
+                          }
+                        };
+                      }
+                    }, 50);
+                  }
+                } catch (err) {
+                  console.error('Error switching camera:', err);
+                  setError('Failed to switch camera. Please try again.');
+                }
+              }}
               disabled={!stream}
               className="px-3 sm:px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold transition-all duration-200 active:scale-95 text-sm sm:text-base"
             >
