@@ -224,12 +224,18 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
                 {isDarkMode ? 'Dark Mode' : 'Light Mode'}
               </span>
               <div className="ml-auto">
-                <div className={`w-10 h-6 rounded-full transition-colors duration-200 ${
-                  isDarkMode ? 'bg-emerald-500' : 'bg-gray-300'
+                <div className={`relative w-11 h-6 rounded-full transition-all duration-300 shadow-inner ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-500/20' 
+                    : 'bg-gradient-to-r from-gray-200 to-gray-300 shadow-gray-400/20'
                 }`}>
-                  <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-200 mt-1 ${
-                    isDarkMode ? 'translate-x-5' : 'translate-x-1'
-                  }`}></div>
+                  <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-lg transform transition-all duration-300 flex items-center justify-center ${
+                    isDarkMode ? 'translate-x-5' : 'translate-x-0'
+                  } hover:scale-105`}>
+                    <span className="text-xs">
+                      {isDarkMode ? '🌙' : '☀️'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </button>

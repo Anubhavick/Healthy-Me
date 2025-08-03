@@ -265,18 +265,43 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Notifications</h4>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Get notified about meal reminders</p>
                     </div>
-                    <button className="w-10 h-6 bg-gray-300 rounded-full relative">
-                      <div className="w-4 h-4 bg-white rounded-full shadow-sm transform translate-x-1 mt-1"></div>
+                    <button
+                      className={`relative w-16 h-8 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-inner ${
+                        false 
+                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 focus:ring-emerald-500 shadow-emerald-500/20' 
+                          : 'bg-gradient-to-r from-gray-200 to-gray-300 focus:ring-gray-400 shadow-gray-400/20'
+                      }`}
+                      aria-label="Toggle notifications"
+                    >
+                      <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-lg transform transition-all duration-300 flex items-center justify-center ${
+                        false ? 'translate-x-8' : 'translate-x-0'
+                      } hover:scale-110`}>
+                        <span className="text-xs">
+                          {false ? '🔔' : '🔕'}
+                        </span>
+                      </div>
                     </button>
                   </div>
-                  
                   <div className={`flex items-center justify-between p-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg`}>
                     <div>
                       <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Auto-sync</h4>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Automatically sync data across devices</p>
                     </div>
-                    <button className="w-10 h-6 bg-emerald-500 rounded-full relative">
-                      <div className="w-4 h-4 bg-white rounded-full shadow-sm transform translate-x-5 mt-1"></div>
+                    <button
+                      className={`relative w-16 h-8 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-inner ${
+                        true 
+                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 focus:ring-emerald-500 shadow-emerald-500/20' 
+                          : 'bg-gradient-to-r from-gray-200 to-gray-300 focus:ring-gray-400 shadow-gray-400/20'
+                      }`}
+                      aria-label="Toggle auto-sync"
+                    >
+                      <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-lg transform transition-all duration-300 flex items-center justify-center ${
+                        true ? 'translate-x-8' : 'translate-x-0'
+                      } hover:scale-110`}>
+                        <span className="text-xs">
+                          {true ? '🔄' : '⏸️'}
+                        </span>
+                      </div>
                     </button>
                   </div>
 
@@ -285,8 +310,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                       <h4 className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Analytics Collection</h4>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Help improve the app with anonymous data</p>
                     </div>
-                    <button className="w-10 h-6 bg-emerald-500 rounded-full relative">
-                      <div className="w-4 h-4 bg-white rounded-full shadow-sm transform translate-x-5 mt-1"></div>
+                    <button
+                      className={`relative w-16 h-8 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-inner ${
+                        true 
+                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 focus:ring-emerald-500 shadow-emerald-500/20' 
+                          : 'bg-gradient-to-r from-gray-200 to-gray-300 focus:ring-gray-400 shadow-gray-400/20'
+                      }`}
+                      aria-label="Toggle analytics collection"
+                    >
+                      <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-lg transform transition-all duration-300 flex items-center justify-center ${
+                        true ? 'translate-x-8' : 'translate-x-0'
+                      } hover:scale-110`}>
+                        <span className="text-xs">
+                          {true ? '📊' : '🚫'}
+                        </span>
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -312,13 +350,20 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                     <button
                       onClick={onDarkModeToggle}
-                      className={`w-10 h-6 rounded-full relative transition-colors duration-200 ${
-                        isDarkMode ? 'bg-emerald-500' : 'bg-gray-300'
+                      className={`relative w-16 h-8 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-inner ${
+                        isDarkMode 
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 focus:ring-blue-500 shadow-blue-500/20' 
+                          : 'bg-gradient-to-r from-gray-200 to-gray-300 focus:ring-gray-400 shadow-gray-400/20'
                       }`}
+                      aria-label="Toggle dark mode"
                     >
-                      <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-200 mt-1 ${
-                        isDarkMode ? 'translate-x-5' : 'translate-x-1'
-                      }`}></div>
+                      <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-lg transform transition-all duration-300 flex items-center justify-center ${
+                        isDarkMode ? 'translate-x-8' : 'translate-x-0'
+                      } hover:scale-110`}>
+                        <span className="text-xs">
+                          {isDarkMode ? '🌙' : '☀️'}
+                        </span>
+                      </div>
                     </button>
                   </div>
 

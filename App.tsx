@@ -479,13 +479,20 @@ const App: React.FC = () => {
             </button>
             <button
               onClick={handleDarkModeToggle}
-              className={`p-2 rounded-lg transition-all duration-200 backdrop-blur-sm ${
+              className={`relative w-14 h-7 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 isDarkMode 
-                  ? 'bg-white/10 hover:bg-white/20' 
-                  : 'bg-blue-100/50 hover:bg-blue-200/50'
+                  ? 'bg-blue-600 focus:ring-blue-500' 
+                  : 'bg-gray-300 focus:ring-gray-400'
               }`}
+              aria-label="Toggle dark mode"
             >
-              {isDarkMode ? '☀️' : '🌙'}
+              <div className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-lg transform transition-all duration-300 flex items-center justify-center ${
+                isDarkMode ? 'translate-x-7' : 'translate-x-0'
+              }`}>
+                <span className="text-xs">
+                  {isDarkMode ? '🌙' : '☀️'}
+                </span>
+              </div>
             </button>
           </div>
           </nav>

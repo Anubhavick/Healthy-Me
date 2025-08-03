@@ -5,6 +5,8 @@ import Carousel from './Carousel';
 interface LandingPageProps {
   onGetStarted: () => void;
   onTryDemo: () => void;
+  onHome?: () => void;
+  onDocs?: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
 }
@@ -12,6 +14,8 @@ interface LandingPageProps {
 const LandingPage: React.FC<LandingPageProps> = ({ 
   onGetStarted, 
   onTryDemo, 
+  onHome,
+  onDocs,
   isDarkMode, 
   onToggleDarkMode 
 }) => {
@@ -46,29 +50,44 @@ const LandingPage: React.FC<LandingPageProps> = ({
           </div>
           
           <div className="flex items-center space-x-3 sm:space-x-6">
-            <button className={`transition-colors duration-200 font-medium text-sm sm:text-base ${
-              isDarkMode 
-                ? 'text-white/80 hover:text-white' 
-                : 'text-gray-600 hover:text-gray-800'
-            }`}>
+            <button 
+              onClick={onHome}
+              className={`transition-colors duration-200 font-medium text-sm sm:text-base hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                isDarkMode 
+                  ? 'text-white/80 hover:text-white focus:ring-white/20' 
+                  : 'text-gray-600 hover:text-gray-800 focus:ring-gray-300'
+              }`}
+              aria-label="Go to Home"
+            >
               <span className="hidden sm:inline">Home</span>
             </button>
-            <button className={`transition-colors duration-200 font-medium text-sm sm:text-base ${
-              isDarkMode 
-                ? 'text-white/80 hover:text-white' 
-                : 'text-gray-600 hover:text-gray-800'
-            }`}>
+            <button 
+              onClick={onDocs}
+              className={`transition-colors duration-200 font-medium text-sm sm:text-base hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                isDarkMode 
+                  ? 'text-white/80 hover:text-white focus:ring-white/20' 
+                  : 'text-gray-600 hover:text-gray-800 focus:ring-gray-300'
+              }`}
+              aria-label="Go to Documentation"
+            >
               <span className="hidden sm:inline">Docs</span>
             </button>
             <button
               onClick={onToggleDarkMode}
-              className={`p-2 rounded-lg transition-all duration-200 backdrop-blur-sm ${
+              className={`relative w-16 h-8 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-inner ${
                 isDarkMode 
-                  ? 'bg-white/10 hover:bg-white/20' 
-                  : 'bg-blue-100/50 hover:bg-blue-200/50'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 focus:ring-blue-500 shadow-blue-500/20' 
+                  : 'bg-gradient-to-r from-gray-200 to-gray-300 focus:ring-gray-400 shadow-gray-400/20'
               }`}
+              aria-label="Toggle dark mode"
             >
-              {isDarkMode ? '☀️' : '🌙'}
+              <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-lg transform transition-all duration-300 flex items-center justify-center ${
+                isDarkMode ? 'translate-x-8' : 'translate-x-0'
+              } hover:scale-110`}>
+                <span className="text-xs">
+                  {isDarkMode ? '🌙' : '☀️'}
+                </span>
+              </div>
             </button>
           </div>
         </nav>
