@@ -22,6 +22,7 @@ import SettingsModal from './components/SettingsModal';
 import { SparklesIcon, LoadingSpinner } from './components/icons';
 import ShinyText from './components/ShinyText';
 import LightRays from './components/LightRays';
+import OpenFoodFactsDemo from './components/OpenFoodFactsDemo';
 import LandingPage from './components/LandingPage';
 
 const App: React.FC = () => {
@@ -35,7 +36,7 @@ const App: React.FC = () => {
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [showShareCard, setShowShareCard] = useState<boolean>(false);
   const [mealToShare, setMealToShare] = useState<Meal | null>(null);
-  const [activeTab, setActiveTab] = useState<'analyze' | 'profile' | 'analytics' | 'social' | 'goals'>('profile');
+  const [activeTab, setActiveTab] = useState<'analyze' | 'profile' | 'analytics' | 'social' | 'goals' | 'api-demo'>('profile');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -827,8 +828,10 @@ const App: React.FC = () => {
                 : 'bg-white/80 border-blue-200/50'
             }`}>
               <div className="text-center">
-                <h2 className={`text-lg sm:text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Scan Your Meal</h2>
-                <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Upload a photo to get instant nutrition analysis and chemical safety assessment</p>
+                <h2 className={`text-lg sm:text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Scan Your Food</h2>
+                <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>
+                  📷 Take a photo for fresh food analysis or 📊 scan barcode for packaged products
+                </p>
               </div>
               <ImageUploader 
                 onImageUpload={handleImageUpload} 
@@ -881,7 +884,9 @@ const App: React.FC = () => {
             }`}>
               <div className="text-center mb-4">
                 <h2 className={`text-lg sm:text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Analysis Results</h2>
-                <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Smart nutrition insights, chemical safety analysis, and health recommendations</p>
+                <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>
+                  AI-powered nutrition insights with health recommendations
+                </p>
               </div>
               
               <div className="flex-1 flex items-center justify-center">

@@ -7,7 +7,7 @@ import { ProductData } from '../services/barcodeService';
 
 interface ImageUploaderProps {
   onImageUpload: (dataUrl: string) => void;
-  onBarcodeDetected?: (barcode: string, productData: ProductData | null) => void;
+  onBarcodeDetected?: (productData: ProductData) => void;
   imagePreviewUrl: string | null;
   isDarkMode?: boolean;
 }
@@ -146,8 +146,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   }, [onImageUpload, stopCamera]);
 
   const handleBarcodeDetected = (barcode: string, productData: ProductData | null) => {
-    if (onBarcodeDetected) {
-      onBarcodeDetected(barcode, productData);
+    if (onBarcodeDetected && productData) {
+      onBarcodeDetected(productData);
     }
     setShowBarcodeScanner(false);
   };
