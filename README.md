@@ -1,8 +1,8 @@
-# 🍎 Healthy Me - AI-Powered Nutrition Assistant
+# Healthy Me - AI-Powered Nutrition Assistant
 
 <div align="center">
   
-![Healthy Me Logo](public/logo.svg)
+<img src="public/logo.svg" width="120" height="120" alt="Healthy Me Logo" />
 
 **Your personal AI nutrition companion for smarter food choices**
 
@@ -13,7 +13,7 @@
 [![TensorFlow.js](https://img.shields.io/badge/TensorFlow.js-4.22+-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)](https://www.tensorflow.org/js)
 [![Vite](https://img.shields.io/badge/Vite-6.2+-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-View_App-success?style=for-the-badge)](https://healthy-me-demo.web.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-View_App-success?style=for-the-badge)](https://healthy-me-demo.web.app)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/Anubhavick/Healthy-Me?style=for-the-badge)](https://github.com/Anubhavick/Healthy-Me/stargazers)
 
@@ -21,32 +21,32 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [🌟 Overview](#-overview)
-- [✨ Key Features](#-key-features)
-- [🏗️ Architecture](#%EF%B8%8F-architecture)
-- [🛠️ Technology Stack](#%EF%B8%8F-technology-stack)
-- [🚀 Quick Start](#-quick-start)
-- [⚙️ Configuration](#%EF%B8%8F-configuration)
-- [📁 Project Structure](#-project-structure)
-- [🔧 Development](#-development)
-- [🚢 Deployment](#-deployment)
-- [🔒 Security & Performance](#-security--performance)
-- [🤝 Contributing](#-contributing)
-- [📞 Support](#-support)
-- [📄 License](#-license)
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [Technology Stack](#technology-stack)
+- [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Development](#development)
+- [Deployment](#deployment)
+- [Security & Performance](#security--performance)
+- [Contributing](#contributing)
+- [Support](#support)
+- [License](#license)
 
 ---
 
-## 🌟 Overview
+## Overview
 
 **Healthy Me** is a cutting-edge nutrition analysis platform that revolutionizes how you understand your food choices. Powered by advanced AI technologies including Google's Gemini AI and TensorFlow.js, our platform provides instant, comprehensive nutritional insights through simple image uploads.
 
-### 🎯 Mission
+### Mission
 To democratize nutrition knowledge and empower individuals to make informed dietary decisions through accessible, AI-powered food analysis.
 
-### 🌍 Impact
+### Impact
 - **Real-time Analysis**: Get nutritional insights in seconds
 - **Personalized Recommendations**: Tailored advice based on your health profile
 - **Evidence-based Scoring**: Scientifically-backed health ratings
@@ -54,36 +54,36 @@ To democratize nutrition knowledge and empower individuals to make informed diet
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 🤖 AI-Powered Analysis Engine
-- **🧠 Gemini AI Integration**: Advanced multimodal AI for food identification and nutritional analysis
-- **📱 TensorFlow.js Models**: Client-side machine learning using MobileNet for real-time classification
-- **🔍 Dual Validation System**: Combined AI validation for 99%+ accuracy in food recognition
-- **⚡ Real-time Processing**: Instant analysis with optimized performance
+### AI-Powered Analysis Engine
+- **Gemini AI Integration**: Advanced multimodal AI for food identification and nutritional analysis
+- **TensorFlow.js Models**: Client-side machine learning using MobileNet for real-time classification
+- **Dual Validation System**: Combined AI validation for 99%+ accuracy in food recognition
+- **Real-time Processing**: Instant analysis with optimized performance
 
-### 📊 Comprehensive Health Assessment
-- **🎯 Smart Scoring Algorithm**: Proprietary 1-20 scale health rating system
-- **🌈 Visual Health Indicators**: Color-coded classification (Excellent, Good, Fair, Poor)
-- **🎨 Personalized Recommendations**: Context-aware suggestions based on user profile
-- **🏥 Medical Condition Support**: Tailored advice for specific health conditions
+### Comprehensive Health Assessment
+- **Smart Scoring Algorithm**: Proprietary 1-20 scale health rating system
+- **Visual Health Indicators**: Color-coded classification (Excellent, Good, Fair, Poor)
+- **Personalized Recommendations**: Context-aware suggestions based on user profile
+- **Medical Condition Support**: Tailored advice for specific health conditions
 
-### 💾 Advanced Data Management
-- **🔐 Secure Authentication**: Multi-provider system (Google OAuth, Email/Password)
-- **☁️ Cloud Firestore**: Real-time NoSQL database with auto-sync
-- **👤 Complete User Profiles**: Dietary preferences, health data, BMI tracking
-- **📈 Historical Analytics**: Comprehensive meal tracking with searchable history
+### Advanced Data Management
+- **Secure Authentication**: Multi-provider system (Google OAuth, Email/Password)
+- **Cloud Firestore**: Real-time NoSQL database with auto-sync
+- **Complete User Profiles**: Dietary preferences, health data, BMI tracking
+- **Historical Analytics**: Comprehensive meal tracking with searchable history
 
-### 🎨 Modern User Experience
-- **📱 Responsive Design**: Optimized for all devices and screen sizes
-- **📊 Interactive Dashboard**: Dynamic charts and visualizations
-- **📤 Export Capabilities**: PDF and CSV export for health reports
-- **🌙 Dark/Light Mode**: Customizable theme preferences
-- **💬 AI Chat Assistant**: Personalized nutrition guidance chatbot
+### Modern User Experience
+- **Responsive Design**: Optimized for all devices and screen sizes
+- **Interactive Dashboard**: Dynamic charts and visualizations
+- **Export Capabilities**: PDF and CSV export for health reports
+- **Dark/Light Mode**: Customizable theme preferences
+- **AI Chat Assistant**: Personalized nutrition guidance chatbot
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 graph TB
@@ -134,7 +134,7 @@ graph TB
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 <div align="center">
 
@@ -169,9 +169,9 @@ graph TB
 </div>
 
 ---
-## 🚀 Quick Start
+## Quick Start
 
-### 📋 Prerequisites
+### Prerequisites
 
 Before you begin, ensure you have the following installed:
 
@@ -187,12 +187,12 @@ git --version
 ```
 
 **Required Software:**
-- 🟢 **Node.js** (v18.0+) - [Download](https://nodejs.org/)
-- 📦 **npm** or **yarn** package manager
-- 🌐 **Git** for version control
-- 🔑 **Google Account** for Firebase and Gemini AI access
+- **Node.js** (v18.0+) - [Download](https://nodejs.org/)
+- **npm** or **yarn** package manager
+- **Git** for version control
+- **Google Account** for Firebase and Gemini AI access
 
-### ⚡ Installation
+### Installation
 
 1. **Clone the Repository**
    ```bash
@@ -211,7 +211,7 @@ git --version
    
    Create a `.env.local` file in the project root:
    ```env
-   # 🔥 Firebase Configuration
+   # Firebase Configuration
    VITE_FIREBASE_API_KEY=your_firebase_api_key_here
    VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
    VITE_FIREBASE_PROJECT_ID=your_project_id_here
@@ -220,10 +220,10 @@ git --version
    VITE_FIREBASE_APP_ID=your_app_id_here
    VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id_here
 
-   # 🤖 Gemini AI Configuration
+   # Gemini AI Configuration
    VITE_GEMINI_API_KEY=your_gemini_api_key_here
 
-   # ☁️ Optional: Cloud Vision API
+   # Optional: Cloud Vision API
    VITE_GOOGLE_CLOUD_VISION_API_KEY=your_cloud_vision_api_key_here
    ```
 
@@ -232,25 +232,25 @@ git --version
    npm run dev
    ```
    
-   🎉 Open [http://localhost:5173](http://localhost:5173) to view the app!
+   Open [http://localhost:5173](http://localhost:5173) to view the app!
 
-### 🎬 Demo
+### Demo
 
 <div align="center">
 
-[![Demo Video](https://img.shields.io/badge/🎥_Watch_Demo-YouTube-red?style=for-the-badge)](https://youtube.com/demo)
-[![Live App](https://img.shields.io/badge/🚀_Try_Live_App-Firebase-orange?style=for-the-badge)](https://healthy-me-demo.web.app)
+[![Demo Video](https://img.shields.io/badge/Watch_Demo-YouTube-red?style=for-the-badge)](https://youtube.com/demo)
+[![Live App](https://img.shields.io/badge/Try_Live_App-Firebase-orange?style=for-the-badge)](https://healthy-me-demo.web.app)
 
 </div>
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
-### 🔥 Firebase Setup
+### Firebase Setup
 
 <details>
-<summary>📱 <strong>Step-by-step Firebase Configuration</strong></summary>
+<summary><strong>Step-by-step Firebase Configuration</strong></summary>
 
 #### 1. Create Firebase Project
 - Visit [Firebase Console](https://console.firebase.google.com/)
@@ -296,10 +296,10 @@ service firebase.storage {
 
 </details>
 
-### 🤖 Gemini AI Setup
+### Gemini AI Setup
 
 <details>
-<summary>🧠 <strong>Gemini AI Configuration</strong></summary>
+<summary><strong>Gemini AI Configuration</strong></summary>
 
 1. **Get API Key**
    - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
@@ -313,10 +313,10 @@ service firebase.storage {
 
 </details>
 
-### 🔧 Advanced Configuration
+### Advanced Configuration
 
 <details>
-<summary>⚙️ <strong>Optional Settings</strong></summary>
+<summary><strong>Optional Settings</strong></summary>
 
 #### Analytics Configuration
 ```env
@@ -339,99 +339,99 @@ VITE_ENABLE_ERROR_REPORTING=true
 </details>
 
 ---
-## 📁 Project Structure
+## Project Structure
 
 ```
-🏠 ai-diet-scanner/
-├── 📁 public/                        # Static assets
-│   ├── 🖼️ *.svg                      # Vector icons and logos
-│   ├── 🖼️ *.png                      # Raster images
-│   └── 📄 index.html                 # HTML entry point
-├── 📁 components/                     # React components
-│   ├── 🤖 AIServicesStatus.tsx       # AI service monitoring
-│   ├── 📊 AnalysisResult.tsx         # Nutrition analysis display
-│   ├── 📈 AnalyticsDashboard.tsx     # Data visualization
-│   ├── 🔐 AuthModal.tsx              # User authentication
-│   ├── ⚖️ BMICalculator.tsx          # BMI calculation tool
-│   ├── 🎠 Carousel.tsx               # Image carousel component
-│   ├── 💬 ChatBot.tsx                # AI nutrition assistant
-│   ├── 🌙 DarkModeIcon.tsx           # Theme toggle component
-│   ├── 🥗 DietSelector.tsx           # Diet preference selection
-│   ├── 🔄 FirebaseSync.tsx           # Data synchronization
-│   ├── 🎯 GoalsStreaksModal.tsx      # Goal tracking interface
-│   ├── 🎨 icons.tsx                  # Icon component library
-│   ├── 📸 ImageUploader.tsx          # Image upload handler
-│   ├── 🏠 LandingPage.tsx            # App landing page
-│   ├── ✨ LightRays.tsx              # Visual effects
-│   ├── 📚 MealHistory.tsx            # Meal tracking history
-│   ├── 📋 MealHistoryModal.tsx       # Detailed meal view
-│   ├── 🏥 MedicalConditionsSelector.tsx # Health conditions
-│   ├── 👤 ProfileDropdown.tsx        # User profile menu
-│   ├── ⚙️ SettingsModal.tsx          # App settings
-│   ├── 📤 ShareCardGenerator.tsx     # Social sharing
-│   ├── ✨ ShinyText.tsx              # Animated text effects
-│   └── 🏆 StreakGoals.tsx            # Achievement tracking
-├── 📁 services/                       # Backend integrations
-│   ├── 💬 chatService.ts             # AI chat functionality
-│   ├── 📤 exportService.ts           # Data export utilities
-│   ├── 🔥 firebase.ts                # Firebase configuration
-│   ├── 🔥 firebaseService.ts         # Firebase operations
-│   ├── 🍔 foodSearchService.ts       # Food database API
-│   ├── 🤖 geminiService.ts           # Gemini AI integration
-│   └── 🧠 tensorflowService.ts       # TensorFlow.js models
-├── 📄 App.tsx                        # Main app component
-├── ⚙️ constants.ts                   # App constants
-├── 🎨 index.css                      # Global styles
-├── 📄 index.tsx                      # React entry point
-├── 📋 metadata.json                  # App metadata
-├── 📦 package.json                   # Dependencies & scripts
-├── 📐 tailwind.config.js             # Tailwind configuration
-├── 🔧 tsconfig.json                  # TypeScript config
-├── 📝 types.ts                       # Type definitions
-├── ⚡ vite.config.ts                 # Vite build config
-└── 📖 README.md                      # Project documentation
+ai-diet-scanner/
+├── public/                        # Static assets
+│   ├── *.svg                      # Vector icons and logos
+│   ├── *.png                      # Raster images
+│   └── index.html                 # HTML entry point
+├── components/                     # React components
+│   ├── AIServicesStatus.tsx       # AI service monitoring
+│   ├── AnalysisResult.tsx         # Nutrition analysis display
+│   ├── AnalyticsDashboard.tsx     # Data visualization
+│   ├── AuthModal.tsx              # User authentication
+│   ├── BMICalculator.tsx          # BMI calculation tool
+│   ├── Carousel.tsx               # Image carousel component
+│   ├── ChatBot.tsx                # AI nutrition assistant
+│   ├── DarkModeIcon.tsx           # Theme toggle component
+│   ├── DietSelector.tsx           # Diet preference selection
+│   ├── FirebaseSync.tsx           # Data synchronization
+│   ├── GoalsStreaksModal.tsx      # Goal tracking interface
+│   ├── icons.tsx                  # Icon component library
+│   ├── ImageUploader.tsx          # Image upload handler
+│   ├── LandingPage.tsx            # App landing page
+│   ├── LightRays.tsx              # Visual effects
+│   ├── MealHistory.tsx            # Meal tracking history
+│   ├── MealHistoryModal.tsx       # Detailed meal view
+│   ├── MedicalConditionsSelector.tsx # Health conditions
+│   ├── ProfileDropdown.tsx        # User profile menu
+│   ├── SettingsModal.tsx          # App settings
+│   ├── ShareCardGenerator.tsx     # Social sharing
+│   ├── ShinyText.tsx              # Animated text effects
+│   └── StreakGoals.tsx            # Achievement tracking
+├── services/                       # Backend integrations
+│   ├── chatService.ts             # AI chat functionality
+│   ├── exportService.ts           # Data export utilities
+│   ├── firebase.ts                # Firebase configuration
+│   ├── firebaseService.ts         # Firebase operations
+│   ├── foodSearchService.ts       # Food database API
+│   ├── geminiService.ts           # Gemini AI integration
+│   └── tensorflowService.ts       # TensorFlow.js models
+├── App.tsx                        # Main app component
+├── constants.ts                   # App constants
+├── index.css                      # Global styles
+├── index.tsx                      # React entry point
+├── metadata.json                  # App metadata
+├── package.json                   # Dependencies & scripts
+├── tailwind.config.js             # Tailwind configuration
+├── tsconfig.json                  # TypeScript config
+├── types.ts                       # Type definitions
+├── vite.config.ts                 # Vite build config
+└── README.md                      # Project documentation
 ```
 
-### 🗂️ Component Organization
+### Component Organization
 
 | Category | Components | Purpose |
 |----------|------------|---------|
-| **🤖 AI/ML** | `AIServicesStatus`, `ChatBot`, `AnalysisResult` | AI integration and analysis |
-| **📊 Analytics** | `AnalyticsDashboard`, `MealHistory`, `StreakGoals` | Data visualization and tracking |
-| **🔐 Auth** | `AuthModal`, `ProfileDropdown`, `SettingsModal` | User management |
-| **🎨 UI/UX** | `LandingPage`, `Carousel`, `DarkModeIcon` | User interface components |
-| **🔧 Utils** | `ImageUploader`, `FirebaseSync`, `ShareCardGenerator` | Utility components |
+| **AI/ML** | `AIServicesStatus`, `ChatBot`, `AnalysisResult` | AI integration and analysis |
+| **Analytics** | `AnalyticsDashboard`, `MealHistory`, `StreakGoals` | Data visualization and tracking |
+| **Auth** | `AuthModal`, `ProfileDropdown`, `SettingsModal` | User management |
+| **UI/UX** | `LandingPage`, `Carousel`, `DarkModeIcon` | User interface components |
+| **Utils** | `ImageUploader`, `FirebaseSync`, `ShareCardGenerator` | Utility components |
 
 ---
 
-## 🔧 Development
+## Development
 
-### 📝 Available Scripts
+### Available Scripts
 
 ```bash
-# 🚀 Start development server with hot reload
+# Start development server with hot reload
 npm run dev
 
-# 🏗️ Build for production
+# Build for production
 npm run build
 
-# 👀 Preview production build locally
+# Preview production build locally
 npm run preview
 
-# 🔍 Type checking without compilation
+# Type checking without compilation
 npx tsc --noEmit
 
-# 🔒 Security audit
+# Security audit
 npm audit
 
-# 📦 Update dependencies
+# Update dependencies
 npm update
 ```
 
-### 🧪 Development Workflow
+### Development Workflow
 
 <details>
-<summary>🔄 <strong>Feature Development Process</strong></summary>
+<summary><strong>Feature Development Process</strong></summary>
 
 1. **Create Feature Branch**
    ```bash
@@ -465,10 +465,10 @@ npm update
 
 </details>
 
-### 🐛 Debugging Tips
+### Debugging Tips
 
 <details>
-<summary>🔍 <strong>Common Issues & Solutions</strong></summary>
+<summary><strong>Common Issues & Solutions</strong></summary>
 
 #### Environment Variables Not Loading
 ```bash
@@ -502,12 +502,12 @@ console.log(import.meta.env.VITE_FIREBASE_API_KEY);
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
-### 🔥 Firebase Hosting (Recommended)
+### Firebase Hosting (Recommended)
 
 <details>
-<summary>📺 <strong>Step-by-step Firebase Deployment</strong></summary>
+<summary><strong>Step-by-step Firebase Deployment</strong></summary>
 
 1. **Install Firebase CLI**
    ```bash
@@ -538,7 +538,7 @@ console.log(import.meta.env.VITE_FIREBASE_API_KEY);
 
 </details>
 
-### 🌐 Alternative Deployment Options
+### Alternative Deployment Options
 
 <div align="center">
 
@@ -551,7 +551,7 @@ console.log(import.meta.env.VITE_FIREBASE_API_KEY);
 </div>
 
 <details>
-<summary>⚡ <strong>Vercel Deployment</strong></summary>
+<summary><strong>Vercel Deployment</strong></summary>
 
 ```bash
 # Install Vercel CLI
@@ -572,7 +572,7 @@ vercel --prod
 </details>
 
 <details>
-<summary>🔶 <strong>Netlify Deployment</strong></summary>
+<summary><strong>Netlify Deployment</strong></summary>
 
 1. **Drag & Drop Method**
    - Build locally: `npm run build`
@@ -586,7 +586,7 @@ vercel --prod
 
 </details>
 
-### 🔒 Production Checklist
+### Production Checklist
 
 - [ ] ✅ Environment variables configured
 - [ ] 🔐 Firebase security rules updated
@@ -599,9 +599,9 @@ vercel --prod
 
 ---
 
-## 🔒 Security & Performance
+## Security & Performance
 
-### 🛡️ Security Features
+### Security Features
 
 <div align="center">
 
@@ -617,7 +617,7 @@ vercel --prod
 </div>
 
 <details>
-<summary>🔒 <strong>Security Best Practices</strong></summary>
+<summary><strong>Security Best Practices</strong></summary>
 
 #### Environment Security
 ```bash
@@ -650,7 +650,7 @@ service cloud.firestore {
 
 </details>
 
-### ⚡ Performance Optimizations
+### Performance Optimizations
 
 <div align="center">
 
@@ -666,7 +666,7 @@ service cloud.firestore {
 </div>
 
 <details>
-<summary>📊 <strong>Performance Metrics</strong></summary>
+<summary><strong>Performance Metrics</strong></summary>
 
 #### Lighthouse Scores
 - 🟢 **Performance**: 95+
@@ -701,29 +701,29 @@ const optimizedImages = {
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-We ❤️ contributions from the community! Whether it's bug fixes, feature requests, or documentation improvements, every contribution helps make Healthy Me better.
+We welcome contributions from the community! Whether it's bug fixes, feature requests, or documentation improvements, every contribution helps make Healthy Me better.
 
-### 🌟 Ways to Contribute
+### Ways to Contribute
 
 <div align="center">
 
 | Type | Description | Difficulty |
 |------|-------------|------------|
-| 🐛 **Bug Reports** | Report issues and bugs | 🟢 Easy |
-| 💡 **Feature Requests** | Suggest new features | 🟢 Easy |
-| 📝 **Documentation** | Improve docs and guides | 🟡 Medium |
-| 🔧 **Code Contributions** | Add features or fix bugs | 🔴 Advanced |
-| 🎨 **UI/UX Improvements** | Enhance user experience | 🟡 Medium |
-| 🧪 **Testing** | Add tests and improve coverage | 🔴 Advanced |
+| **Bug Reports** | Report issues and bugs | Easy |
+| **Feature Requests** | Suggest new features | Easy |
+| **Documentation** | Improve docs and guides | Medium |
+| **Code Contributions** | Add features or fix bugs | Advanced |
+| **UI/UX Improvements** | Enhance user experience | Medium |
+| **Testing** | Add tests and improve coverage | Advanced |
 
 </div>
 
-### 🚀 Getting Started
+### Getting Started
 
 <details>
-<summary>🔄 <strong>Development Workflow</strong></summary>
+<summary><strong>Development Workflow</strong></summary>
 
 1. **Fork & Clone**
    ```bash
@@ -765,10 +765,10 @@ We ❤️ contributions from the community! Whether it's bug fixes, feature requ
 
 </details>
 
-### 📋 Coding Standards
+### Coding Standards
 
 <details>
-<summary>✅ <strong>Code Quality Guidelines</strong></summary>
+<summary><strong>Code Quality Guidelines</strong></summary>
 
 #### TypeScript Standards
 ```typescript
@@ -804,68 +804,49 @@ const MyComponent: React.FC<ComponentProps> = ({ title, onAction }) => {
 
 </details>
 
-### 🎯 Good First Issues
+### Good First Issues
 
 Looking for a place to start? Check out issues labeled with:
-- 🟢 `good first issue`
-- 📚 `documentation`
-- 🐛 `bug`
-- 🎨 `ui/ux`
+- `good first issue`
+- `documentation`
+- `bug`
+- `ui/ux`
 
-### 🏆 Contributors Hall of Fame
+### Developer
 
 <div align="center">
 
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/Anubhavick">
-        <img src="https://github.com/Anubhavick.png" width="80px;" alt="Anubhav Mishra"/>
-        <br />
-        <sub><b>Anubhav Mishra</b></sub>
-      </a>
-      <br />
-      <sub>🎯 Project Lead</sub>
-    </td>
-    <td align="center">
-      <a href="https://github.com/YOUR_USERNAME">
-        <img src="https://via.placeholder.com/80x80.png?text=YOU" width="80px;" alt="Your Name"/>
-        <br />
-        <sub><b>Your Name Here</b></sub>
-      </a>
-      <br />
-      <sub>🚀 Contributor</sub>
-    </td>
-  </tr>
-</table>
+**Anubhav Mishra**  
+*Full-stack Developer & Project Lead*
 
-*Ready to see your name here? Make your first contribution today!*
+[![GitHub](https://img.shields.io/badge/GitHub-Anubhavick-black?style=flat-square&logo=github)](https://github.com/Anubhavick)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square&logo=linkedin)](https://linkedin.com/in/anubhavick)
 
 </div>
 
 ---
 
-## 📞 Support
+## Support
 
-### 🆘 Getting Help
+### Getting Help
 
 <div align="center">
 
 | Need Help With | Where to Go | Response Time |
 |----------------|-------------|---------------|
-| 🐛 **Bug Reports** | [GitHub Issues](https://github.com/Anubhavick/Healthy-Me/issues) | 24-48 hours |
-| 💡 **Feature Requests** | [GitHub Discussions](https://github.com/Anubhavick/Healthy-Me/discussions) | 2-3 days |
-| ❓ **General Questions** | [Discussions](https://github.com/Anubhavick/Healthy-Me/discussions) | 1-2 days |
-| 🔒 **Security Issues** | Email: security@healthyme.dev | Immediate |
+| **Bug Reports** | [GitHub Issues](https://github.com/Anubhavick/Healthy-Me/issues) | 24-48 hours |
+| **Feature Requests** | [GitHub Discussions](https://github.com/Anubhavick/Healthy-Me/discussions) | 2-3 days |
+| **General Questions** | [Discussions](https://github.com/Anubhavick/Healthy-Me/discussions) | 1-2 days |
+| **Security Issues** | Email: security@healthyme.dev | Immediate |
 
 </div>
 
-### 🔧 Troubleshooting
+### Troubleshooting
 
 <details>
-<summary>❗ <strong>Common Issues & Solutions</strong></summary>
+<summary><strong>Common Issues & Solutions</strong></summary>
 
-#### 🔥 Firebase Issues
+#### Firebase Issues
 ```bash
 # Error: Firebase not initialized
 ✅ Solution: Check .env.local file exists
@@ -878,7 +859,7 @@ Looking for a place to start? Check out issues labeled with:
 ✅ Verify user owns the data
 ```
 
-#### 🤖 AI Service Issues
+#### AI Service Issues
 ```bash
 # Error: Gemini API quota exceeded
 ✅ Solution: Check API usage in Google AI Studio
@@ -891,7 +872,7 @@ Looking for a place to start? Check out issues labeled with:
 ✅ Try different browser
 ```
 
-#### 🖼️ Image Upload Issues
+#### Image Upload Issues
 ```bash
 # Error: Image upload failed
 ✅ Solution: Check file size (max 10MB)
@@ -901,14 +882,14 @@ Looking for a place to start? Check out issues labeled with:
 
 </details>
 
-### 📚 Documentation
+### Documentation
 
-- 📖 **API Documentation**: `/docs/api.md`
-- 🎨 **Component Library**: `/docs/components.md`
-- 🚀 **Deployment Guide**: `/docs/deployment.md`
-- 🔧 **Configuration**: `/docs/configuration.md`
+- **API Documentation**: `/docs/api.md`
+- **Component Library**: `/docs/components.md`
+- **Deployment Guide**: `/docs/deployment.md`
+- **Configuration**: `/docs/configuration.md`
 
-### 💬 Community
+### Community
 
 <div align="center">
 
@@ -920,7 +901,7 @@ Looking for a place to start? Check out issues labeled with:
 
 ---
 
-## 📄 License
+## License
 
 <div align="center">
 
@@ -952,7 +933,7 @@ SOFTWARE.
 
 </div>
 
-### 🆓 What This Means
+### What This Means
 
 - ✅ **Commercial Use**: Use in commercial projects
 - ✅ **Modification**: Modify the source code
@@ -963,11 +944,11 @@ SOFTWARE.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 <div align="center">
 
-### 🌟 Special Thanks
+### Special Thanks
 
 This project wouldn't be possible without these amazing technologies and communities:
 
@@ -1004,7 +985,7 @@ This project wouldn't be possible without these amazing technologies and communi
   </tr>
 </table>
 
-### 🌍 Open Source Community
+### Open Source Community
 
 *A heartfelt thank you to the countless developers who contribute to open source projects that make applications like this possible.*
 
@@ -1014,16 +995,16 @@ This project wouldn't be possible without these amazing technologies and communi
 
 <div align="center">
 
-## 🚀 Ready to Get Started?
+## Ready to Get Started?
 
 **Transform your nutrition journey with AI-powered insights**
 
-[![Get Started](https://img.shields.io/badge/🚀_Get_Started-Try_Now-success?style=for-the-badge&color=28a745)](https://healthy-me-demo.web.app)
-[![Star on GitHub](https://img.shields.io/badge/⭐_Star_on_GitHub-Support_Project-yellow?style=for-the-badge&color=ffd700)](https://github.com/Anubhavick/Healthy-Me)
+[![Get Started](https://img.shields.io/badge/Get_Started-Try_Now-success?style=for-the-badge&color=28a745)](https://healthy-me-demo.web.app)
+[![Star on GitHub](https://img.shields.io/badge/Star_on_GitHub-Support_Project-yellow?style=for-the-badge&color=ffd700)](https://github.com/Anubhavick/Healthy-Me)
 
 **Built with ❤️ by [Anubhav Mishra](https://github.com/Anubhavick)**
 
-*If this project helps you make better food choices, please consider giving it a star on GitHub! ⭐*
+*If this project helps you make better food choices, please consider giving it a star on GitHub!*
 
 ---
 
