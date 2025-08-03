@@ -167,27 +167,29 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, imagePrevi
           </div>
           
           {/* Camera controls */}
-          <div className="flex justify-center gap-4 mt-4">
+                    <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mt-4">
             <button
               onClick={capturePhoto}
-              disabled={!!error}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold flex items-center gap-2"
+              disabled={!stream}
+              className="px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95"
             >
-              <CameraIcon className="w-5 h-5" />
-              Capture Photo
+              <CameraIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-sm sm:text-base">Capture</span>
             </button>
+            
             <button
-              onClick={switchCamera}
-              disabled={!!error}
-              className="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold"
+              onClick={() => setFacingMode(facingMode === 'user' ? 'environment' : 'user')}
+              disabled={!stream}
+              className="px-3 sm:px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold transition-all duration-200 active:scale-95 text-sm sm:text-base"
             >
-              🔄 {facingMode === 'user' ? 'Front' : 'Back'}
+              Flip
             </button>
+            
             <button
               onClick={stopCamera}
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-semibold"
+              className="px-4 sm:px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-semibold transition-all duration-200 active:scale-95 text-sm sm:text-base"
             >
-              Cancel
+              Stop
             </button>
           </div>
         </div>
@@ -195,35 +197,35 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, imagePrevi
         <div className="w-full">
           {/* Image preview or upload area */}
           <div
-            className="w-full aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-200 hover:border-gray-400 transition-colors"
+            className="w-full aspect-video bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:bg-gray-200 hover:border-gray-400 transition-colors touch-manipulation"
             onClick={triggerFileInput}
           >
             {imagePreviewUrl ? (
               <img src={imagePreviewUrl} alt="Meal preview" className="w-full h-full object-cover rounded-lg" />
             ) : (
-              <div className="text-center text-gray-500">
-                <CameraIcon className="w-12 h-12 mx-auto text-gray-400" />
-                <p className="mt-2 font-semibold">Click to upload a photo</p>
-                <p className="text-sm">PNG, JPG, or WEBP</p>
+              <div className="text-center text-gray-500 p-4">
+                <CameraIcon className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-400" />
+                <p className="mt-2 font-semibold text-sm sm:text-base">Tap to upload a photo</p>
+                <p className="text-xs sm:text-sm">PNG, JPG, or WEBP</p>
               </div>
             )}
           </div>
           
           {/* Action buttons */}
-          <div className="flex justify-center gap-4 mt-4">
-                        <button
+          <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mt-4">
+            <button
               onClick={triggerFileInput}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold flex items-center gap-2"
+              className="px-4 sm:px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95"
             >
-              <DarkModeIcon src="/file-upload-svgrepo-com.svg" alt="Upload" className="w-5 h-5" isDarkMode={false} invertInDarkMode={true} />
-              Upload File
+              <DarkModeIcon src="/file-upload-svgrepo-com.svg" alt="Upload" className="w-4 h-4 sm:w-5 sm:h-5" isDarkMode={false} invertInDarkMode={true} />
+              <span className="text-sm sm:text-base">Upload File</span>
             </button>
             <button
               onClick={startCamera}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2"
+              className="px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95"
             >
-              <CameraIcon className="w-5 h-5" />
-              Use Camera
+              <CameraIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-sm sm:text-base">Use Camera</span>
             </button>
           </div>
           

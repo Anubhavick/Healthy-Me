@@ -22,13 +22,13 @@ const LandingPage: React.FC<LandingPageProps> = ({
         : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100'
     }`}>
       {/* Navigation Header */}
-      <nav className={`flex items-center justify-between p-6 backdrop-blur-sm border-b ${
+      <nav className={`flex items-center justify-between p-4 sm:p-6 backdrop-blur-sm border-b ${
         isDarkMode 
           ? 'bg-white/10 border-white/20' 
           : 'bg-white/70 border-gray-200/50'
       }`}>
-        <div className="flex items-center space-x-3">
-          <div className={`w-8 h-8 flex items-center justify-center rounded-lg p-1 ${
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg p-1 ${
             isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-600/10 backdrop-blur-sm'
           }`}>
             <img 
@@ -37,27 +37,27 @@ const LandingPage: React.FC<LandingPageProps> = ({
               className={`w-full h-full ${isDarkMode ? '' : 'filter hue-rotate-200 saturate-150'}`} 
             />
           </div>
-          <span className={`font-semibold text-xl ${
+          <span className={`font-semibold text-lg sm:text-xl ${
             isDarkMode ? 'text-white' : 'text-gray-800'
           }`}>
             Healthy Me
           </span>
         </div>
         
-        <div className="flex items-center space-x-6">
-          <button className={`transition-colors duration-200 font-medium ${
+        <div className="flex items-center space-x-3 sm:space-x-6">
+          <button className={`transition-colors duration-200 font-medium text-sm sm:text-base ${
             isDarkMode 
               ? 'text-white/80 hover:text-white' 
               : 'text-gray-600 hover:text-gray-800'
           }`}>
-            Home
+            <span className="hidden sm:inline">Home</span>
           </button>
-          <button className={`transition-colors duration-200 font-medium ${
+          <button className={`transition-colors duration-200 font-medium text-sm sm:text-base ${
             isDarkMode 
               ? 'text-white/80 hover:text-white' 
               : 'text-gray-600 hover:text-gray-800'
           }`}>
-            Docs
+            <span className="hidden sm:inline">Docs</span>
           </button>
           <button
             onClick={onToggleDarkMode}
@@ -102,10 +102,10 @@ const LandingPage: React.FC<LandingPageProps> = ({
           </h2>
           
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mt-8 sm:mt-12">
             <button
               onClick={onGetStarted}
-              className={`px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg min-w-[200px] ${
+              className={`px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg min-w-[180px] sm:min-w-[200px] ${
                 isDarkMode 
                   ? 'bg-white text-gray-900 hover:bg-gray-100' 
                   : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -115,7 +115,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
             </button>
             <button
               onClick={onTryDemo}
-              className={`px-8 py-4 bg-transparent border-2 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 min-w-[200px] ${
+              className={`px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 min-w-[180px] sm:min-w-[200px] ${
                 isDarkMode 
                   ? 'border-white text-white hover:bg-white/10' 
                   : 'border-blue-300 text-blue-700 hover:bg-blue-50'
@@ -127,9 +127,9 @@ const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         {/* Feature Carousel */}
-        <div className="flex justify-center mt-20">
+        <div className="flex justify-center mt-12 sm:mt-20 px-4 sm:px-0">
           <Carousel
-            baseWidth={400}
+            baseWidth={300}
             autoplay={true}
             autoplayDelay={4000}
             pauseOnHover={true}
