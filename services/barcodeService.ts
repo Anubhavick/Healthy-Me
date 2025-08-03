@@ -1,4 +1,4 @@
-import Quagga from 'quagga';
+// Dynamic import for Quagga to avoid ES module issues
 import jsQR from 'jsqr';
 
 export interface BarcodeResult {
@@ -45,51 +45,63 @@ export interface OpenFoodFactsResponse {
 export class BarcodeService {
   private isInitialized = false;
 
-  // Initialize Quagga for 1D barcode scanning
+    // Initialize Quagga for 1D barcode scanning
   async initializeQuagga(videoElement: HTMLVideoElement): Promise<void> {
-    return new Promise((resolve, reject) => {
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: videoElement,
-          constraints: {
-            width: 640,
-            height: 480,
-            facingMode: "environment" // Use back camera
-          }
-        },
-        locator: {
-          patchSize: "medium",
-          halfSample: true
-        },
-        numOfWorkers: 2,
-        frequency: 10,
-        decoder: {
-          readers: [
-            "code_128_reader",
-            "ean_reader",
-            "ean_8_reader",
-            "code_39_reader",
-            "code_39_vin_reader",
-            "codabar_reader",
-            "upc_reader",
-            "upc_e_reader",
-            "i2of5_reader"
-          ]
-        },
-        locate: true
-      }, (err) => {
-        if (err) {
-          console.error('Quagga initialization failed:', err);
-          reject(err);
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (this.isInitialized) {
+          resolve();
           return;
         }
-        
-        this.isInitialized = true;
-        Quagga.start();
-        resolve();
-      });
+
+        // Dynamic import for Quagga
+        const Quagga = (await import('quagga')).default;
+
+        Quagga.init({
+          inputStream: {
+            name: 'Live',
+            type: 'LiveStream',
+            target: videoElement,
+            constraints: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: 'environment'
+            }
+          },
+          locator: {
+            patchSize: 'medium',
+            halfSample: true
+          },
+          numOfWorkers: 2,
+          decoder: {
+            readers: [
+              'code_128_reader',
+              'ean_reader',
+              'ean_8_reader',
+              'code_39_reader',
+              'code_39_vin_reader',
+              'codabar_reader',
+              'upc_reader',
+              'upc_e_reader',
+              'i2of5_reader'
+            ]
+          },
+          locate: true
+        }, (err: any) => {
+          if (err) {
+            console.error('Quagga initialization failed:', err);
+            reject(err);
+            return;
+          }
+          
+          this.isInitialized = true;
+          Quagga.start();
+          resolve();
+        });
+      } catch (error) {
+        console.error('Failed to load Quagga:', error);
+        reject(error);
+      }
     });
   }
 
@@ -125,11 +137,16 @@ export class BarcodeService {
     }
   }
 
-  // Stop barcode scanning
-  stopScanning(): void {
-    if (this.isInitialized) {
-      Quagga.stop();
-      this.isInitialized = false;
+    // Stop Quagga scanning
+  async stopQuagga(): Promise<void> {
+    try {
+      if (this.isInitialized) {
+        const Quagga = (await import('quagga')).default;
+        Quagga.stop();
+        this.isInitialized = false;
+      }
+    } catch (error) {
+      console.error('Error stopping Quagga:', error);
     }
   }
 

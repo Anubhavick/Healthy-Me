@@ -150,7 +150,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   };
 
   // Stop scanning and cleanup
-  const stopScanning = useCallback(() => {
+  const stopScanning = useCallback(async () => {
     setIsScanning(false);
     
     if (stream) {
@@ -158,7 +158,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       setStream(null);
     }
     
-    barcodeService.stopScanning();
+    await barcodeService.stopQuagga();
   }, [stream]);
 
   // Cleanup on unmount

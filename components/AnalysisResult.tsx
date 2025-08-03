@@ -3,9 +3,20 @@ import React from 'react';
 import { AnalysisResult as AnalysisResultType } from '../types';
 import { CheckCircleIcon, XCircleIcon, SparklesIcon } from './icons';
 
+interface ProductDisplay {
+  productName?: string;
+  brands?: string;
+  imageUrl?: string;
+  nutritionGrade?: string;
+  categories?: string;
+  isBarcode?: boolean;
+  barcodeData?: any; // OpenFoodFacts product data
+}
+
 interface AnalysisResultProps {
   result: AnalysisResultType;
   onShare?: () => void;
+  productDisplay?: ProductDisplay;
 }
 
 const StatCard: React.FC<{ title: string; value: string | number; children?: React.ReactNode }> = ({ title, value, children }) => (
@@ -14,6 +25,34 @@ const StatCard: React.FC<{ title: string; value: string | number; children?: Rea
         <p className="mt-1 text-3xl font-semibold text-gray-900">{value}</p>
         {children}
     </div>
+);
+
+const NutritionCard: React.FC<{ 
+  title: string; 
+  value: number; 
+  unit: string; 
+  color?: string;
+  isDarkMode?: boolean;
+}> = ({ title, value, unit, color = 'blue', isDarkMode = false }) => (
+  <div className={`p-4 rounded-lg shadow-sm border ${
+    isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+  }`}>
+    <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>{title}</h3>
+    <div className="flex items-baseline mt-1">
+      <p className={`text-2xl font-bold ${
+        color === 'green' ? 'text-green-600' :
+        color === 'blue' ? 'text-blue-600' :
+        color === 'orange' ? 'text-orange-600' :
+        color === 'red' ? 'text-red-600' :
+        isDarkMode ? 'text-white' : 'text-gray-900'
+      }`}>
+        {Math.round(value * 10) / 10}
+      </p>
+      <span className={`ml-1 text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+        {unit}
+      </span>
+    </div>
+  </div>
 );
 
 const HealthScoreCard: React.FC<{ score: number }> = ({ score }) => {
@@ -55,7 +94,7 @@ const HealthScoreCard: React.FC<{ score: number }> = ({ score }) => {
 };
 
 
-const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
+const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare, productDisplay }) => {
   const { isCompatible, reason } = result.dietCompatibility;
   
   const calculateHealthScore = () => {
@@ -124,22 +163,119 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
 
   const healthScore = calculateHealthScore();
   
+  // Check if this is a barcode product
+  const isProduct = productDisplay?.isBarcode || false;
+  
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-800">{result.dishName}</h2>
-        {onShare && (
-          <button
-            onClick={onShare}
-            className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-blue-200/50"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-            </svg>
-            Share Your Success
-          </button>
-        )}
-      </div>
+      {/* Enhanced Product Header for Barcode Items */}
+      {isProduct && productDisplay ? (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl shadow-sm border border-blue-200">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Product Image */}
+            <div className="flex-shrink-0">
+              {productDisplay.imageUrl ? (
+                <div className="relative">
+                  <img 
+                    src={productDisplay.imageUrl} 
+                    alt={productDisplay.productName || 'Product'} 
+                    className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-lg shadow-md border border-gray-200"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    📷 Product
+                  </div>
+                </div>
+              ) : (
+                <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center border border-gray-300">
+                  <div className="text-center text-gray-500">
+                    <span className="text-3xl block mb-1">📦</span>
+                    <span className="text-xs">No Image</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Product Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1 line-clamp-2">
+                    {productDisplay.productName || result.dishName}
+                  </h2>
+                  {productDisplay.brands && (
+                    <p className="text-lg text-blue-600 font-medium mb-2">
+                      by {productDisplay.brands}
+                    </p>
+                  )}
+                  {productDisplay.categories && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {productDisplay.categories.split(',').slice(0, 3).map((category, index) => (
+                        <span key={index} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+                          {category.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col items-end gap-2 ml-4">
+                  {/* Nutrition Grade */}
+                  {productDisplay.nutritionGrade && productDisplay.nutritionGrade !== 'unknown' && (
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ${
+                      productDisplay.nutritionGrade === 'a' ? 'bg-green-500' :
+                      productDisplay.nutritionGrade === 'b' ? 'bg-lime-500' :
+                      productDisplay.nutritionGrade === 'c' ? 'bg-yellow-500' :
+                      productDisplay.nutritionGrade === 'd' ? 'bg-orange-500' :
+                      productDisplay.nutritionGrade === 'e' ? 'bg-red-500' :
+                      'bg-gray-400'
+                    }`}>
+                      {productDisplay.nutritionGrade.toUpperCase()}
+                    </div>
+                  )}
+                  {onShare && (
+                    <button
+                      onClick={onShare}
+                      className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-2 px-4 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-blue-200/50 text-sm"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                      </svg>
+                      Share
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Barcode Badge */}
+              <div className="flex items-center gap-2 text-sm text-blue-600">
+                <span className="bg-blue-100 px-2 py-1 rounded-full text-xs font-medium">
+                  🏷️ Scanned Product
+                </span>
+                <span className="text-gray-400">•</span>
+                <span>OpenFoodFacts Database</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Original Header for Photo Analysis */
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-800">{result.dishName}</h2>
+          {onShare && (
+            <button
+              onClick={onShare}
+              className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-blue-200/50"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+              </svg>
+              Share Your Success
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard title="Estimated Calories" value={result.estimatedCalories}>
@@ -158,6 +294,80 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare }) => {
             </div>
         </div>
       </div>
+      
+      {/* Enhanced Nutrition Breakdown for Barcode Products */}
+      {isProduct && result.nutritionalBreakdown && (
+        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-xl shadow-sm border border-indigo-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-xl text-indigo-800 flex items-center">
+              📊 Detailed Nutrition (per 100g)
+            </h3>
+            {productDisplay?.nutritionGrade && productDisplay.nutritionGrade !== 'unknown' && (
+              <div className="text-sm text-indigo-600">
+                Nutri-Score: <span className={`font-bold px-2 py-1 rounded-full text-white ${
+                  productDisplay.nutritionGrade === 'a' ? 'bg-green-500' :
+                  productDisplay.nutritionGrade === 'b' ? 'bg-lime-500' :
+                  productDisplay.nutritionGrade === 'c' ? 'bg-yellow-500' :
+                  productDisplay.nutritionGrade === 'd' ? 'bg-orange-500' :
+                  productDisplay.nutritionGrade === 'e' ? 'bg-red-500' :
+                  'bg-gray-400'
+                }`}>{productDisplay.nutritionGrade.toUpperCase()}</span>
+              </div>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <NutritionCard 
+              title="Carbohydrates" 
+              value={result.nutritionalBreakdown.carbs} 
+              unit="g" 
+              color="blue"
+            />
+            <NutritionCard 
+              title="Protein" 
+              value={result.nutritionalBreakdown.protein} 
+              unit="g" 
+              color="green"
+            />
+            <NutritionCard 
+              title="Fat" 
+              value={result.nutritionalBreakdown.fat} 
+              unit="g" 
+              color="orange"
+            />
+            <NutritionCard 
+              title="Fiber" 
+              value={result.nutritionalBreakdown.fiber} 
+              unit="g" 
+              color="green"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <NutritionCard 
+              title="Sugar" 
+              value={result.nutritionalBreakdown.sugar} 
+              unit="g" 
+              color="red"
+            />
+            <NutritionCard 
+              title="Sodium" 
+              value={result.nutritionalBreakdown.sodium * 1000} 
+              unit="mg" 
+              color="red"
+            />
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <h4 className="text-sm font-medium text-gray-500">Energy</h4>
+              <div className="flex items-baseline mt-1">
+                <p className="text-2xl font-bold text-purple-600">
+                  {result.estimatedCalories}
+                </p>
+                <span className="ml-1 text-sm font-medium text-gray-500">kcal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
         <h3 className="font-semibold text-lg text-gray-800 mb-3">Identified Ingredients</h3>

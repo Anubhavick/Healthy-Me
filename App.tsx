@@ -22,8 +22,8 @@ import SettingsModal from './components/SettingsModal';
 import { SparklesIcon, LoadingSpinner } from './components/icons';
 import ShinyText from './components/ShinyText';
 import LightRays from './components/LightRays';
-import OpenFoodFactsDemo from './components/OpenFoodFactsDemo';
 import LandingPage from './components/LandingPage';
+import ChatBot from './components/ChatBot';
 
 const App: React.FC = () => {
   const [showLandingPage, setShowLandingPage] = useState<boolean>(true);
@@ -35,6 +35,7 @@ const App: React.FC = () => {
   const [showGoalsModal, setShowGoalsModal] = useState<boolean>(false);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   const [showShareCard, setShowShareCard] = useState<boolean>(false);
+  const [showChatBot, setShowChatBot] = useState<boolean>(false);
   const [mealToShare, setMealToShare] = useState<Meal | null>(null);
   const [activeTab, setActiveTab] = useState<'analyze' | 'profile' | 'analytics' | 'social' | 'goals' | 'api-demo'>('profile');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
@@ -43,6 +44,7 @@ const App: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
   const [diet, setDiet] = useState<Diet>(Diet.None);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [productDisplayData, setProductDisplayData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [mealHistory, setMealHistory] = useState<Meal[]>([]);
@@ -168,6 +170,7 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setIsModelLoading(true);
+    setProductDisplayData(null); // Clear barcode product data for photo analysis
 
     try {
       const result = await analyzeImage(image, userProfile);
@@ -316,6 +319,17 @@ const App: React.FC = () => {
           recommendations: generateRecommendations(productData, userProfile.diet)
         }
       };
+
+      // Set product display data for enhanced UI
+      setProductDisplayData({
+        productName: productData.product_name || productData.product_name_en,
+        brands: productData.brands,
+        imageUrl: productData.image_front_url || productData.image_url,
+        nutritionGrade: productData.nutriscore_grade,
+        categories: productData.categories,
+        isBarcode: true,
+        barcodeData: productData
+      });
 
       setAnalysisResult(result);
       
@@ -472,6 +486,7 @@ const App: React.FC = () => {
   const handleImageUpload = (imageDataUrl: string) => {
       setImage(imageDataUrl);
       setAnalysisResult(null);
+      setProductDisplayData(null); // Clear product display data when uploading new image
       setError(null);
   }
 
@@ -801,6 +816,20 @@ const App: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* Chat Bot Button */}
+          <button
+            onClick={() => setShowChatBot(true)}
+            className={`p-2 rounded-lg transition-all duration-200 backdrop-blur-sm ${
+              isDarkMode 
+                ? 'bg-white/10 hover:bg-white/20 text-white' 
+                : 'bg-blue-100/50 hover:bg-blue-200/50 text-blue-600'
+            }`}
+            title="Chat with Nutrition Assistant"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+            </svg>
+          </button>
           <ProfileDropdown
             user={user}
             userProfile={userProfile}
@@ -811,6 +840,7 @@ const App: React.FC = () => {
             onShowGoals={() => setShowGoalsModal(true)}
             onShowSettings={() => setShowSettingsModal(true)}
             onShowProfileEdit={() => setShowSettingsModal(true)}
+            onShowChat={() => setShowChatBot(true)}
             onToggleDarkMode={handleDarkModeToggle}
             onLogout={handleLogout}
           />
@@ -908,7 +938,7 @@ const App: React.FC = () => {
                     <AnalysisResultComponent 
                       result={analysisResult} 
                       onShare={handleShareCurrentAnalysis}
-                      isDarkMode={isDarkMode}
+                      productDisplay={productDisplayData}
                     />
                   </div>
                 )}
@@ -965,6 +995,21 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Floating Chat Button for Mobile */}
+      <button
+        onClick={() => setShowChatBot(true)}
+        className={`fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 backdrop-blur-sm border flex items-center justify-center lg:hidden ${
+          isDarkMode 
+            ? 'bg-blue-600/90 hover:bg-blue-700/90 border-blue-400/30 text-white' 
+            : 'bg-blue-500/90 hover:bg-blue-600/90 border-blue-300/50 text-white'
+        }`}
+        title="Chat with Nutrition Assistant"
+      >
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+        </svg>
+      </button>
 
       {/* Meal History Modal */}
       <MealHistoryModal
@@ -1047,6 +1092,16 @@ const App: React.FC = () => {
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={handleAuthSuccess}
           isDarkMode={isDarkMode}
+        />
+      )}
+
+      {/* Chat Bot */}
+      {showChatBot && (
+        <ChatBot
+          userProfile={userProfile}
+          recentAnalysis={analysisResult}
+          isDarkMode={isDarkMode}
+          onClose={() => setShowChatBot(false)}
         />
       )}
     </div>
