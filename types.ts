@@ -89,6 +89,10 @@ export interface AnalysisResult {
   ingredients: string[];
   healthTips: string[];
   dishName: string;
+  productIdentifier?: string; // For consistency tracking
+  healthScore?: number; // 1-10 score from AI
+  processingLevel?: 'MINIMAL' | 'MODERATE' | 'HIGHLY_PROCESSED';
+  nutritionalDensity?: 'LOW' | 'MODERATE' | 'HIGH';
   medicalAdvice?: {
     isSafeForConditions: boolean;
     warnings: string[];

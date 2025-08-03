@@ -2,6 +2,7 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { Diet, AnalysisResult, MedicalCondition, UserProfile } from '../types';
 import { tensorflowService, TensorFlowAnalysis } from './tensorflowService';
+import { ConsistencyService } from './consistencyService';
 
 if (!import.meta.env.VITE_GEMINI_API_KEY) {
   throw new Error("VITE_GEMINI_API_KEY environment variable is not set.");
@@ -35,259 +36,43 @@ export async function analyzeImage(
   
   const imagePart = base64ToGenerativePart(base64Data, mimeType);
 
-  // Step 1: Pre-validate with TensorFlow
-  let tensorflowAnalysis: TensorFlowAnalysis | undefined;
-  let tensorflowValidation;
-  
-  try {
-    tensorflowValidation = await tensorflowService.validateFoodImage(imageDataUrl);
-    
-    if (tensorflowValidation.isValidFood) {
-      tensorflowAnalysis = await tensorflowService.enhancedFoodAnalysis(imageDataUrl);
+  // Run TensorFlow and Gemini in parallel for faster processing
+  const [tensorflowResult, geminiResult] = await Promise.allSettled([
+    runTensorFlowAnalysis(imageDataUrl),
+    runGeminiAnalysis(imagePart, userProfile)
+  ]);
+
+  // Extract results from Promise.allSettled
+  const tensorflowAnalysis = tensorflowResult.status === 'fulfilled' ? tensorflowResult.value : undefined;
+  let geminiAnalysis = geminiResult.status === 'fulfilled' ? geminiResult.value : null;
+
+  // Check for cached analysis for consistency if Gemini analysis exists
+  if (geminiAnalysis?.productIdentifier) {
+    const cachedAnalysis = ConsistencyService.getCachedAnalysis(geminiAnalysis.productIdentifier);
+    if (cachedAnalysis) {
+      // Use cached analysis but update with current TensorFlow data
+      geminiAnalysis = {
+        ...cachedAnalysis,
+        tensorflowAnalysis: tensorflowAnalysis
+      };
     }
-  } catch (tfError) {
-    console.warn('TensorFlow analysis failed, proceeding with Gemini only:', tfError);
+  } else if (geminiAnalysis) {
+    // Try to find similar cached analysis as fallback
+    const similarAnalysis = ConsistencyService.findSimilarCachedAnalysis(
+      geminiAnalysis.dishName, 
+      geminiAnalysis.ingredients
+    );
+    if (similarAnalysis) {
+      geminiAnalysis = {
+        ...similarAnalysis,
+        dishName: geminiAnalysis.dishName,
+        ingredients: geminiAnalysis.ingredients,
+        tensorflowAnalysis: tensorflowAnalysis
+      };
+    }
   }
 
-  const dietInstruction = userProfile.diet === Diet.None 
-    ? "No specific diet is being followed." 
-    : `The user is following a ${userProfile.diet} diet. Assess if the meal is compatible.`;
-
-  const medicalConditions = userProfile.medicalConditions.filter(c => c !== MedicalCondition.None);
-  const medicalInstruction = medicalConditions.length > 0 
-    ? `IMPORTANT: The user has the following medical conditions: ${medicalConditions.join(', ')}${userProfile.customCondition ? `, ${userProfile.customCondition}` : ''}. Provide specific medical advice, warnings, and recommendations for these conditions.`
-    : "No specific medical conditions reported.";
-
-  const bmiInstruction = userProfile.bmi 
-    ? `The user's BMI is ${userProfile.bmi.value} (${userProfile.bmi.category}). Consider this in your nutritional advice.`
-    : "";
-
-  // Add TensorFlow insights to the prompt if available
-  const tensorflowInsights = tensorflowAnalysis ? `
-  
-TENSORFLOW ANALYSIS INSIGHTS:
-- Primary food type identified: ${tensorflowAnalysis.foodIdentification.primaryFoodType}
-- TensorFlow calorie estimate: ${tensorflowAnalysis.nutritionalEstimation.estimatedCalories} kcal
-- Estimated macros: ${tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs}g carbs, ${tensorflowAnalysis.nutritionalEstimation.macronutrients.protein}g protein, ${tensorflowAnalysis.nutritionalEstimation.macronutrients.fat}g fat
-- Portion size: ${tensorflowAnalysis.visualAnalysis.portionSize}
-- Freshness score: ${tensorflowAnalysis.visualAnalysis.freshnessScore}/10
-- Processing level: ${tensorflowAnalysis.qualityAssessment.processingLevel}
-- Cooking method: ${tensorflowAnalysis.visualAnalysis.cookingMethod}
-
-Please use these insights to enhance your analysis, but prioritize your own visual assessment. Cross-reference the TensorFlow estimates with your analysis.` 
-    : "";
-
-  const prompt = `You are a nutrition expert, food scientist, and medical advisor. Analyze the food or food product packaging in this image comprehensively. 
-
-IMPORTANT: If this is a packaged food product with ingredient labels, focus heavily on chemical analysis including harmful additives, preservatives, artificial chemicals, allergens, and E-numbers.
-
-${dietInstruction}
-${medicalInstruction}
-${bmiInstruction}
-${tensorflowInsights}
-
-For packaged foods, perform detailed ingredient label analysis:
-1. Identify all chemicals, additives, preservatives, and artificial ingredients
-2. Assess their safety levels and potential health impacts
-3. Check for harmful substances like trans fats, high fructose corn syrup, artificial colors, MSG, etc.
-4. Evaluate E-numbers and their safety ratings
-5. Identify allergens and their severity levels
-6. Determine if the product is organic or contains artificial ingredients
-
-For prepared meals, provide general nutrition analysis but also flag any visible processed ingredients that might contain harmful chemicals.
-
-Be realistic with estimations and provide actionable, medically-informed advice. Respond ONLY with a JSON object that matches the schema.`;
-
-  const responseSchema = {
-    type: Type.OBJECT,
-    properties: {
-      dishName: {
-        type: Type.STRING,
-        description: "A concise name for the dish identified in the image.",
-      },
-      estimatedCalories: {
-        type: Type.INTEGER,
-        description: "The estimated total calorie count for the meal.",
-      },
-      nutritionalBreakdown: {
-        type: Type.OBJECT,
-        properties: {
-          carbs: { type: Type.NUMBER, description: "Carbohydrates in grams" },
-          protein: { type: Type.NUMBER, description: "Protein in grams" },
-          fat: { type: Type.NUMBER, description: "Fat in grams" },
-          fiber: { type: Type.NUMBER, description: "Fiber in grams" },
-          sugar: { type: Type.NUMBER, description: "Sugar in grams" },
-          sodium: { type: Type.NUMBER, description: "Sodium in milligrams" }
-        },
-        required: ["carbs", "protein", "fat", "fiber", "sugar", "sodium"]
-      },
-      dietCompatibility: {
-        type: Type.OBJECT,
-        properties: {
-          isCompatible: {
-            type: Type.BOOLEAN,
-            description: "True if the meal is compatible with the specified diet, false otherwise.",
-          },
-          reason: {
-            type: Type.STRING,
-            description: "A brief explanation for the diet compatibility assessment.",
-          },
-        },
-        required: ["isCompatible", "reason"],
-      },
-      medicalAdvice: {
-        type: Type.OBJECT,
-        properties: {
-          isSafeForConditions: {
-            type: Type.BOOLEAN,
-            description: "Whether this meal is safe for the user's medical conditions"
-          },
-          warnings: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "Specific warnings related to the user's medical conditions"
-          },
-          recommendations: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "Medical recommendations for the user's conditions"
-          }
-        },
-        required: ["isSafeForConditions", "warnings", "recommendations"]
-      },
-      ingredients: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.STRING,
-          description: "An ingredient in the meal.",
-        },
-        description: "A list of the primary ingredients identified in the meal.",
-      },
-      healthTips: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.STRING,
-          description: "A health tip related to the meal.",
-        },
-        description: "A list of 2-3 concise and actionable health tips related to the meal.",
-      },
-      chemicalAnalysis: {
-        type: Type.OBJECT,
-        properties: {
-          harmfulChemicals: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING, description: "Name of the harmful chemical" },
-                riskLevel: { type: Type.STRING, description: "Risk level: LOW, MEDIUM, HIGH, or SEVERE" },
-                description: { type: Type.STRING, description: "Description of the chemical" },
-                healthEffects: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                  description: "List of potential health effects"
-                }
-              },
-              required: ["name", "riskLevel", "description", "healthEffects"]
-            },
-            description: "List of harmful chemicals found in the product"
-          },
-          additives: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING, description: "Name of the additive" },
-                eNumber: { type: Type.STRING, description: "E-number if applicable" },
-                type: { type: Type.STRING, description: "Type: PRESERVATIVE, COLORANT, FLAVOR_ENHANCER, EMULSIFIER, SWEETENER, or OTHER" },
-                safetyRating: { type: Type.STRING, description: "Safety rating: SAFE, CAUTION, or AVOID" },
-                description: { type: Type.STRING, description: "Description of the additive" }
-              },
-              required: ["name", "type", "safetyRating", "description"]
-            },
-            description: "List of additives found in the product"
-          },
-          allergens: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING, description: "Name of the allergen" },
-                severity: { type: Type.STRING, description: "Severity: MILD, MODERATE, or SEVERE" },
-                commonReactions: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                  description: "Common allergic reactions"
-                }
-              },
-              required: ["name", "severity", "commonReactions"]
-            },
-            description: "List of allergens found in the product"
-          },
-          overallSafetyScore: {
-            type: Type.INTEGER,
-            description: "Overall safety score from 1-10 (10 being safest)"
-          },
-          isOrganicCertified: {
-            type: Type.BOOLEAN,
-            description: "Whether the product has organic certification"
-          },
-          hasArtificialIngredients: {
-            type: Type.BOOLEAN,
-            description: "Whether the product contains artificial ingredients"
-          }
-        },
-        required: ["harmfulChemicals", "additives", "allergens", "overallSafetyScore", "isOrganicCertified", "hasArtificialIngredients"],
-        description: "Chemical analysis of the food product"
-      },
-    },
-    required: ["dishName", "estimatedCalories", "nutritionalBreakdown", "dietCompatibility", "medicalAdvice", "ingredients", "healthTips", "chemicalAnalysis"],
-  };
-
-  try {
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: { parts: [imagePart, { text: prompt }] },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: responseSchema
-      },
-    });
-
-    const jsonText = response.text;
-    const result = JSON.parse(jsonText) as AnalysisResult;
-    
-    // Merge TensorFlow analysis with Gemini results
-    if (tensorflowAnalysis) {
-      result.tensorflowAnalysis = tensorflowAnalysis;
-      
-      // Enhance nutritional breakdown with TensorFlow data if Gemini didn't provide detailed macros
-      if (!result.nutritionalBreakdown || !result.nutritionalBreakdown.carbs) {
-        result.nutritionalBreakdown = {
-          carbs: tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs,
-          protein: tensorflowAnalysis.nutritionalEstimation.macronutrients.protein,
-          fat: tensorflowAnalysis.nutritionalEstimation.macronutrients.fat,
-          fiber: tensorflowAnalysis.nutritionalEstimation.macronutrients.fiber,
-          sugar: result.nutritionalBreakdown?.sugar || 5, // Default if not provided
-          sodium: result.nutritionalBreakdown?.sodium || 300 // Default if not provided
-        };
-      }
-      
-      // Cross-validate calorie estimates
-      const geminiCalories = result.estimatedCalories;
-      const tfCalories = tensorflowAnalysis.nutritionalEstimation.estimatedCalories;
-      const avgCalories = Math.round((geminiCalories + tfCalories) / 2);
-      
-      // Use average if both estimates are reasonable, otherwise prioritize Gemini
-      if (Math.abs(geminiCalories - tfCalories) < 200) {
-        result.estimatedCalories = avgCalories;
-      }
-    }
-    
-    return result;
-
-  } catch (error) {
-    
+  if (!geminiAnalysis) {
     // Fallback: if Gemini fails but TensorFlow succeeded, provide basic analysis
     if (tensorflowAnalysis) {
       return {
@@ -300,8 +85,7 @@ Be realistic with estimations and provide actionable, medically-informed advice.
         ingredients: ['Analysis based on visual identification'],
         healthTips: [
           `This appears to be ${tensorflowAnalysis.foodIdentification.primaryFoodType.toLowerCase()} food`,
-          `Processing level: ${tensorflowAnalysis.qualityAssessment.processingLevel.toLowerCase()}`,
-          `Quality score: ${tensorflowAnalysis.qualityAssessment.overallQuality}/10`
+          `Processing level: ${tensorflowAnalysis.qualityAssessment.processingLevel.toLowerCase()}`
         ],
         nutritionalBreakdown: {
           carbs: tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs,
@@ -314,12 +98,216 @@ Be realistic with estimations and provide actionable, medically-informed advice.
         tensorflowAnalysis
       };
     }
-    
-    if (error instanceof Error) {
-        throw new Error(`Failed to analyze image: ${error.message}`);
-    }
-    throw new Error("An unknown error occurred during image analysis.");
+    throw new Error("Both AI services failed to analyze the image");
   }
+
+  // Merge TensorFlow analysis with Gemini results
+  if (tensorflowAnalysis) {
+    geminiAnalysis.tensorflowAnalysis = tensorflowAnalysis;
+    
+    // Cross-validate calorie estimates
+    const geminiCalories = geminiAnalysis.estimatedCalories;
+    const tfCalories = tensorflowAnalysis.nutritionalEstimation.estimatedCalories;
+    
+    // Use average if both estimates are reasonable
+    if (Math.abs(geminiCalories - tfCalories) < 200) {
+      geminiAnalysis.estimatedCalories = Math.round((geminiCalories + tfCalories) / 2);
+    }
+  }
+  
+  return geminiAnalysis;
+}
+
+// Separate TensorFlow analysis function
+async function runTensorFlowAnalysis(imageDataUrl: string): Promise<TensorFlowAnalysis | undefined> {
+  try {
+    const validation = await tensorflowService.validateFoodImage(imageDataUrl);
+    if (validation.isValidFood) {
+      return await tensorflowService.enhancedFoodAnalysis(imageDataUrl);
+    }
+  } catch (error) {
+    console.warn('TensorFlow analysis failed:', error);
+  }
+  return undefined;
+}
+
+// Separate Gemini analysis function with consistency checking
+async function runGeminiAnalysis(imagePart: any, userProfile: UserProfile): Promise<AnalysisResult> {
+  const dietInstruction = userProfile.diet === Diet.None 
+    ? "No specific diet." 
+    : `User follows ${userProfile.diet} diet.`;
+
+  const medicalConditions = userProfile.medicalConditions.filter(c => c !== MedicalCondition.None);
+  const medicalInstruction = medicalConditions.length > 0 
+    ? `Medical conditions: ${medicalConditions.join(', ')}${userProfile.customCondition ? `, ${userProfile.customCondition}` : ''}.`
+    : "";
+
+  // Enhanced prompt with specific health score calculation instructions
+  const prompt = `Analyze this food image comprehensively. ${dietInstruction} ${medicalInstruction}
+
+CRITICAL: Be consistent - same product must get same analysis every time.
+
+Analysis requirements:
+1. Identify food name precisely
+2. Estimate calories based on visible portion size
+3. List ALL visible ingredients from packaging (if packaged food)
+4. Calculate health score (1-10) based on:
+   - Nutritional density: protein, fiber, vitamins (high=better)
+   - Processing level: minimal=10, moderate=6-7, highly processed=1-4
+   - Chemical safety: preservatives, artificial additives, harmful compounds
+   - Medical compatibility with user's conditions
+
+For packaged foods:
+- Read ingredient labels carefully
+- Identify preservatives, artificial colors, high sodium
+- Check for allergens and harmful chemicals
+- Assess processing level from ingredient complexity
+
+Health Score Guidelines:
+- 9-10: Whole foods, minimal processing, high nutrients
+- 7-8: Good nutrition, some processing acceptable
+- 5-6: Moderate nutrition, noticeable processing
+- 3-4: Poor nutrition, heavily processed
+- 1-2: Harmful ingredients, very poor nutrition
+
+Respond with precise JSON only.`;
+
+  // Simplified response schema for faster processing
+  const responseSchema = {
+    type: Type.OBJECT,
+    properties: {
+      dishName: { type: Type.STRING },
+      productIdentifier: { 
+        type: Type.STRING,
+        description: "Unique product identifier based on brand+name+key ingredients for consistency"
+      },
+      estimatedCalories: { type: Type.INTEGER },
+      nutritionalBreakdown: {
+        type: Type.OBJECT,
+        properties: {
+          carbs: { type: Type.NUMBER },
+          protein: { type: Type.NUMBER },
+          fat: { type: Type.NUMBER },
+          fiber: { type: Type.NUMBER },
+          sugar: { type: Type.NUMBER },
+          sodium: { type: Type.NUMBER }
+        },
+        required: ["carbs", "protein", "fat", "fiber", "sugar", "sodium"]
+      },
+      healthScore: {
+        type: Type.INTEGER,
+        description: "Health score from 1-10 based on nutritional value, processing level, and safety"
+      },
+      processingLevel: {
+        type: Type.STRING,
+        enum: ["MINIMAL", "MODERATE", "HIGHLY_PROCESSED"],
+        description: "Level of food processing"
+      },
+      nutritionalDensity: {
+        type: Type.STRING,
+        enum: ["LOW", "MODERATE", "HIGH"],
+        description: "Overall nutritional density and quality"
+      },
+      dietCompatibility: {
+        type: Type.OBJECT,
+        properties: {
+          isCompatible: { type: Type.BOOLEAN },
+          reason: { type: Type.STRING }
+        },
+        required: ["isCompatible", "reason"]
+      },
+      medicalAdvice: {
+        type: Type.OBJECT,
+        properties: {
+          isSafeForConditions: { type: Type.BOOLEAN },
+          warnings: { type: Type.ARRAY, items: { type: Type.STRING } },
+          recommendations: { type: Type.ARRAY, items: { type: Type.STRING } }
+        },
+        required: ["isSafeForConditions", "warnings", "recommendations"]
+      },
+      ingredients: {
+        type: Type.ARRAY,
+        items: { type: Type.STRING }
+      },
+      healthTips: {
+        type: Type.ARRAY,
+        items: { type: Type.STRING }
+      },
+      chemicalAnalysis: {
+        type: Type.OBJECT,
+        properties: {
+          harmfulChemicals: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                riskLevel: { type: Type.STRING },
+                description: { type: Type.STRING },
+                healthEffects: { type: Type.ARRAY, items: { type: Type.STRING } }
+              },
+              required: ["name", "riskLevel", "description", "healthEffects"]
+            }
+          },
+          additives: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                eNumber: { type: Type.STRING },
+                type: { type: Type.STRING },
+                safetyRating: { type: Type.STRING },
+                description: { type: Type.STRING }
+              },
+              required: ["name", "type", "safetyRating", "description"]
+            }
+          },
+          allergens: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                severity: { type: Type.STRING },
+                commonReactions: { type: Type.ARRAY, items: { type: Type.STRING } }
+              },
+              required: ["name", "severity", "commonReactions"]
+            }
+          },
+          overallSafetyScore: { type: Type.INTEGER },
+          isOrganicCertified: { type: Type.BOOLEAN },
+          hasArtificialIngredients: { type: Type.BOOLEAN }
+        },
+        required: ["overallSafetyScore", "isOrganicCertified", "hasArtificialIngredients"]
+      }
+    },
+    required: ["dishName", "productIdentifier", "estimatedCalories", "nutritionalBreakdown", "healthScore", "processingLevel", "nutritionalDensity", "dietCompatibility", "medicalAdvice", "ingredients", "healthTips", "chemicalAnalysis"]
+  };
+
+  const response: GenerateContentResponse = await ai.models.generateContent({
+    model: 'gemini-2.0-flash-exp',
+    contents: { parts: [imagePart, { text: prompt }] },
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: responseSchema
+    },
+  });
+
+  const result = JSON.parse(response.text) as AnalysisResult;
+  
+  // Generate identifier if not provided
+  if (!result.productIdentifier) {
+    result.productIdentifier = ConsistencyService.generateProductIdentifier(
+      result.dishName, 
+      result.ingredients
+    );
+  }
+  
+  // Cache this analysis for future consistency
+  ConsistencyService.cacheAnalysis(result);
+  
+  return result;
 }
 
 // BMI Calculator with AI-powered health advice

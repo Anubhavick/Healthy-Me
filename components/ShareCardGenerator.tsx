@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Meal, UserProfile } from '../types';
+import { HealthScoreService } from '../services/healthScoreService';
 import html2canvas from 'html2canvas';
 
 interface ShareCardGeneratorProps {
@@ -12,17 +13,22 @@ const ShareCardGenerator: React.FC<ShareCardGeneratorProps> = ({ meal, userProfi
   const cardRef = useRef<HTMLDivElement>(null);
 
   const getHealthScoreColor = (score: number) => {
-    if (score >= 16) return { bg: 'bg-green-100', text: 'text-green-800', accent: 'bg-green-500' };
-    if (score >= 12) return { bg: 'bg-yellow-100', text: 'text-yellow-800', accent: 'bg-yellow-500' };
-    if (score >= 8) return { bg: 'bg-orange-100', text: 'text-orange-800', accent: 'bg-orange-500' };
+    const colorClass = HealthScoreService.getHealthScoreColor(score);
+    // Convert text color classes to background/accent combinations
+    if (colorClass.includes('green')) return { bg: 'bg-green-100', text: 'text-green-800', accent: 'bg-green-500' };
+    if (colorClass.includes('yellow')) return { bg: 'bg-yellow-100', text: 'text-yellow-800', accent: 'bg-yellow-500' };
+    if (colorClass.includes('orange')) return { bg: 'bg-orange-100', text: 'text-orange-800', accent: 'bg-orange-500' };
     return { bg: 'bg-red-100', text: 'text-red-800', accent: 'bg-red-500' };
   };
 
   const getHealthLabel = (score: number) => {
-    if (score >= 16) return 'Excellent Choice!';
-    if (score >= 12) return 'Good Choice!';
-    if (score >= 8) return 'Okay Choice';
-    return 'Could Be Better';
+    const label = HealthScoreService.getHealthScoreLabel(score);
+    // Convert label to share-friendly format
+    return label === 'Excellent' ? 'Excellent Choice!' :
+           label === 'Very Good' ? 'Great Choice!' :
+           label === 'Good' ? 'Good Choice!' :
+           label === 'Fair' ? 'Okay Choice' :
+           'Could Be Better';
   };
 
   const downloadCard = async () => {

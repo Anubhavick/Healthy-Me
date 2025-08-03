@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { AnalysisResult as AnalysisResultType } from '../types';
+import { HealthScoreService } from '../services/healthScoreService';
 import { CheckCircleIcon, XCircleIcon, SparklesIcon } from './icons';
 
 interface ProductDisplay {
@@ -105,87 +106,7 @@ const HealthScoreCard: React.FC<{ score: number }> = ({ score }) => {
 const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare, productDisplay }) => {
   const { isCompatible, reason } = result.dietCompatibility;
   
-  const calculateHealthScore = () => {
-    // Start with the chemical safety score as the foundation (converted to 20-point scale)
-    let score = result.chemicalAnalysis ? 
-      Math.round((result.chemicalAnalysis.overallSafetyScore / 10) * 20) : 12;
-    
-    // If no chemical analysis, start from middle
-    if (!result.chemicalAnalysis) {
-      score = 12;
-    }
-    
-    // Calorie adjustment (max ±3 points)
-    const calories = result.estimatedCalories;
-    if (calories <= 300) score += 2;
-    else if (calories <= 500) score += 1;
-    else if (calories > 800) score -= 2;
-    else if (calories > 1200) score -= 3;
-    
-    // Diet compatibility (max ±2 points)
-    if (isCompatible) score += 1;
-    else score -= 2;
-    
-    // Chemical safety penalties (this is crucial for health)
-    if (result.chemicalAnalysis) {
-      const harmfulChemicals = result.chemicalAnalysis.harmfulChemicals;
-      if (harmfulChemicals.length > 0) {
-        // Heavy penalty for harmful chemicals
-        const severeCount = harmfulChemicals.filter(c => c.riskLevel === 'SEVERE').length;
-        const highCount = harmfulChemicals.filter(c => c.riskLevel === 'HIGH').length;
-        const mediumCount = harmfulChemicals.filter(c => c.riskLevel === 'MEDIUM').length;
-        
-        score -= (severeCount * 4 + highCount * 3 + mediumCount * 1);
-      }
-      
-      // Artificial ingredients penalty
-      if (result.chemicalAnalysis.hasArtificialIngredients) score -= 2;
-      
-      // Organic bonus
-      if (result.chemicalAnalysis.isOrganicCertified) score += 2;
-      
-      // Allergen penalties
-      if (result.chemicalAnalysis.allergens.length > 0) {
-        score -= result.chemicalAnalysis.allergens.length;
-      }
-    }
-    
-    // Processing level from TensorFlow (max ±2 points)
-    if (result.tensorflowAnalysis) {
-      switch (result.tensorflowAnalysis.qualityAssessment.processingLevel) {
-        case 'MINIMAL':
-          score += 2;
-          break;
-        case 'MODERATE':
-          // No change
-          break;
-        case 'HIGHLY_PROCESSED':
-          score -= 3;
-          break;
-      }
-      
-      // Quality bonus
-      const quality = result.tensorflowAnalysis.qualityAssessment.overallQuality;
-      if (quality >= 8) score += 1;
-      else if (quality <= 4) score -= 1;
-    }
-    
-    // Ensure score stays within bounds and reflects chemical safety
-    const finalScore = Math.max(1, Math.min(20, Math.round(score)));
-    
-    // Additional check: if chemical safety is very low, cap the max score
-    if (result.chemicalAnalysis && result.chemicalAnalysis.overallSafetyScore <= 5) {
-      return Math.min(finalScore, 10); // Cap at 10 if safety is very poor
-    }
-    
-    if (result.chemicalAnalysis && result.chemicalAnalysis.overallSafetyScore <= 7) {
-      return Math.min(finalScore, 14); // Cap at 14 if safety is poor
-    }
-    
-    return finalScore;
-  };
-
-  const healthScore = calculateHealthScore();
+  const healthScore = HealthScoreService.calculateHealthScore(result);
   
   // Check if this is a barcode product
   const isProduct = productDisplay?.isBarcode || false;
@@ -408,7 +329,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare, produc
         <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-              🧪 Safety Analysis
+              Safety Analysis
             </h3>
             <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
               result.chemicalAnalysis.overallSafetyScore >= 8 ? 'bg-green-100 text-green-800' :
@@ -420,60 +341,78 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare, produc
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            <div className={`p-3 rounded-lg text-center ${
-              result.chemicalAnalysis.isOrganicCertified ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'
-            }`}>
-              <div className="text-lg mb-1">{result.chemicalAnalysis.isOrganicCertified ? '🌱' : '🏭'}</div>
-              <div className="text-sm font-medium">
-                {result.chemicalAnalysis.isOrganicCertified ? 'Organic' : 'Conventional'}
-              </div>
-            </div>
-            
-            <div className={`p-3 rounded-lg text-center ${
-              !result.chemicalAnalysis.hasArtificialIngredients ? 'bg-green-50 border border-green-200' : 'bg-orange-50 border border-orange-200'
-            }`}>
-              <div className="text-lg mb-1">{!result.chemicalAnalysis.hasArtificialIngredients ? '✅' : '⚠️'}</div>
-              <div className="text-sm font-medium">
-                {!result.chemicalAnalysis.hasArtificialIngredients ? 'Natural' : 'Artificial'}
-              </div>
-            </div>
-
-            <div className={`p-3 rounded-lg text-center ${
-              result.chemicalAnalysis.harmfulChemicals.length === 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-            }`}>
-              <div className="text-lg mb-1">{result.chemicalAnalysis.harmfulChemicals.length === 0 ? '🛡️' : '⚠️'}</div>
-              <div className="text-sm font-medium">
-                {result.chemicalAnalysis.harmfulChemicals.length === 0 ? 'Safe' : `${result.chemicalAnalysis.harmfulChemicals.length} Concerns`}
-              </div>
-            </div>
-          </div>
-
-          {result.chemicalAnalysis.harmfulChemicals.length > 0 && (
-            <div className="space-y-2 mb-4">
-              <h4 className="font-medium text-red-800 text-sm">⚠️ Safety Concerns:</h4>
-              {result.chemicalAnalysis.harmfulChemicals.slice(0, 3).map((chemical, index) => (
-                <div key={index} className="bg-red-50 border border-red-200 p-2 rounded text-sm">
-                  <div className="flex justify-between items-start">
-                    <span className="font-medium">{chemical.name}</span>
-                    <span className={`px-2 py-0.5 text-xs font-bold rounded ${
-                      chemical.riskLevel === 'HIGH' || chemical.riskLevel === 'SEVERE' ? 'bg-red-600 text-white' : 'bg-orange-600 text-white'
-                    }`}>
-                      {chemical.riskLevel}
-                    </span>
+          {result.chemicalAnalysis.harmfulChemicals.length > 0 ? (
+            <div className="space-y-3">
+              <h4 className="font-medium text-red-800 text-sm">
+                Harmful Chemicals Detected:
+              </h4>
+              {result.chemicalAnalysis.harmfulChemicals.map((chemical, index) => {
+                const getThreatColor = (riskLevel: string) => {
+                  switch (riskLevel) {
+                    case 'SEVERE':
+                      return {
+                        bg: 'bg-red-100 border-red-300',
+                        badge: 'bg-red-600 text-white',
+                        text: 'text-red-800'
+                      };
+                    case 'HIGH':
+                      return {
+                        bg: 'bg-orange-100 border-orange-300',
+                        badge: 'bg-orange-600 text-white',
+                        text: 'text-orange-800'
+                      };
+                    case 'MEDIUM':
+                      return {
+                        bg: 'bg-yellow-100 border-yellow-300',
+                        badge: 'bg-yellow-600 text-white',
+                        text: 'text-yellow-800'
+                      };
+                    default:
+                      return {
+                        bg: 'bg-blue-100 border-blue-300',
+                        badge: 'bg-blue-600 text-white',
+                        text: 'text-blue-800'
+                      };
+                  }
+                };
+                
+                const threatStyle = getThreatColor(chemical.riskLevel);
+                
+                return (
+                  <div key={index} className={`${threatStyle.bg} border p-4 rounded-lg`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className={`font-semibold ${threatStyle.text}`}>{chemical.name}</span>
+                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${threatStyle.badge}`}>
+                        {chemical.riskLevel} THREAT
+                      </span>
+                    </div>
+                    
+                    <p className={`text-sm ${threatStyle.text} mb-2`}>{chemical.description}</p>
+                    
+                    {chemical.healthEffects && chemical.healthEffects.length > 0 && (
+                      <div>
+                        <h5 className={`font-medium text-xs ${threatStyle.text} mb-1`}>
+                          Health Effects:
+                        </h5>
+                        <p className={`text-xs ${threatStyle.text}`}>
+                          {chemical.healthEffects.join(', ')}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-600 mt-1">{chemical.description}</p>
-                </div>
-              ))}
-              {result.chemicalAnalysis.harmfulChemicals.length > 3 && (
-                <p className="text-xs text-gray-500">+ {result.chemicalAnalysis.harmfulChemicals.length - 3} more concerns</p>
-              )}
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-center">
+              <p className="text-green-800 font-medium">No Harmful Chemicals Detected</p>
+              <p className="text-green-600 text-sm">This product appears to be safe for consumption</p>
             </div>
           )}
 
           {result.chemicalAnalysis.allergens.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
-              <h4 className="font-medium text-yellow-800 text-sm mb-2">🚫 Allergen Warning</h4>
+            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mt-3">
+              <h4 className="font-medium text-yellow-800 text-sm mb-2">Allergen Warning</h4>
               <div className="flex flex-wrap gap-1">
                 {result.chemicalAnalysis.allergens.map((allergen, index) => (
                   <span key={index} className="bg-yellow-200 text-yellow-800 text-xs px-2 py-1 rounded">

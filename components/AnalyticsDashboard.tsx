@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import { Meal, UserProfile } from '../types';
+import { HealthScoreService } from '../services/healthScoreService';
 import { SparklesIcon } from './icons';
 
 ChartJS.register(
@@ -58,27 +59,6 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
   const [chartData, setChartData] = useState<any>(null);
 
-  const calculateHealthScore = (meal: Meal) => {
-    let score = 10;
-    const calories = meal.analysis?.estimatedCalories || 0;
-    const ingredientCount = meal.analysis?.ingredients?.length || 0;
-    const isCompatible = meal.analysis?.dietCompatibility?.isCompatible || false;
-    
-    if (calories <= 400) score += 3;
-    else if (calories <= 600) score += 4;
-    else if (calories <= 800) score += 2;
-    else score -= 2;
-    
-    if (ingredientCount >= 5) score += 3;
-    else if (ingredientCount >= 3) score += 2;
-    else score += 1;
-    
-    if (isCompatible) score += 3;
-    else score -= 1;
-    
-    return Math.max(1, Math.min(20, score));
-  };
-
   const generateDailyData = (meals: Meal[], days: number, aggregator: (dayMeals: Meal[]) => number) => {
     const data = [];
     const now = new Date();
@@ -121,7 +101,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     );
 
     const healthScoreTrend = generateDailyData(filteredMeals, days, (dayMeals) => {
-      const scores = dayMeals.map(m => calculateHealthScore(m));
+      const scores = dayMeals.map(m => HealthScoreService.calculateHealthScore(m.analysis));
       return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
     });
 
@@ -160,7 +140,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       const totalCalories = mealHistory.reduce((sum, meal) => sum + (meal.analysis?.estimatedCalories || 0), 0);
       const avgCalories = Math.round(totalCalories / mealHistory.length);
       
-      const healthScores = mealHistory.map(calculateHealthScore);
+      const healthScores = mealHistory.map(meal => HealthScoreService.calculateHealthScore(meal.analysis));
       const avgHealthScore = Math.round(healthScores.reduce((sum, score) => sum + score, 0) / healthScores.length);
       
       const foodCounts: { [key: string]: number } = {};
@@ -196,17 +176,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   }, [mealHistory, timeRange, mode]);
 
   const getHealthScoreColor = (score: number) => {
-    if (score >= 16) return 'text-green-600';
-    if (score >= 12) return 'text-yellow-600';
-    if (score >= 8) return 'text-orange-600';
-    return 'text-red-600';
+    return HealthScoreService.getHealthScoreColor(score);
   };
 
   const getHealthScoreLabel = (score: number) => {
-    if (score >= 16) return 'Excellent';
-    if (score >= 12) return 'Good';
-    if (score >= 8) return 'Fair';
-    return 'Needs Improvement';
+    return HealthScoreService.getHealthScoreLabel(score);
   };
 
   if (mealHistory.length === 0) {

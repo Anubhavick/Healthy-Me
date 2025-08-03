@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Diet, AnalysisResult, Meal, UserProfile, MedicalCondition } from './types';
-import { analyzeImage } from './services/geminiService';
+import { analyzeImage, calculateBMI } from './services/geminiService';
+import { HealthScoreService } from './services/healthScoreService';
+import { tensorflowService } from './services/tensorflowService';
 import { findBestFoodMatch } from './services/foodSearchService';
 import { ExportService } from './services/exportService';
 import ImageUploader from './components/ImageUploader';
@@ -49,88 +51,6 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [mealHistory, setMealHistory] = useState<Meal[]>([]);
   const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
-
-  // Helper function to calculate health score
-  const calculateHealthScore = (analysis: AnalysisResult): number => {
-    // Start with the chemical safety score as the foundation (converted to 20-point scale)
-    let score = analysis.chemicalAnalysis ? 
-      Math.round((analysis.chemicalAnalysis.overallSafetyScore / 10) * 20) : 12;
-    
-    // If no chemical analysis, start from middle
-    if (!analysis.chemicalAnalysis) {
-      score = 12;
-    }
-    
-    // Calorie adjustment (max ±3 points)
-    const calories = analysis.estimatedCalories;
-    if (calories <= 300) score += 2;
-    else if (calories <= 500) score += 1;
-    else if (calories > 800) score -= 2;
-    else if (calories > 1200) score -= 3;
-    
-    // Diet compatibility 
-    const isCompatible = analysis.dietCompatibility.isCompatible;
-    if (isCompatible) score += 1;
-    else score -= 2;
-    
-    // Chemical safety penalties (this is crucial for health)
-    if (analysis.chemicalAnalysis) {
-      const harmfulChemicals = analysis.chemicalAnalysis.harmfulChemicals;
-      if (harmfulChemicals.length > 0) {
-        // Heavy penalty for harmful chemicals
-        const severeCount = harmfulChemicals.filter(c => c.riskLevel === 'SEVERE').length;
-        const highCount = harmfulChemicals.filter(c => c.riskLevel === 'HIGH').length;
-        const mediumCount = harmfulChemicals.filter(c => c.riskLevel === 'MEDIUM').length;
-        
-        score -= (severeCount * 4 + highCount * 3 + mediumCount * 1);
-      }
-      
-      // Artificial ingredients penalty
-      if (analysis.chemicalAnalysis.hasArtificialIngredients) score -= 2;
-      
-      // Organic bonus
-      if (analysis.chemicalAnalysis.isOrganicCertified) score += 2;
-      
-      // Allergen penalties
-      if (analysis.chemicalAnalysis.allergens.length > 0) {
-        score -= analysis.chemicalAnalysis.allergens.length;
-      }
-    }
-    
-    // Processing level from TensorFlow
-    if (analysis.tensorflowAnalysis) {
-      switch (analysis.tensorflowAnalysis.qualityAssessment.processingLevel) {
-        case 'MINIMAL':
-          score += 2;
-          break;
-        case 'MODERATE':
-          // No change
-          break;
-        case 'HIGHLY_PROCESSED':
-          score -= 3;
-          break;
-      }
-      
-      // Quality bonus
-      const quality = analysis.tensorflowAnalysis.qualityAssessment.overallQuality;
-      if (quality >= 8) score += 1;
-      else if (quality <= 4) score -= 1;
-    }
-    
-    // Ensure score stays within bounds and reflects chemical safety
-    const finalScore = Math.max(1, Math.min(20, Math.round(score)));
-    
-    // Additional check: if chemical safety is very low, cap the max score
-    if (analysis.chemicalAnalysis && analysis.chemicalAnalysis.overallSafetyScore <= 5) {
-      return Math.min(finalScore, 10); // Cap at 10 if safety is very poor
-    }
-    
-    if (analysis.chemicalAnalysis && analysis.chemicalAnalysis.overallSafetyScore <= 7) {
-      return Math.min(finalScore, 14); // Cap at 14 if safety is poor
-    }
-    
-    return finalScore;
-  };
 
   useEffect(() => {
     try {
@@ -202,8 +122,8 @@ const App: React.FC = () => {
         // No OpenFoodFacts match found, using AI analysis only
       }
       
-      // Calculate health score
-      const healthScore = calculateHealthScore(result);
+      // Calculate health score using centralized service
+      const healthScore = HealthScoreService.calculateHealthScore(result);
       
       const newMeal: Meal = {
         id: Date.now().toString(),
@@ -401,7 +321,7 @@ const App: React.FC = () => {
         timestamp: new Date().toISOString(),
         imageDataUrl: image,
         analysis: analysisResult,
-        healthScore: calculateHealthScore(analysisResult)
+        healthScore: HealthScoreService.calculateHealthScore(analysisResult)
       };
       setMealToShare(currentMeal);
       setShowShareCard(true);
