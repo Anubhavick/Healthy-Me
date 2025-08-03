@@ -441,13 +441,14 @@ const App: React.FC = () => {
           : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100'
       } flex items-center justify-center p-3 sm:p-4 relative overflow-hidden`}>
         
-        {/* Navigation Header - matching landing page */}
-        <nav className={`absolute top-0 left-0 right-0 flex items-center justify-between p-4 sm:p-6 backdrop-blur-sm z-20 ${
-          isDarkMode 
-            ? 'bg-white/10 border-b border-white/20' 
-            : 'bg-white/70 border-b border-gray-200/50'
-        }`}>
-          <div className="flex items-center space-x-2 sm:space-x-3">
+        {/* Floating Navigation Header */}
+        <div className="absolute top-0 left-0 right-0 z-20 px-4 sm:px-6 pt-4 sm:pt-6">
+          <nav className={`flex items-center justify-between p-4 sm:p-6 rounded-2xl backdrop-blur-md border shadow-lg ${
+            isDarkMode 
+              ? 'bg-white/10 border-white/20 shadow-black/20' 
+              : 'bg-white/80 border-gray-200/30 shadow-gray-500/10'
+          }`}>
+            <div className="flex items-center space-x-2 sm:space-x-3">
             <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg p-1 ${
               isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-600/10 backdrop-blur-sm'
             }`}>
@@ -487,7 +488,8 @@ const App: React.FC = () => {
               {isDarkMode ? '☀️' : '🌙'}
             </button>
           </div>
-        </nav>
+          </nav>
+        </div>
 
         {/* Animated Light Rays Background */}
         <div className="absolute inset-0 z-0">
@@ -539,46 +541,6 @@ const App: React.FC = () => {
             }`}>
               Sign in to continue your healthy journey
             </p>
-          </div>
-
-          {/* Features preview - Material Design cards */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
-            <div className={`text-center p-2 sm:p-4 backdrop-blur-sm rounded-xl sm:rounded-2xl border transition-all duration-300 ${
-              isDarkMode 
-                ? 'bg-white/10 border-white/20 hover:bg-white/20' 
-                : 'bg-blue-50/50 border-blue-200/50 hover:bg-blue-100/50'
-            }`}>
-              <div className="flex justify-center mb-1 sm:mb-2">
-                <svg className={`w-4 h-4 sm:w-6 sm:h-6 ${isDarkMode ? 'text-white' : 'text-blue-600'}`} fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm5-18v4h3V3h-3z"/>
-                </svg>
-              </div>
-              <div className={`text-xs font-semibold ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Smart Analysis</div>
-            </div>
-            <div className={`text-center p-2 sm:p-4 backdrop-blur-sm rounded-xl sm:rounded-2xl border transition-all duration-300 ${
-              isDarkMode 
-                ? 'bg-white/10 border-white/20 hover:bg-white/20' 
-                : 'bg-blue-50/50 border-blue-200/50 hover:bg-blue-100/50'
-            }`}>
-              <div className="flex justify-center mb-1 sm:mb-2">
-                <svg className={`w-4 h-4 sm:w-6 sm:h-6 ${isDarkMode ? 'text-white' : 'text-blue-600'}`} fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              </div>
-              <div className={`text-xs font-semibold ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Health Scoring</div>
-            </div>
-            <div className={`text-center p-2 sm:p-4 backdrop-blur-sm rounded-xl sm:rounded-2xl border transition-all duration-300 ${
-              isDarkMode 
-                ? 'bg-white/10 border-white/20 hover:bg-white/20' 
-                : 'bg-blue-50/50 border-blue-200/50 hover:bg-blue-100/50'
-            }`}>
-              <div className="flex justify-center mb-1 sm:mb-2">
-                <svg className={`w-4 h-4 sm:w-6 sm:h-6 ${isDarkMode ? 'text-white' : 'text-blue-600'}`} fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
-                </svg>
-              </div>
-              <div className={`text-xs font-semibold ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Smart Tracking</div>
-            </div>
           </div>
           
           {/* Action buttons - Enhanced theme */}
@@ -689,49 +651,36 @@ const App: React.FC = () => {
         />
       </div>
 
-      {/* Header - Glass morphism style matching landing page */}
-      <nav className={`relative z-20 flex items-center justify-between p-4 sm:p-6 backdrop-blur-sm ${
-        isDarkMode 
-          ? 'bg-white/10 border-b border-white/20' 
-          : 'bg-white/70 border-b border-gray-200/50'
-      }`}>
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg p-1 ${
-            isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-600/10 backdrop-blur-sm'
-          }`}>
-            <img 
-              src="/logo.svg" 
-              alt="Healthy Me Logo" 
-              className={`w-full h-full ${isDarkMode ? '' : 'filter hue-rotate-200 saturate-150'}`} 
-            />
+      {/* Floating Header - Glass morphism navbar */}
+      <div className="relative z-20 w-full px-4 sm:px-6 pt-4 sm:pt-6">
+        <nav className={`flex items-center justify-between p-4 sm:p-6 rounded-2xl backdrop-blur-md border shadow-lg ${
+          isDarkMode 
+            ? 'bg-white/10 border-white/20 shadow-black/20' 
+            : 'bg-white/80 border-gray-200/30 shadow-gray-500/10'
+        }`}>
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg p-1 ${
+              isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-600/10 backdrop-blur-sm'
+            }`}>
+              <img 
+                src="/logo.svg" 
+                alt="Healthy Me Logo" 
+                className={`w-full h-full ${isDarkMode ? '' : 'filter hue-rotate-200 saturate-150'}`} 
+              />
+            </div>
+            <div className="hidden sm:block">
+              <span className={`font-semibold text-lg sm:text-xl ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Healthy Me</span>
+              <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Smart Nutrition Analysis</p>
+            </div>
+            <div className="sm:hidden">
+              <span className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Healthy Me</span>
+            </div>
           </div>
-          <div className="hidden sm:block">
-            <span className={`font-semibold text-lg sm:text-xl ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Healthy Me</span>
-            <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Smart Nutrition Analysis</p>
-          </div>
-          <div className="sm:hidden">
-            <span className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Healthy Me</span>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          {/* Chat Bot Button */}
-          <button
-            onClick={() => setShowChatBot(true)}
-            className={`p-2 rounded-lg transition-all duration-200 backdrop-blur-sm ${
-              isDarkMode 
-                ? 'bg-white/10 hover:bg-white/20 text-white' 
-                : 'bg-blue-100/50 hover:bg-blue-200/50 text-blue-600'
-            }`}
-            title="Chat with Nutrition Assistant"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
-            </svg>
-          </button>
-          <ProfileDropdown
-            user={user}
-            userProfile={userProfile}
+          
+          <div className="flex items-center space-x-4">
+            <ProfileDropdown
+              user={user}
+              userProfile={userProfile}
             mealHistoryCount={mealHistory.length}
             isDarkMode={isDarkMode}
             onShowHistory={() => setShowHistoryModal(true)}
@@ -739,14 +688,14 @@ const App: React.FC = () => {
             onShowGoals={() => setShowGoalsModal(true)}
             onShowSettings={() => setShowSettingsModal(true)}
             onShowProfileEdit={() => setShowSettingsModal(true)}
-            onShowChat={() => setShowChatBot(true)}
             onToggleDarkMode={handleDarkModeToggle}
             onLogout={handleLogout}
           />
-        </div>
-      </nav>
+          </div>
+        </nav>
+      </div>
       
-      <main className="relative z-10 container mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8">
+      <main className="relative z-10 container mx-auto p-3 sm:p-6 pt-2 sm:pt-4 space-y-4 sm:space-y-8">
         {/* Main Analysis Section - Glass morphism Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           
@@ -992,6 +941,30 @@ const App: React.FC = () => {
           isDarkMode={isDarkMode}
         />
       )}
+
+      {/* Floating Chat Bot Button */}
+      <button
+        onClick={() => setShowChatBot(true)}
+        className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm border hover:scale-110 active:scale-95 ${
+          isDarkMode 
+            ? 'bg-blue-600/90 hover:bg-blue-700/90 text-white border-blue-500/30 shadow-blue-500/25' 
+            : 'bg-blue-500/90 hover:bg-blue-600/90 text-white border-blue-400/30 shadow-blue-500/20'
+        }`}
+        title="Chat with Nutrition Assistant"
+        style={{
+          backgroundImage: isDarkMode 
+            ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(29, 78, 216, 0.9))' 
+            : 'linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9))'
+        }}
+      >
+        <svg className="w-6 h-6 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+        </svg>
+        {/* Pulse animation for attention */}
+        <div className={`absolute inset-0 rounded-full animate-ping ${
+          isDarkMode ? 'bg-blue-400/40' : 'bg-blue-300/40'
+        }`}></div>
+      </button>
 
       {/* Chat Bot */}
       {showChatBot && (

@@ -53,10 +53,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onAuthSuccess, isDarkMod
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className={`rounded-xl max-w-md w-full p-8 relative backdrop-blur-sm border shadow-2xl ${
+      <div className={`rounded-2xl max-w-md w-full p-8 relative backdrop-blur-md border shadow-2xl ${
         isDarkMode 
-          ? 'bg-gray-900/90 border-slate-600/30 text-white' 
-          : 'bg-white/90 border-cyan-300/30 text-gray-900'
+          ? 'bg-gray-900/90 border-white/20 text-white shadow-black/25' 
+          : 'bg-white/90 border-gray-200/30 text-gray-900 shadow-gray-500/15'
       }`}>
         {/* Close button */}
         <button

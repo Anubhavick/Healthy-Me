@@ -12,7 +12,6 @@ interface ProfileDropdownProps {
   onShowGoals: () => void;
   onShowSettings: () => void;
   onShowProfileEdit: () => void;
-  onShowChat: () => void;
   onToggleDarkMode: () => void;
   onLogout: () => void;
 }
@@ -27,7 +26,6 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   onShowGoals,
   onShowSettings,
   onShowProfileEdit,
-  onShowChat,
   onToggleDarkMode,
   onLogout,
 }) => {
@@ -186,22 +184,6 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
             >
               <DarkModeIcon src="/goals and streak.svg" alt="Goals" className="w-5 h-5" isDarkMode={isDarkMode} />
               <span className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Goals & Streaks</span>
-            </button>
-
-            <button
-              onClick={() => {
-                onShowChat();
-                setIsOpen(false);
-              }}
-              className={`w-full px-4 py-2 text-left ${isDarkMode ? 'hover:bg-green-900/50' : 'hover:bg-green-50'} transition-colors duration-150 flex items-center space-x-3 text-sm`}
-            >
-              <svg className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
-              </svg>
-              <span className={`${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Chat Assistant</span>
-              <span className="ml-auto text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
-                AI
-              </span>
             </button>
 
             <div className={`border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-100'} my-1`}></div>

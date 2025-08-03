@@ -21,59 +21,61 @@ const LandingPage: React.FC<LandingPageProps> = ({
         ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
         : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100'
     }`}>
-      {/* Navigation Header */}
-      <nav className={`flex items-center justify-between p-4 sm:p-6 backdrop-blur-sm border-b ${
-        isDarkMode 
-          ? 'bg-white/10 border-white/20' 
-          : 'bg-white/70 border-gray-200/50'
-      }`}>
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg p-1 ${
-            isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-600/10 backdrop-blur-sm'
-          }`}>
-            <img 
-              src="/logo.svg" 
-              alt="Healthy Me Logo" 
-              className={`w-full h-full ${isDarkMode ? '' : 'filter hue-rotate-200 saturate-150'}`} 
-            />
+      {/* Floating Navigation Header */}
+      <div className="w-full px-4 sm:px-6 pt-4 sm:pt-6">
+        <nav className={`flex items-center justify-between p-4 sm:p-6 rounded-2xl backdrop-blur-md border shadow-lg ${
+          isDarkMode 
+            ? 'bg-white/10 border-white/20 shadow-black/20' 
+            : 'bg-white/80 border-gray-200/30 shadow-gray-500/10'
+        }`}>
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg p-1 ${
+              isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-600/10 backdrop-blur-sm'
+            }`}>
+              <img 
+                src="/logo.svg" 
+                alt="Healthy Me Logo" 
+                className={`w-full h-full ${isDarkMode ? '' : 'filter hue-rotate-200 saturate-150'}`} 
+              />
+            </div>
+            <span className={`font-semibold text-lg sm:text-xl ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
+            }`}>
+              Healthy Me
+            </span>
           </div>
-          <span className={`font-semibold text-lg sm:text-xl ${
-            isDarkMode ? 'text-white' : 'text-gray-800'
-          }`}>
-            Healthy Me
-          </span>
-        </div>
-        
-        <div className="flex items-center space-x-3 sm:space-x-6">
-          <button className={`transition-colors duration-200 font-medium text-sm sm:text-base ${
-            isDarkMode 
-              ? 'text-white/80 hover:text-white' 
-              : 'text-gray-600 hover:text-gray-800'
-          }`}>
-            <span className="hidden sm:inline">Home</span>
-          </button>
-          <button className={`transition-colors duration-200 font-medium text-sm sm:text-base ${
-            isDarkMode 
-              ? 'text-white/80 hover:text-white' 
-              : 'text-gray-600 hover:text-gray-800'
-          }`}>
-            <span className="hidden sm:inline">Docs</span>
-          </button>
-          <button
-            onClick={onToggleDarkMode}
-            className={`p-2 rounded-lg transition-all duration-200 backdrop-blur-sm ${
+          
+          <div className="flex items-center space-x-3 sm:space-x-6">
+            <button className={`transition-colors duration-200 font-medium text-sm sm:text-base ${
               isDarkMode 
-                ? 'bg-white/10 hover:bg-white/20' 
-                : 'bg-blue-100/50 hover:bg-blue-200/50'
-            }`}
-          >
-            {isDarkMode ? '☀️' : '🌙'}
-          </button>
-        </div>
-      </nav>
+                ? 'text-white/80 hover:text-white' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}>
+              <span className="hidden sm:inline">Home</span>
+            </button>
+            <button className={`transition-colors duration-200 font-medium text-sm sm:text-base ${
+              isDarkMode 
+                ? 'text-white/80 hover:text-white' 
+                : 'text-gray-600 hover:text-gray-800'
+            }`}>
+              <span className="hidden sm:inline">Docs</span>
+            </button>
+            <button
+              onClick={onToggleDarkMode}
+              className={`p-2 rounded-lg transition-all duration-200 backdrop-blur-sm ${
+                isDarkMode 
+                  ? 'bg-white/10 hover:bg-white/20' 
+                  : 'bg-blue-100/50 hover:bg-blue-200/50'
+              }`}
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+          </div>
+        </nav>
+      </div>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] px-6">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-140px)] px-6 pt-2">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className={`text-5xl md:text-7xl font-bold mb-8 leading-tight ${
             isDarkMode ? 'text-white' : 'text-gray-800'
