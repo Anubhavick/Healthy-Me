@@ -188,7 +188,6 @@ const App: React.FC = () => {
       try {
         const foodMatch = await findBestFoodMatch(result.dishName, result.ingredients);
         if (foodMatch && foodMatch.nutritionGrade && foodMatch.nutritionGrade !== 'unknown') {
-          console.log('Found OpenFoodFacts match:', foodMatch.productName);
           setProductDisplayData({
             productName: foodMatch.productName,
             brands: foodMatch.brands,
@@ -200,7 +199,7 @@ const App: React.FC = () => {
           });
         }
       } catch (searchError) {
-        console.log('No OpenFoodFacts match found, using AI analysis only');
+        // No OpenFoodFacts match found, using AI analysis only
       }
       
       // Calculate health score
