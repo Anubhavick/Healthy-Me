@@ -58,16 +58,18 @@ const NutritionCard: React.FC<{
 const HealthScoreCard: React.FC<{ score: number }> = ({ score }) => {
   const getScoreColor = (score: number) => {
     if (score >= 16) return 'text-green-600 bg-green-50 border-green-200';
-    if (score >= 12) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-    if (score >= 8) return 'text-orange-600 bg-orange-50 border-orange-200';
+    if (score >= 13) return 'text-lime-600 bg-lime-50 border-lime-200';
+    if (score >= 10) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    if (score >= 7) return 'text-orange-600 bg-orange-50 border-orange-200';
     return 'text-red-600 bg-red-50 border-red-200';
   };
 
   const getScoreLabel = (score: number) => {
     if (score >= 16) return 'Excellent';
-    if (score >= 12) return 'Good';
-    if (score >= 8) return 'Fair';
-    return 'Poor';
+    if (score >= 13) return 'Good';
+    if (score >= 10) return 'Fair';
+    if (score >= 7) return 'Poor';
+    return 'Very Poor';
   };
 
   return (
@@ -83,12 +85,18 @@ const HealthScoreCard: React.FC<{ score: number }> = ({ score }) => {
         <div 
           className={`h-2 rounded-full transition-all duration-500 ${
             score >= 16 ? 'bg-green-600' : 
-            score >= 12 ? 'bg-yellow-600' : 
-            score >= 8 ? 'bg-orange-600' : 'bg-red-600'
+            score >= 13 ? 'bg-lime-600' : 
+            score >= 10 ? 'bg-yellow-600' : 
+            score >= 7 ? 'bg-orange-600' : 'bg-red-600'
           }`}
           style={{ width: `${(score / 20) * 100}%` }}
         ></div>
       </div>
+      {score <= 10 && (
+        <p className="text-xs text-gray-500 mt-2">
+          ⚠️ Consider healthier alternatives
+        </p>
+      )}
     </div>
   );
 };
@@ -98,67 +106,83 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare, produc
   const { isCompatible, reason } = result.dietCompatibility;
   
   const calculateHealthScore = () => {
-    let score = 10;
+    // Start with the chemical safety score as the foundation (converted to 20-point scale)
+    let score = result.chemicalAnalysis ? 
+      Math.round((result.chemicalAnalysis.overallSafetyScore / 10) * 20) : 12;
     
-    const calories = result.estimatedCalories;
-    if (calories <= 400) score += 3;
-    else if (calories <= 600) score += 4;
-    else if (calories <= 800) score += 2;
-    else score -= 2;
-    
-    const ingredientCount = result.ingredients.length;
-    if (ingredientCount >= 5) score += 3;
-    else if (ingredientCount >= 3) score += 2;
-    else score += 1;
-    
-    if (isCompatible) score += 3;
-    else score -= 1;
-    
-    if (result.chemicalAnalysis) {
-      score += Math.floor(result.chemicalAnalysis.overallSafetyScore / 5);
-      
-      if (result.chemicalAnalysis.harmfulChemicals.length > 0) {
-        const severeChemicals = result.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'SEVERE');
-        const highRiskChemicals = result.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'HIGH');
-        score -= (severeChemicals.length * 3 + highRiskChemicals.length * 2);
-      }
-      
-      if (result.chemicalAnalysis.isOrganicCertified) score += 2;
-      if (result.chemicalAnalysis.hasArtificialIngredients) score -= 1;
-      
-      const harmfulAdditives = result.chemicalAnalysis.additives.filter(a => a.safetyRating === 'AVOID');
-      score -= harmfulAdditives.length;
+    // If no chemical analysis, start from middle
+    if (!result.chemicalAnalysis) {
+      score = 12;
     }
     
-    if (result.tensorflowAnalysis) {
-      score += Math.floor(result.tensorflowAnalysis.qualityAssessment.overallQuality / 3);
+    // Calorie adjustment (max ±3 points)
+    const calories = result.estimatedCalories;
+    if (calories <= 300) score += 2;
+    else if (calories <= 500) score += 1;
+    else if (calories > 800) score -= 2;
+    else if (calories > 1200) score -= 3;
+    
+    // Diet compatibility (max ±2 points)
+    if (isCompatible) score += 1;
+    else score -= 2;
+    
+    // Chemical safety penalties (this is crucial for health)
+    if (result.chemicalAnalysis) {
+      const harmfulChemicals = result.chemicalAnalysis.harmfulChemicals;
+      if (harmfulChemicals.length > 0) {
+        // Heavy penalty for harmful chemicals
+        const severeCount = harmfulChemicals.filter(c => c.riskLevel === 'SEVERE').length;
+        const highCount = harmfulChemicals.filter(c => c.riskLevel === 'HIGH').length;
+        const mediumCount = harmfulChemicals.filter(c => c.riskLevel === 'MEDIUM').length;
+        
+        score -= (severeCount * 4 + highCount * 3 + mediumCount * 1);
+      }
       
+      // Artificial ingredients penalty
+      if (result.chemicalAnalysis.hasArtificialIngredients) score -= 2;
+      
+      // Organic bonus
+      if (result.chemicalAnalysis.isOrganicCertified) score += 2;
+      
+      // Allergen penalties
+      if (result.chemicalAnalysis.allergens.length > 0) {
+        score -= result.chemicalAnalysis.allergens.length;
+      }
+    }
+    
+    // Processing level from TensorFlow (max ±2 points)
+    if (result.tensorflowAnalysis) {
       switch (result.tensorflowAnalysis.qualityAssessment.processingLevel) {
         case 'MINIMAL':
           score += 2;
           break;
         case 'MODERATE':
+          // No change
           break;
         case 'HIGHLY_PROCESSED':
-          score -= 2;
+          score -= 3;
           break;
       }
       
-      if (result.tensorflowAnalysis.visualAnalysis.freshnessScore >= 8) score += 1;
-      else if (result.tensorflowAnalysis.visualAnalysis.freshnessScore <= 5) score -= 1;
-      
-      if (result.tensorflowAnalysis.visualAnalysis.portionSize === 'EXTRA_LARGE') score -= 1;
-      else if (result.tensorflowAnalysis.visualAnalysis.portionSize === 'SMALL') score += 1;
-      
-      if (result.tensorflowAnalysis.qualityAssessment.naturalness >= 8) score += 1;
-      else if (result.tensorflowAnalysis.qualityAssessment.naturalness <= 4) score -= 2;
+      // Quality bonus
+      const quality = result.tensorflowAnalysis.qualityAssessment.overallQuality;
+      if (quality >= 8) score += 1;
+      else if (quality <= 4) score -= 1;
     }
     
-    // Fewer health tips = better overall health
-    if (result.healthTips.length <= 2) score += 2;
-    else if (result.healthTips.length <= 4) score += 1;
+    // Ensure score stays within bounds and reflects chemical safety
+    const finalScore = Math.max(1, Math.min(20, Math.round(score)));
     
-    return Math.max(1, Math.min(20, score));
+    // Additional check: if chemical safety is very low, cap the max score
+    if (result.chemicalAnalysis && result.chemicalAnalysis.overallSafetyScore <= 5) {
+      return Math.min(finalScore, 10); // Cap at 10 if safety is very poor
+    }
+    
+    if (result.chemicalAnalysis && result.chemicalAnalysis.overallSafetyScore <= 7) {
+      return Math.min(finalScore, 14); // Cap at 14 if safety is poor
+    }
+    
+    return finalScore;
   };
 
   const healthScore = calculateHealthScore();
@@ -384,7 +408,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare, produc
         <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-              🧪 Chemical & Safety Analysis
+              🧪 Safety Analysis
             </h3>
             <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
               result.chemicalAnalysis.overallSafetyScore >= 8 ? 'bg-green-100 text-green-800' :
@@ -392,141 +416,71 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare, produc
               result.chemicalAnalysis.overallSafetyScore >= 4 ? 'bg-orange-100 text-orange-800' :
               'bg-red-100 text-red-800'
             }`}>
-              Safety Score: {result.chemicalAnalysis.overallSafetyScore}/10
+              {result.chemicalAnalysis.overallSafetyScore}/10
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className={`p-3 rounded-lg border ${
-              result.chemicalAnalysis.isOrganicCertified ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+            <div className={`p-3 rounded-lg text-center ${
+              result.chemicalAnalysis.isOrganicCertified ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'
             }`}>
-              <div className="flex items-center">
-                <span className="text-xl mr-2">{result.chemicalAnalysis.isOrganicCertified ? '🌱' : '🏭'}</span>
-                <span className={`font-medium ${result.chemicalAnalysis.isOrganicCertified ? 'text-green-800' : 'text-gray-600'}`}>
-                  {result.chemicalAnalysis.isOrganicCertified ? 'Organic Certified' : 'Conventional'}
-                </span>
+              <div className="text-lg mb-1">{result.chemicalAnalysis.isOrganicCertified ? '🌱' : '🏭'}</div>
+              <div className="text-sm font-medium">
+                {result.chemicalAnalysis.isOrganicCertified ? 'Organic' : 'Conventional'}
               </div>
             </div>
-            <div className={`p-3 rounded-lg border ${
-              !result.chemicalAnalysis.hasArtificialIngredients ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'
+            
+            <div className={`p-3 rounded-lg text-center ${
+              !result.chemicalAnalysis.hasArtificialIngredients ? 'bg-green-50 border border-green-200' : 'bg-orange-50 border border-orange-200'
             }`}>
-              <div className="flex items-center">
-                <span className="text-xl mr-2">{!result.chemicalAnalysis.hasArtificialIngredients ? '✅' : '⚠️'}</span>
-                <span className={`font-medium ${!result.chemicalAnalysis.hasArtificialIngredients ? 'text-green-800' : 'text-orange-800'}`}>
-                  {!result.chemicalAnalysis.hasArtificialIngredients ? 'No Artificial Ingredients' : 'Contains Artificial Ingredients'}
-                </span>
+              <div className="text-lg mb-1">{!result.chemicalAnalysis.hasArtificialIngredients ? '✅' : '⚠️'}</div>
+              <div className="text-sm font-medium">
+                {!result.chemicalAnalysis.hasArtificialIngredients ? 'Natural' : 'Artificial'}
+              </div>
+            </div>
+
+            <div className={`p-3 rounded-lg text-center ${
+              result.chemicalAnalysis.harmfulChemicals.length === 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+            }`}>
+              <div className="text-lg mb-1">{result.chemicalAnalysis.harmfulChemicals.length === 0 ? '🛡️' : '⚠️'}</div>
+              <div className="text-sm font-medium">
+                {result.chemicalAnalysis.harmfulChemicals.length === 0 ? 'Safe' : `${result.chemicalAnalysis.harmfulChemicals.length} Concerns`}
               </div>
             </div>
           </div>
 
           {result.chemicalAnalysis.harmfulChemicals.length > 0 && (
-            <div className="mb-4">
-              <h4 className="font-semibold text-red-800 mb-2 flex items-center">
-                ⚠️ Harmful Chemicals Detected
-              </h4>
-              <div className="space-y-2">
-                {result.chemicalAnalysis.harmfulChemicals.map((chemical, index) => (
-                  <div key={index} className={`p-3 rounded-lg border ${
-                    chemical.riskLevel === 'SEVERE' ? 'bg-red-50 border-red-300' :
-                    chemical.riskLevel === 'HIGH' ? 'bg-red-50 border-red-200' :
-                    chemical.riskLevel === 'MEDIUM' ? 'bg-orange-50 border-orange-200' :
-                    'bg-yellow-50 border-yellow-200'
-                  }`}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-1">
-                          <span className="font-semibold text-gray-900">{chemical.name}</span>
-                          <span className={`ml-2 px-2 py-1 text-xs font-bold rounded ${
-                            chemical.riskLevel === 'SEVERE' ? 'bg-red-600 text-white' :
-                            chemical.riskLevel === 'HIGH' ? 'bg-red-500 text-white' :
-                            chemical.riskLevel === 'MEDIUM' ? 'bg-orange-500 text-white' :
-                            'bg-yellow-500 text-white'
-                          }`}>
-                            {chemical.riskLevel}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">{chemical.description}</p>
-                        <div className="text-xs text-gray-500">
-                          <strong>Health Effects:</strong> {chemical.healthEffects.join(', ')}
-                        </div>
-                      </div>
-                    </div>
+            <div className="space-y-2 mb-4">
+              <h4 className="font-medium text-red-800 text-sm">⚠️ Safety Concerns:</h4>
+              {result.chemicalAnalysis.harmfulChemicals.slice(0, 3).map((chemical, index) => (
+                <div key={index} className="bg-red-50 border border-red-200 p-2 rounded text-sm">
+                  <div className="flex justify-between items-start">
+                    <span className="font-medium">{chemical.name}</span>
+                    <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                      chemical.riskLevel === 'HIGH' || chemical.riskLevel === 'SEVERE' ? 'bg-red-600 text-white' : 'bg-orange-600 text-white'
+                    }`}>
+                      {chemical.riskLevel}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {result.chemicalAnalysis.additives.length > 0 && (
-            <div className="mb-4">
-              <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
-                🧬 Food Additives
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {result.chemicalAnalysis.additives.map((additive, index) => (
-                  <div key={index} className={`p-2 rounded border text-sm ${
-                    additive.safetyRating === 'AVOID' ? 'bg-red-50 border-red-200' :
-                    additive.safetyRating === 'CAUTION' ? 'bg-yellow-50 border-yellow-200' :
-                    'bg-green-50 border-green-200'
-                  }`}>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <span className="font-medium">{additive.name}</span>
-                        {additive.eNumber && <span className="text-gray-500 ml-1">({additive.eNumber})</span>}
-                        <div className="text-xs text-gray-600">{additive.type.replace(/_/g, ' ')}</div>
-                      </div>
-                      <span className={`px-1 py-0.5 text-xs font-bold rounded ${
-                        additive.safetyRating === 'AVOID' ? 'bg-red-600 text-white' :
-                        additive.safetyRating === 'CAUTION' ? 'bg-yellow-600 text-white' :
-                        'bg-green-600 text-white'
-                      }`}>
-                        {additive.safetyRating}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  <p className="text-xs text-gray-600 mt-1">{chemical.description}</p>
+                </div>
+              ))}
+              {result.chemicalAnalysis.harmfulChemicals.length > 3 && (
+                <p className="text-xs text-gray-500">+ {result.chemicalAnalysis.harmfulChemicals.length - 3} more concerns</p>
+              )}
             </div>
           )}
 
           {result.chemicalAnalysis.allergens.length > 0 && (
-            <div className="mb-4">
-              <h4 className="font-semibold text-purple-800 mb-2 flex items-center">
-                🚫 Allergen Warning
-              </h4>
-              <div className="space-y-2">
+            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
+              <h4 className="font-medium text-yellow-800 text-sm mb-2">🚫 Allergen Warning</h4>
+              <div className="flex flex-wrap gap-1">
                 {result.chemicalAnalysis.allergens.map((allergen, index) => (
-                  <div key={index} className={`p-3 rounded-lg border ${
-                    allergen.severity === 'SEVERE' ? 'bg-red-50 border-red-300' :
-                    allergen.severity === 'MODERATE' ? 'bg-orange-50 border-orange-200' :
-                    'bg-yellow-50 border-yellow-200'
-                  }`}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-gray-900">{allergen.name}</span>
-                      <span className={`px-2 py-1 text-xs font-bold rounded ${
-                        allergen.severity === 'SEVERE' ? 'bg-red-600 text-white' :
-                        allergen.severity === 'MODERATE' ? 'bg-orange-600 text-white' :
-                        'bg-yellow-600 text-white'
-                      }`}>
-                        {allergen.severity}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      <strong>Common Reactions:</strong> {allergen.commonReactions.join(', ')}
-                    </div>
-                  </div>
+                  <span key={index} className="bg-yellow-200 text-yellow-800 text-xs px-2 py-1 rounded">
+                    {allergen.name}
+                  </span>
                 ))}
               </div>
-            </div>
-          )}
-
-          {result.chemicalAnalysis.harmfulChemicals.length === 0 && 
-           result.chemicalAnalysis.additives.filter(a => a.safetyRating !== 'SAFE').length === 0 && 
-           result.chemicalAnalysis.allergens.length === 0 && (
-            <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-center">
-              <span className="text-4xl mb-2 block">✅</span>
-              <p className="font-semibold text-green-800">No harmful chemicals or major allergens detected!</p>
-              <p className="text-sm text-green-600 mt-1">This product appears to be safe for consumption.</p>
             </div>
           )}
         </div>
@@ -541,92 +495,45 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ result, onShare, produc
             <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
               result.tensorflowAnalysis.qualityAssessment.overallQuality >= 8 ? 'bg-green-100 text-green-800' :
               result.tensorflowAnalysis.qualityAssessment.overallQuality >= 6 ? 'bg-yellow-100 text-yellow-800' :
-              result.tensorflowAnalysis.qualityAssessment.overallQuality >= 4 ? 'bg-orange-100 text-orange-800' :
               'bg-red-100 text-red-800'
             }`}>
-              Quality: {result.tensorflowAnalysis.qualityAssessment.overallQuality}/10
+              {result.tensorflowAnalysis.qualityAssessment.overallQuality}/10
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-2">🔍 Food Type Detected</h4>
-              <div className="space-y-1">
-                <div className="text-sm">
-                  <span className="font-medium">Primary Type:</span> {result.tensorflowAnalysis.foodIdentification.primaryFoodType}
-                </div>
-                <div className="text-sm">
-                  <span className="font-medium">Confidence:</span> {Math.round(result.tensorflowAnalysis.foodIdentification.confidence * 100)}%
-                </div>
-                <div className="text-xs text-blue-600 mt-2">
-                  <strong>Top Predictions:</strong>
-                  <ul className="mt-1">
-                    {result.tensorflowAnalysis.foodIdentification.predictions.slice(0, 3).map((pred, i) => (
-                      <li key={i}>• {pred.className} ({Math.round(pred.probability * 100)}%)</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-              <h4 className="font-semibold text-purple-800 mb-2">📊 Enhanced Nutrition</h4>
-              <div className="space-y-1 text-sm">
-                <div><span className="font-medium">Calories:</span> {result.tensorflowAnalysis.nutritionalEstimation.estimatedCalories} kcal</div>
-                <div><span className="font-medium">Carbs:</span> {result.tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs}g</div>
-                <div><span className="font-medium">Protein:</span> {result.tensorflowAnalysis.nutritionalEstimation.macronutrients.protein}g</div>
-                <div><span className="font-medium">Fat:</span> {result.tensorflowAnalysis.nutritionalEstimation.macronutrients.fat}g</div>
-                <div><span className="font-medium">Fiber:</span> {result.tensorflowAnalysis.nutritionalEstimation.macronutrients.fiber}g</div>
-                <div className="text-xs text-purple-600 mt-2">
-                  Confidence: {Math.round(result.tensorflowAnalysis.nutritionalEstimation.confidenceLevel * 100)}%
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 text-center">
-              <div className="text-2xl mb-1">🍽️</div>
-              <div className="font-semibold text-orange-800">Portion Size</div>
-              <div className="text-sm text-orange-700">{result.tensorflowAnalysis.visualAnalysis.portionSize}</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 text-center">
+              <div className="text-lg mb-1">🍽️</div>
+              <div className="text-xs font-medium text-blue-800">Portion</div>
+              <div className="text-xs text-blue-700">{result.tensorflowAnalysis.visualAnalysis.portionSize}</div>
             </div>
             
             <div className="p-3 bg-green-50 rounded-lg border border-green-200 text-center">
-              <div className="text-2xl mb-1">🌿</div>
-              <div className="font-semibold text-green-800">Freshness</div>
-              <div className="text-sm text-green-700">{result.tensorflowAnalysis.visualAnalysis.freshnessScore}/10</div>
+              <div className="text-lg mb-1">�</div>
+              <div className="text-xs font-medium text-green-800">Freshness</div>
+              <div className="text-xs text-green-700">{result.tensorflowAnalysis.visualAnalysis.freshnessScore}/10</div>
             </div>
             
+            <div className="p-3 bg-purple-50 rounded-lg border border-purple-200 text-center">
+              <div className="text-lg mb-1">🔬</div>
+              <div className="text-xs font-medium text-purple-800">Processing</div>
+              <div className="text-xs text-purple-700">{result.tensorflowAnalysis.qualityAssessment.processingLevel}</div>
+            </div>
+
             <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-center">
-              <div className="text-2xl mb-1">👨‍🍳</div>
-              <div className="font-semibold text-amber-800">Cooking Method</div>
-              <div className="text-sm text-amber-700 capitalize">{result.tensorflowAnalysis.visualAnalysis.cookingMethod}</div>
+              <div className="text-lg mb-1">�</div>
+              <div className="text-xs font-medium text-amber-800">Confidence</div>
+              <div className="text-xs text-amber-700">{Math.round(result.tensorflowAnalysis.foodIdentification.confidence * 100)}%</div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <h4 className="font-semibold text-gray-800 mb-2">🔬 Processing Level</h4>
-              <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                result.tensorflowAnalysis.qualityAssessment.processingLevel === 'MINIMAL' ? 'bg-green-100 text-green-800' :
-                result.tensorflowAnalysis.qualityAssessment.processingLevel === 'MODERATE' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                {result.tensorflowAnalysis.qualityAssessment.processingLevel}
-              </div>
-              <div className="text-sm text-gray-600 mt-2">
-                Naturalness Score: {result.tensorflowAnalysis.qualityAssessment.naturalness}/10
-              </div>
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="text-sm">
+              <span className="font-medium text-gray-700">Detected as:</span> {result.tensorflowAnalysis.foodIdentification.primaryFoodType}
             </div>
-
-            {result.tensorflowAnalysis.visualAnalysis.colorAnalysis.length > 0 && (
-              <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-200">
-                <h4 className="font-semibold text-indigo-800 mb-2">🎨 Color Analysis</h4>
-                <div className="text-sm text-indigo-700">
-                  {result.tensorflowAnalysis.visualAnalysis.colorAnalysis.map((analysis, i) => (
-                    <div key={i}>• {analysis}</div>
-                  ))}
-                </div>
+            {result.tensorflowAnalysis.foodIdentification.predictions.length > 1 && (
+              <div className="text-xs text-gray-500 mt-1">
+                Also matches: {result.tensorflowAnalysis.foodIdentification.predictions.slice(1, 3).map(p => p.className).join(', ')}
               </div>
             )}
           </div>

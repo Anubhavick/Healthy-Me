@@ -28,14 +28,44 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       setError(null);
       setIsLoading(true);
 
-      // Get camera stream
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+      // Check if camera permissions are available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera not supported on this device');
+      }
+
+      // Get camera stream with fallback constraints
+      let mediaStream: MediaStream;
+      try {
+        // Try with preferred settings first
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 1280, min: 640 },
+            height: { ideal: 720, min: 480 }
+          }
+        });
+      } catch (backCameraError) {
+        console.warn('Back camera failed, trying front camera:', backCameraError);
+        try {
+          // Fallback to front camera
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'user',
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 }
+            }
+          });
+        } catch (frontCameraError) {
+          console.warn('Front camera failed, trying any camera:', frontCameraError);
+          // Final fallback - any available camera
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 }
+            }
+          });
         }
-      });
+      }
 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -43,64 +73,93 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         
         videoRef.current.onloadedmetadata = async () => {
           if (videoRef.current) {
-            videoRef.current.play();
-            
-            if (scanMode === '1D') {
-              // Initialize Quagga for 1D barcodes
-              try {
-                await barcodeService.initializeQuagga(videoRef.current);
-                setupQuaggaListeners();
-              } catch (err) {
-                console.error('Quagga initialization failed:', err);
-                setError('1D barcode scanner initialization failed. Switching to QR mode.');
-                setScanMode('QR');
+            try {
+              await videoRef.current.play();
+              
+              if (scanMode === '1D') {
+                // Initialize Quagga for 1D barcodes
+                try {
+                  await barcodeService.initializeQuagga(videoRef.current);
+                  // Setup listeners directly
+                  try {
+                    const Quagga = (await import('quagga')).default;
+                    Quagga.offDetected();
+                    Quagga.onDetected((result: any) => {
+                      console.log('Quagga detected barcode:', result.codeResult.code, 'format:', result.codeResult.format);
+                      const code = result.codeResult.code;
+                      if (code === lastScannedCode) {
+                        console.log('Duplicate barcode, skipping:', code);
+                        return;
+                      }
+                      if (barcodeService.isValidBarcode(code)) {
+                        console.log('Valid barcode detected:', code);
+                        setLastScannedCode(code);
+                        handleBarcodeDetected({
+                          code,
+                          format: result.codeResult.format,
+                          confidence: result.codeResult.confidence
+                        });
+                      } else {
+                        console.log('Invalid barcode format:', code);
+                      }
+                    });
+                    console.log('Quagga listeners setup complete');
+                  } catch (listenerError) {
+                    console.error('Error setting up Quagga listeners:', listenerError);
+                    throw listenerError;
+                  }
+                } catch (err) {
+                  console.error('Quagga initialization failed:', err);
+                  setError('1D barcode scanner initialization failed. Switching to QR mode.');
+                  setScanMode('QR');
+                }
               }
+              
+              setIsScanning(true);
+              setIsLoading(false);
+            } catch (playError) {
+              console.error('Video play failed:', playError);
+              setError('Failed to start camera. Please try again.');
+              setIsLoading(false);
             }
-            
-            setIsScanning(true);
-            setIsLoading(false);
           }
+        };
+        
+        // Add error handler for video element
+        videoRef.current.onerror = (e) => {
+          console.error('Video error:', e);
+          setError('Camera error occurred. Please try again.');
+          setIsLoading(false);
         };
       }
     } catch (err) {
-      setError('Camera access denied. Please allow camera permissions.');
+      console.error('Camera initialization error:', err);
+      setError('Camera access denied. Please allow camera permissions and try again.');
       setIsLoading(false);
     }
-  }, [scanMode]);
-
-  // Setup Quagga barcode detection listeners
-  const setupQuaggaListeners = useCallback(() => {
-    // Remove existing listeners
-    // @ts-ignore
-    Quagga.offDetected();
-    
-    // @ts-ignore
-    Quagga.onDetected((result) => {
-      const code = result.codeResult.code;
-      
-      // Avoid duplicate scans
-      if (code === lastScannedCode) return;
-      
-      if (barcodeService.isValidBarcode(code)) {
-        setLastScannedCode(code);
-        handleBarcodeDetected({
-          code,
-          format: result.codeResult.format,
-          confidence: result.codeResult.confidence
-        });
-      }
-    });
-  }, [lastScannedCode]);
+  }, [scanMode, lastScannedCode]);
 
   // Handle QR code scanning
   const scanForQRCode = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current) {
+      console.log('QR scan failed: missing video or canvas ref');
+      return;
+    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
-    if (!ctx) return;
+    if (!ctx) {
+      console.log('QR scan failed: no canvas context');
+      return;
+    }
+
+    // Check if video has dimensions
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      console.log('QR scan failed: video not ready', video.videoWidth, video.videoHeight);
+      return;
+    }
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -111,9 +170,12 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     if (imageData) {
       const qrResult = barcodeService.scanQRCode(imageData);
       if (qrResult && qrResult.code !== lastScannedCode) {
+        console.log('QR code detected:', qrResult.code);
         setLastScannedCode(qrResult.code);
         handleBarcodeDetected(qrResult);
       }
+    } else {
+      console.log('QR scan failed: no image data');
     }
   }, [lastScannedCode]);
 
@@ -122,21 +184,33 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     let interval: NodeJS.Timeout;
     
     if (isScanning && scanMode === 'QR') {
-      interval = setInterval(scanForQRCode, 500);
+      console.log('Starting QR scanning interval');
+      interval = setInterval(scanForQRCode, 200); // Increased frequency
     }
     
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) {
+        console.log('Stopping QR scanning interval');
+        clearInterval(interval);
+      }
     };
   }, [isScanning, scanMode, scanForQRCode]);
 
   // Handle barcode detection
   const handleBarcodeDetected = async (result: BarcodeResult) => {
     try {
+      console.log('Barcode detected:', result);
       setIsLoading(true);
       
       // Fetch product data from OpenFoodFacts
+      console.log('Fetching product data for:', result.code);
       const productData = await barcodeService.fetchProductData(result.code);
+      
+      if (productData) {
+        console.log('Product data found:', productData.product_name);
+      } else {
+        console.log('No product data found for barcode:', result.code);
+      }
       
       // Call parent callback
       onBarcodeDetected(result.code, productData);
@@ -144,6 +218,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       // Stop scanning after successful detection
       stopScanning();
     } catch (err) {
+      console.error('Error in handleBarcodeDetected:', err);
       setError('Failed to fetch product information');
       setIsLoading(false);
     }
@@ -300,9 +375,24 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
                 isDarkMode
                   ? 'bg-gray-600 text-white hover:bg-gray-500'
                   : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-              }`}
+              } disabled:bg-gray-400`}
             >
               {scanMode === '1D' ? 'QR' : '1D'}
+            </button>
+            
+            {/* Test button for known barcode */}
+            <button
+              onClick={() => {
+                // Test with a known Coca-Cola barcode
+                handleBarcodeDetected({
+                  code: '5449000000996',
+                  format: 'EAN-13'
+                });
+              }}
+              disabled={isLoading}
+              className="px-3 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 transition-colors text-sm"
+            >
+              Test
             </button>
           </div>
 

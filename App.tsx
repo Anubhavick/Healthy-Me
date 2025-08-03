@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Diet, AnalysisResult, Meal, UserProfile, MedicalCondition } from './types';
 import { analyzeImage } from './services/geminiService';
-import { ProductData } from './services/barcodeService';
+import { findBestFoodMatch } from './services/foodSearchService';
 import { ExportService } from './services/exportService';
 import ImageUploader from './components/ImageUploader';
 import DietSelector from './components/DietSelector';
@@ -52,76 +52,84 @@ const App: React.FC = () => {
 
   // Helper function to calculate health score
   const calculateHealthScore = (analysis: AnalysisResult): number => {
-    let score = 10; // Base score
+    // Start with the chemical safety score as the foundation (converted to 20-point scale)
+    let score = analysis.chemicalAnalysis ? 
+      Math.round((analysis.chemicalAnalysis.overallSafetyScore / 10) * 20) : 12;
     
-    // Calorie assessment
-    const calories = analysis.estimatedCalories;
-    if (calories <= 400) score += 3;
-    else if (calories <= 600) score += 4;
-    else if (calories <= 800) score += 2;
-    else score -= 2;
-    
-    // Ingredient quality
-    const ingredientCount = analysis.ingredients.length;
-    if (ingredientCount >= 5) score += 3;
-    else if (ingredientCount >= 3) score += 2;
-    else score += 1;
-    
-    // Diet compatibility
-    if (analysis.dietCompatibility.isCompatible) score += 3;
-    else score -= 1;
-    
-    // Medical safety
-    if (analysis.medicalAdvice?.isSafeForConditions) score += 2;
-    else score -= 2;
-    
-    // Chemical safety analysis
-    if (analysis.chemicalAnalysis) {
-      // Safety score contribution (0-2 points)
-      score += Math.floor(analysis.chemicalAnalysis.overallSafetyScore / 5);
-      
-      // Penalty for harmful chemicals
-      if (analysis.chemicalAnalysis.harmfulChemicals.length > 0) {
-        const severeChemicals = analysis.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'SEVERE');
-        const highRiskChemicals = analysis.chemicalAnalysis.harmfulChemicals.filter(c => c.riskLevel === 'HIGH');
-        score -= (severeChemicals.length * 3 + highRiskChemicals.length * 2);
-      }
-      
-      // Bonus for organic certification
-      if (analysis.chemicalAnalysis.isOrganicCertified) score += 2;
-      
-      // Penalty for artificial ingredients
-      if (analysis.chemicalAnalysis.hasArtificialIngredients) score -= 1;
-      
-      // Penalty for harmful additives
-      const harmfulAdditives = analysis.chemicalAnalysis.additives.filter(a => a.safetyRating === 'AVOID');
-      score -= harmfulAdditives.length;
+    // If no chemical analysis, start from middle
+    if (!analysis.chemicalAnalysis) {
+      score = 12;
     }
     
-    // TensorFlow analysis contribution
-    if (analysis.tensorflowAnalysis) {
-      // Quality bonus (0-3 points)
-      score += Math.floor(analysis.tensorflowAnalysis.qualityAssessment.overallQuality / 3);
+    // Calorie adjustment (max ±3 points)
+    const calories = analysis.estimatedCalories;
+    if (calories <= 300) score += 2;
+    else if (calories <= 500) score += 1;
+    else if (calories > 800) score -= 2;
+    else if (calories > 1200) score -= 3;
+    
+    // Diet compatibility 
+    const isCompatible = analysis.dietCompatibility.isCompatible;
+    if (isCompatible) score += 1;
+    else score -= 2;
+    
+    // Chemical safety penalties (this is crucial for health)
+    if (analysis.chemicalAnalysis) {
+      const harmfulChemicals = analysis.chemicalAnalysis.harmfulChemicals;
+      if (harmfulChemicals.length > 0) {
+        // Heavy penalty for harmful chemicals
+        const severeCount = harmfulChemicals.filter(c => c.riskLevel === 'SEVERE').length;
+        const highCount = harmfulChemicals.filter(c => c.riskLevel === 'HIGH').length;
+        const mediumCount = harmfulChemicals.filter(c => c.riskLevel === 'MEDIUM').length;
+        
+        score -= (severeCount * 4 + highCount * 3 + mediumCount * 1);
+      }
       
-      // Processing level adjustment
+      // Artificial ingredients penalty
+      if (analysis.chemicalAnalysis.hasArtificialIngredients) score -= 2;
+      
+      // Organic bonus
+      if (analysis.chemicalAnalysis.isOrganicCertified) score += 2;
+      
+      // Allergen penalties
+      if (analysis.chemicalAnalysis.allergens.length > 0) {
+        score -= analysis.chemicalAnalysis.allergens.length;
+      }
+    }
+    
+    // Processing level from TensorFlow
+    if (analysis.tensorflowAnalysis) {
       switch (analysis.tensorflowAnalysis.qualityAssessment.processingLevel) {
         case 'MINIMAL':
           score += 2;
           break;
+        case 'MODERATE':
+          // No change
+          break;
         case 'HIGHLY_PROCESSED':
-          score -= 2;
+          score -= 3;
           break;
       }
       
-      // Freshness and naturalness bonus
-      if (analysis.tensorflowAnalysis.visualAnalysis.freshnessScore >= 8) score += 1;
-      if (analysis.tensorflowAnalysis.qualityAssessment.naturalness >= 8) score += 1;
-      
-      // Portion size consideration
-      if (analysis.tensorflowAnalysis.visualAnalysis.portionSize === 'EXTRA_LARGE') score -= 1;
+      // Quality bonus
+      const quality = analysis.tensorflowAnalysis.qualityAssessment.overallQuality;
+      if (quality >= 8) score += 1;
+      else if (quality <= 4) score -= 1;
     }
     
-    return Math.max(1, Math.min(20, score));
+    // Ensure score stays within bounds and reflects chemical safety
+    const finalScore = Math.max(1, Math.min(20, Math.round(score)));
+    
+    // Additional check: if chemical safety is very low, cap the max score
+    if (analysis.chemicalAnalysis && analysis.chemicalAnalysis.overallSafetyScore <= 5) {
+      return Math.min(finalScore, 10); // Cap at 10 if safety is very poor
+    }
+    
+    if (analysis.chemicalAnalysis && analysis.chemicalAnalysis.overallSafetyScore <= 7) {
+      return Math.min(finalScore, 14); // Cap at 14 if safety is poor
+    }
+    
+    return finalScore;
   };
 
   useEffect(() => {
@@ -170,11 +178,30 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setIsModelLoading(true);
-    setProductDisplayData(null); // Clear barcode product data for photo analysis
+    setProductDisplayData(null);
 
     try {
       const result = await analyzeImage(image, userProfile);
       setAnalysisResult(result);
+      
+      // Try to find OpenFoodFacts match for additional context
+      try {
+        const foodMatch = await findBestFoodMatch(result.dishName, result.ingredients);
+        if (foodMatch && foodMatch.nutritionGrade && foodMatch.nutritionGrade !== 'unknown') {
+          console.log('Found OpenFoodFacts match:', foodMatch.productName);
+          setProductDisplayData({
+            productName: foodMatch.productName,
+            brands: foodMatch.brands,
+            imageUrl: foodMatch.imageUrl,
+            nutritionGrade: foodMatch.nutritionGrade,
+            categories: foodMatch.categories,
+            isBarcode: false, // This is from text search, not barcode
+            foodSearchData: foodMatch
+          });
+        }
+      } catch (searchError) {
+        console.log('No OpenFoodFacts match found, using AI analysis only');
+      }
       
       // Calculate health score
       const healthScore = calculateHealthScore(result);
@@ -227,133 +254,6 @@ const App: React.FC = () => {
         return 'compatible';
     }
   };
-
-  // Helper function to generate recommendations
-  const generateRecommendations = (productData: ProductData, diet: Diet): string[] => {
-    const recommendations = [];
-    
-    if (productData.nutrition_grades && ['d', 'e'].includes(productData.nutrition_grades)) {
-      recommendations.push('Consider healthier alternatives with better nutritional profiles');
-    }
-    
-    if (productData.nutriments?.sugars_100g && productData.nutriments.sugars_100g > 15) {
-      recommendations.push('High sugar content - consume in moderation');
-    }
-    
-    if (productData.nutriments?.sodium_100g && productData.nutriments.sodium_100g > 0.6) {
-      recommendations.push('High sodium content - be mindful of daily intake');
-    }
-    
-    const compatibility = checkDietCompatibility(productData.ingredients_text || '', diet);
-    if (compatibility === 'incompatible') {
-      recommendations.push(`Not compatible with ${diet} diet`);
-    }
-    
-    return recommendations;
-  };
-
-  // Helper function to generate medical considerations
-  const generateMedicalConsiderations = (productData: ProductData, conditions: MedicalCondition[]): string[] => {
-    const considerations = [];
-    
-    conditions.forEach(condition => {
-      switch (condition) {
-        case MedicalCondition.Diabetes:
-          if (productData.nutriments?.sugars_100g && productData.nutriments.sugars_100g > 10) {
-            considerations.push('High sugar content - monitor blood glucose levels');
-          }
-          break;
-        case MedicalCondition.Hypertension:
-          if (productData.nutriments?.sodium_100g && productData.nutriments.sodium_100g > 0.4) {
-            considerations.push('High sodium content - may affect blood pressure');
-          }
-          break;
-        case MedicalCondition.HeartDisease:
-          if (productData.nutriments?.fat_100g && productData.nutriments.fat_100g > 20) {
-            considerations.push('High fat content - consider heart-healthy alternatives');
-          }
-          break;
-        case MedicalCondition.Cholesterol:
-          if (productData.nutriments?.['saturated-fat_100g'] && productData.nutriments['saturated-fat_100g'] > 5) {
-            considerations.push('High saturated fat - may affect cholesterol levels');
-          }
-          break;
-      }
-    });
-    
-    return considerations;
-  };
-
-  // Handle barcode detection
-  const handleBarcodeDetection = useCallback(async (productData: ProductData) => {
-    if (!userProfile) return;
-
-    setIsLoading(true);
-    setError(null);
-    setIsModelLoading(true);
-
-    try {
-      // Convert ProductData to AnalysisResult format
-      const result: AnalysisResult = {
-        dishName: productData.product_name || productData.product_name_en || 'Unknown Product',
-        estimatedCalories: Math.round((productData.nutriments?.energy_100g || 0) / 4.184), // Convert kJ to kcal
-        ingredients: productData.ingredients_text ? productData.ingredients_text.split(',').map(i => i.trim()) : [],
-        dietCompatibility: {
-          isCompatible: checkDietCompatibility(productData.ingredients_text || '', userProfile.diet) === 'compatible',
-          reason: checkDietCompatibility(productData.ingredients_text || '', userProfile.diet) === 'compatible' 
-            ? `Compatible with ${userProfile.diet} diet` 
-            : `Not compatible with ${userProfile.diet} diet - check ingredients`
-        },
-        healthTips: generateRecommendations(productData, userProfile.diet),
-        nutritionalBreakdown: {
-          carbs: productData.nutriments?.carbohydrates_100g || 0,
-          protein: productData.nutriments?.proteins_100g || 0,
-          fat: productData.nutriments?.fat_100g || 0,
-          fiber: productData.nutriments?.fiber_100g || 0,
-          sugar: productData.nutriments?.sugars_100g || 0,
-          sodium: productData.nutriments?.sodium_100g || 0
-        },
-        medicalAdvice: {
-          isSafeForConditions: generateMedicalConsiderations(productData, userProfile.medicalConditions).length === 0,
-          warnings: generateMedicalConsiderations(productData, userProfile.medicalConditions),
-          recommendations: generateRecommendations(productData, userProfile.diet)
-        }
-      };
-
-      // Set product display data for enhanced UI
-      setProductDisplayData({
-        productName: productData.product_name || productData.product_name_en,
-        brands: productData.brands,
-        imageUrl: productData.image_front_url || productData.image_url,
-        nutritionGrade: productData.nutriscore_grade,
-        categories: productData.categories,
-        isBarcode: true,
-        barcodeData: productData
-      });
-
-      setAnalysisResult(result);
-      
-      // Calculate health score
-      const healthScore = calculateHealthScore(result);
-      
-      const newMeal: Meal = {
-        id: Date.now().toString(),
-        timestamp: new Date().toISOString(),
-        imageDataUrl: productData.image_front_url || productData.image_url || '/artpicture.png',
-        analysis: result,
-        healthScore
-      };
-      
-      const updatedHistory = [newMeal, ...mealHistory];
-      setMealHistory(updatedHistory);
-      localStorage.setItem('mealHistory', JSON.stringify(updatedHistory));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred processing product data');
-    } finally {
-      setIsLoading(false);
-      setIsModelLoading(false);
-    }
-  }, [userProfile, mealHistory]);
 
   const handleDeleteMeal = (mealId: string) => {
     const updatedHistory = mealHistory.filter(meal => meal.id !== mealId);
@@ -860,13 +760,12 @@ const App: React.FC = () => {
               <div className="text-center">
                 <h2 className={`text-lg sm:text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Scan Your Food</h2>
                 <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>
-                  📷 Take a photo for fresh food analysis or 📊 scan barcode for packaged products
+                  📷 Take a photo for AI-powered nutrition analysis with health insights
                 </p>
               </div>
               <ImageUploader 
                 onImageUpload={handleImageUpload} 
                 imagePreviewUrl={image}
-                onBarcodeDetected={handleBarcodeDetection}
               />
               
               <div className="text-center">

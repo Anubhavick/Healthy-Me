@@ -2,19 +2,15 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { CameraIcon } from './icons';
 import DarkModeIcon from './DarkModeIcon';
-import BarcodeScanner from './BarcodeScanner';
-import { ProductData } from '../services/barcodeService';
 
 interface ImageUploaderProps {
   onImageUpload: (dataUrl: string) => void;
-  onBarcodeDetected?: (productData: ProductData) => void;
   imagePreviewUrl: string | null;
   isDarkMode?: boolean;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ 
   onImageUpload, 
-  onBarcodeDetected, 
   imagePreviewUrl, 
   isDarkMode = false 
 }) => {
@@ -22,10 +18,41 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCamera, setIsCamera] = useState(false);
-  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+
+  // Effect to handle video stream assignment
+  useEffect(() => {
+    if (stream && videoRef.current && isCamera) {
+      console.log('Effect: Assigning stream to video element');
+      const video = videoRef.current;
+      
+      // Clear existing source
+      video.srcObject = null;
+      
+      // Set new source
+      video.srcObject = stream;
+      
+      // Force load and play
+      video.load();
+      
+      const playVideo = async () => {
+        try {
+          await video.play();
+          console.log('Effect: Video playing successfully');
+        } catch (err) {
+          console.error('Effect: Video play failed:', err);
+        }
+      };
+      
+      if (video.readyState >= 1) {
+        playVideo();
+      } else {
+        video.addEventListener('loadedmetadata', playVideo, { once: true });
+      }
+    }
+  }, [stream, isCamera]);
 
   // Cleanup camera stream on component unmount
   useEffect(() => {
@@ -75,8 +102,64 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       setIsCamera(true);
       
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        console.log('Video stream assigned to video element');
+        // Clear any existing source first
+        videoRef.current.srcObject = null;
+        
+        // Wait a bit then assign new stream
+        setTimeout(() => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = mediaStream;
+            console.log('Video stream assigned to video element');
+            
+            // Force video element to load
+            videoRef.current.load();
+            
+            // Add multiple event listeners for better compatibility
+            videoRef.current.onloadedmetadata = () => {
+              console.log('Video metadata loaded');
+              if (videoRef.current) {
+                console.log('Video dimensions:', videoRef.current.videoWidth, 'x', videoRef.current.videoHeight);
+                videoRef.current.play().then(() => {
+                  console.log('Video playback started successfully');
+                }).catch(err => {
+                  console.error('Video play failed:', err);
+                  setError('Failed to start video playback. Please try again.');
+                });
+              }
+            };
+            
+            videoRef.current.oncanplay = () => {
+              console.log('Video can start playing');
+              if (videoRef.current && videoRef.current.paused) {
+                videoRef.current.play().catch(console.error);
+              }
+            };
+            
+            videoRef.current.onplaying = () => {
+              console.log('Video is now playing');
+            };
+            
+            videoRef.current.onerror = (e) => {
+              console.error('Video error:', e);
+              setError('Video error occurred. Please try again.');
+            };
+            
+            // Multiple fallback attempts
+            setTimeout(() => {
+              if (videoRef.current && videoRef.current.readyState >= 2) {
+                console.log('Fallback play attempt 1');
+                videoRef.current.play().catch(console.error);
+              }
+            }, 100);
+            
+            setTimeout(() => {
+              if (videoRef.current && videoRef.current.paused && videoRef.current.readyState >= 1) {
+                console.log('Fallback play attempt 2');
+                videoRef.current.play().catch(console.error);
+              }
+            }, 500);
+          }
+        }, 50);
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -145,13 +228,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     stopCamera();
   }, [onImageUpload, stopCamera]);
 
-  const handleBarcodeDetected = (barcode: string, productData: ProductData | null) => {
-    if (onBarcodeDetected && productData) {
-      onBarcodeDetected(productData);
-    }
-    setShowBarcodeScanner(false);
-  };
-
   return (
     <div className="w-full">
       <input
@@ -173,8 +249,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             <video
               ref={videoRef}
               autoPlay
+              muted
               playsInline
-              className="w-full h-full object-cover"
+              controls={false}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover',
+                backgroundColor: 'black'
+              }}
             />
             {error && (
               <div className="absolute inset-0 bg-red-100 flex items-center justify-center">
@@ -200,6 +283,32 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               className="px-3 sm:px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold transition-all duration-200 active:scale-95 text-sm sm:text-base"
             >
               Flip
+            </button>
+            
+            <button
+              onClick={() => {
+                console.log('Manual video refresh triggered');
+                if (videoRef.current && stream) {
+                  console.log('Current video state:', {
+                    readyState: videoRef.current.readyState,
+                    paused: videoRef.current.paused,
+                    videoWidth: videoRef.current.videoWidth,
+                    videoHeight: videoRef.current.videoHeight
+                  });
+                  videoRef.current.srcObject = null;
+                  setTimeout(() => {
+                    if (videoRef.current) {
+                      videoRef.current.srcObject = stream;
+                      videoRef.current.load();
+                      videoRef.current.play().catch(console.error);
+                    }
+                  }, 100);
+                }
+              }}
+              disabled={!stream}
+              className="px-2 sm:px-3 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold transition-all duration-200 active:scale-95 text-xs sm:text-sm"
+            >
+              Refresh
             </button>
             
             <button
@@ -244,17 +353,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               <CameraIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="text-sm sm:text-base">Use Camera</span>
             </button>
-            {onBarcodeDetected && (
-              <button
-                onClick={() => setShowBarcodeScanner(true)}
-                className="px-4 sm:px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold flex items-center justify-center gap-2 transition-all duration-200 active:scale-95"
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 5v4h2V7h2V5H3zm2 10H3v4h4v-2H5v-2zm14 4v-2h-2v4h4v-2h-2zM19 5h-2v2h2v2h2V5h-4zM7 17h10v2H7v-2zm0-4h10v2H7v-2zm0-4h10v2H7V9z"/>
-                </svg>
-                <span className="text-sm sm:text-base">Scan Barcode</span>
-              </button>
-            )}
           </div>
           
           {/* Debug info */}
@@ -271,15 +369,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             )}
           </div>
         </div>
-      )}
-
-      {/* Barcode Scanner Modal */}
-      {showBarcodeScanner && onBarcodeDetected && (
-        <BarcodeScanner
-          onBarcodeDetected={handleBarcodeDetected}
-          onClose={() => setShowBarcodeScanner(false)}
-          isDarkMode={isDarkMode}
-        />
       )}
     </div>
   );

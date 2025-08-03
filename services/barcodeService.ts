@@ -210,7 +210,7 @@ export class BarcodeService {
     const nutriments = product.nutriments || {};
     
     return {
-      estimatedCalories: Math.round(nutriments.energy_100g || 0),
+      estimatedCalories: Math.round((nutriments.energy_100g || 0) / 4.184), // Convert kJ to kcal
       macronutrients: {
         carbs: Math.round((nutriments.carbohydrates_100g || 0) * 10) / 10,
         protein: Math.round((nutriments.proteins_100g || 0) * 10) / 10,
@@ -218,7 +218,7 @@ export class BarcodeService {
         fiber: Math.round((nutriments.fiber_100g || 0) * 10) / 10,
         sugar: Math.round((nutriments.sugars_100g || 0) * 10) / 10,
         saturatedFat: Math.round((nutriments['saturated-fat_100g'] || 0) * 10) / 10,
-        sodium: Math.round((nutriments.sodium_100g || 0) * 1000) / 1000 // Convert to mg
+        sodium: Math.round((nutriments.sodium_100g || 0) * 1000) / 1000 // Keep in grams, not mg
       },
       servingSize: "per 100g",
       nutritionGrade: product.nutriscore_grade || 'unknown'

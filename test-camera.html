@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 20px auto;
+            background: black;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        canvas {
+            display: none;
+        }
+        .captured-image {
+            max-width: 100%;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Camera Test</h1>
+    
+    <div class="status" id="status">Status: Ready</div>
+    
+    <div class="camera-container">
+        <video id="video" autoplay muted playsinline></video>
+    </div>
+    
+    <div>
+        <button onclick="startCamera()" id="startBtn">Start Camera</button>
+        <button onclick="stopCamera()" id="stopBtn" disabled>Stop Camera</button>
+        <button onclick="switchCamera()" id="switchBtn" disabled>Switch Camera</button>
+        <button onclick="capturePhoto()" id="captureBtn" disabled>Capture Photo</button>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+    <img id="capturedImage" class="captured-image" style="display: none;" />
+
+    <script>
+        let stream = null;
+        let facingMode = 'environment'; // start with back camera
+        
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const status = document.getElementById('status');
+        const capturedImage = document.getElementById('capturedImage');
+        
+        function updateStatus(message) {
+            console.log(message);
+            status.textContent = message;
+        }
+        
+        function updateButtons(cameraRunning) {
+            document.getElementById('startBtn').disabled = cameraRunning;
+            document.getElementById('stopBtn').disabled = !cameraRunning;
+            document.getElementById('switchBtn').disabled = !cameraRunning;
+            document.getElementById('captureBtn').disabled = !cameraRunning;
+        }
+        
+        async function startCamera() {
+            try {
+                updateStatus('Requesting camera access...');
+                
+                // Check if getUserMedia is supported
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('getUserMedia is not supported');
+                }
+                
+                // Stop existing stream if any
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                
+                const constraints = {
+                    video: {
+                        facingMode: facingMode,
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 }
+                    }
+                };
+                
+                updateStatus(`Requesting camera with facingMode: ${facingMode}`);
+                
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (err) {
+                    updateStatus(`Failed with ${facingMode}, trying fallback...`);
+                    // Fallback to any available camera
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 1280, min: 640 },
+                            height: { ideal: 720, min: 480 }
+                        }
+                    });
+                }
+                
+                updateStatus('Camera access granted, setting up video...');
+                
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    updateStatus(`Video metadata loaded. Dimensions: ${video.videoWidth}x${video.videoHeight}`);
+                    video.play().then(() => {
+                        updateStatus(`Video playing successfully. Current time: ${video.currentTime}`);
+                        updateButtons(true);
+                    }).catch(err => {
+                        updateStatus(`Video play failed: ${err.message}`);
+                    });
+                };
+                
+                video.oncanplay = () => {
+                    updateStatus('Video can play');
+                };
+                
+                video.onplaying = () => {
+                    updateStatus('Video is playing');
+                };
+                
+                video.onerror = (e) => {
+                    updateStatus(`Video error: ${e.message || 'Unknown error'}`);
+                };
+                
+                // Additional fallback
+                setTimeout(() => {
+                    if (video.readyState >= 2 && video.paused) {
+                        updateStatus('Attempting fallback play...');
+                        video.play().catch(err => {
+                            updateStatus(`Fallback play failed: ${err.message}`);
+                        });
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                updateStatus(`Camera error: ${error.message}`);
+                updateButtons(false);
+            }
+        }
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                    updateStatus(`Stopped track: ${track.kind}`);
+                });
+                stream = null;
+                video.srcObject = null;
+                updateStatus('Camera stopped');
+                updateButtons(false);
+            }
+        }
+        
+        async function switchCamera() {
+            facingMode = facingMode === 'environment' ? 'user' : 'environment';
+            updateStatus(`Switching to ${facingMode} camera...`);
+            await startCamera();
+        }
+        
+        function capturePhoto() {
+            if (!stream || !video.videoWidth || !video.videoHeight) {
+                updateStatus('Cannot capture: video not ready');
+                return;
+            }
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            ctx.drawImage(video, 0, 0);
+            
+            const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+            capturedImage.src = dataURL;
+            capturedImage.style.display = 'block';
+            
+            updateStatus(`Photo captured: ${canvas.width}x${canvas.height}`);
+        }
+        
+        // Check camera permissions on load
+        navigator.permissions.query({name: 'camera'}).then(result => {
+            updateStatus(`Camera permission: ${result.state}`);
+        }).catch(err => {
+            updateStatus(`Permission check failed: ${err.message}`);
+        });
+        
+        // List available cameras
+        navigator.mediaDevices.enumerateDevices().then(devices => {
+            const cameras = devices.filter(device => device.kind === 'videoinput');
+            updateStatus(`Available cameras: ${cameras.length}`);
+            cameras.forEach((camera, index) => {
+                updateStatus(`Camera ${index}: ${camera.label || 'Unknown'}`);
+            });
+        }).catch(err => {
+            updateStatus(`Device enumeration failed: ${err.message}`);
+        });
+    </script>
+</body>
+</html>
