@@ -17,11 +17,11 @@ const StreakGoals: React.FC<StreakGoalsProps> = ({ userProfile, onGoalsUpdate, o
   };
 
   const getStreakMessage = (streak: number) => {
-    if (streak === 0) return "Start your healthy eating journey today! 🌱";
-    if (streak === 1) return "Great start! Keep the momentum going! 💪";
-    if (streak < 7) return `${streak} days strong! You're building a habit! 🔥`;
-    if (streak < 30) return `${streak} days streak! You're doing amazing! ⭐`;
-    return `${streak} days streak! You're a nutrition champion! 🏆`;
+    if (streak === 0) return "Start your healthy eating journey today! ";
+    if (streak === 1) return "Great start! Keep the momentum going! ";
+    if (streak < 7) return `${streak} days strong! You're building a habit! `;
+    if (streak < 30) return `${streak} days streak! You're doing amazing! `;
+    return `${streak} days streak! You're a nutrition champion! `;
   };
 
   const getStreakEmoji = (streak: number) => {

@@ -151,24 +151,37 @@ Analysis requirements:
 1. Identify food name precisely
 2. Estimate calories based on visible portion size
 3. List ALL visible ingredients from packaging (if packaged food)
-4. Calculate health score (1-10) based on:
+4. MANDATORY CHEMICAL ANALYSIS: Scan for ALL chemicals, preservatives, additives, artificial ingredients
+5. Calculate health score (1-10) based on:
    - Nutritional density: protein, fiber, vitamins (high=better)
    - Processing level: minimal=10, moderate=6-7, highly processed=1-4
-   - Chemical safety: preservatives, artificial additives, harmful compounds
+   - Chemical safety: preservatives, artificial additives, harmful compounds (CRITICAL FACTOR)
    - Medical compatibility with user's conditions
 
-For packaged foods:
-- Read ingredient labels carefully
-- Identify preservatives, artificial colors, high sodium
-- Check for allergens and harmful chemicals
-- Assess processing level from ingredient complexity
+For packaged foods - CRITICAL CHEMICAL SCANNING:
+- Read ALL ingredient labels word-by-word
+- Identify ALL preservatives (E200-E400 series): BHA, BHT, sodium benzoate, potassium sorbate
+- Find ALL artificial colors (E100-E199): Red 40, Yellow 6, Blue 1, tartrazine
+- Detect ALL flavor enhancers: MSG, disodium inosinate, disodium guanylate
+- Spot ALL emulsifiers and stabilizers: lecithin, carrageenan, xanthan gum
+- Find ALL artificial sweeteners: aspartame, sucralose, acesulfame K
+- Check for harmful chemicals: trans fats, high fructose corn syrup, nitrates/nitrites
+- Assess EVERY E-number and chemical compound for safety
+- Note any cancer-linked, hormone-disrupting, or toxic substances
 
-Health Score Guidelines:
-- 9-10: Whole foods, minimal processing, high nutrients
-- 7-8: Good nutrition, some processing acceptable
-- 5-6: Moderate nutrition, noticeable processing
-- 3-4: Poor nutrition, heavily processed
-- 1-2: Harmful ingredients, very poor nutrition
+Chemical Analysis Requirements:
+- Rate EVERY chemical found (SAFE/CAUTION/AVOID)
+- List health effects for harmful chemicals
+- Calculate chemical safety score (1-10) - heavily weight this in final health score
+- If multiple harmful chemicals present, significantly lower health score (max 4/10)
+- Natural, organic foods with no additives = higher scores
+
+Health Score Guidelines (Chemical-Weighted):
+- 9-10: Whole foods, no harmful chemicals, minimal processing, high nutrients
+- 7-8: Good nutrition, minor safe additives only
+- 5-6: Moderate nutrition, some concerning chemicals
+- 3-4: Poor nutrition, multiple harmful chemicals (MSG, artificial colors, preservatives)
+- 1-2: Very harmful ingredients, toxic chemicals, cancer-linked substances
 
 Respond with precise JSON only.`;
 

@@ -13,11 +13,9 @@ import MealHistoryModal from './components/MealHistoryModal';
 import GoalsStreaksModal from './components/GoalsStreaksModal';
 import ShareCardGenerator from './components/ShareCardGenerator';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
-import FirebaseSync from './components/FirebaseSync';
-import AIServicesStatus from './components/AIServicesStatus';
 import AuthModal from './components/AuthModal';
 import BMICalculator from './components/BMICalculator';
-import MedicalConditionsSelector from './components/MedicalConditionsSelector';
+import MedicalConditionsModal from './components/MedicalConditionsDropdown';
 import StreakGoals from './components/StreakGoals';
 import ProfileDropdown from './components/ProfileDropdown';
 import SettingsModal from './components/SettingsModal';
@@ -30,7 +28,7 @@ import ChatBot from './components/ChatBot';
 const App: React.FC = () => {
   const [showLandingPage, setShowLandingPage] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const [showAuthModal, setShowAuthModal] = useState<boolean | 'modal'>(false);
   const [showProfileSetup, setShowProfileSetup] = useState<boolean>(false);
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState<boolean>(false);
@@ -225,17 +223,6 @@ const App: React.FC = () => {
     }
   };
 
-  const handleConditionsUpdate = (conditions: MedicalCondition[], customCondition?: string) => {
-    if (userProfile) {
-      const updatedProfile = { 
-        ...userProfile, 
-        medicalConditions: conditions,
-        customCondition 
-      };
-      handleProfileUpdate(updatedProfile);
-    }
-  };
-
   const handleGoalsUpdate = (goals: UserProfile['goals']) => {
     if (userProfile) {
       const updatedProfile = { ...userProfile, goals };
@@ -352,8 +339,8 @@ const App: React.FC = () => {
     );
   }
 
-  // Show authentication modal if not logged in
-  if (!isAuthenticated) {
+  // Show authentication page if user clicked "Get Started"
+  if (showAuthModal === true && !isAuthenticated) {
     return (
       <div className={`min-h-screen transition-all duration-500 ${
         isDarkMode 
@@ -387,15 +374,21 @@ const App: React.FC = () => {
           
           <div className="flex items-center space-x-3 sm:space-x-6">
             <button 
-              onClick={() => setShowLandingPage(true)}
-              className={`transition-colors duration-200 font-medium text-sm sm:text-base ${
+              onClick={() => {
+                setShowAuthModal(false);
+                setShowLandingPage(true);
+              }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 font-medium text-sm sm:text-base backdrop-blur-sm ${
                 isDarkMode 
-                  ? 'text-white/80 hover:text-white' 
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+                  ? 'bg-white/10 text-white/90 hover:bg-white/20 hover:text-white border border-white/20' 
+                  : 'bg-blue-50/80 text-blue-700 hover:bg-blue-100/80 hover:text-blue-800 border border-blue-200/50'
+              } shadow-lg hover:shadow-xl hover:scale-105 active:scale-95`}
             >
-              <span className="hidden sm:inline">← Back to Home</span>
-              <span className="sm:hidden">← Home</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span className="hidden sm:inline">Back to Home</span>
+              <span className="sm:hidden">Home</span>
             </button>
             <button
               onClick={handleDarkModeToggle}
@@ -473,7 +466,10 @@ const App: React.FC = () => {
           {/* Action buttons - Enhanced theme */}
           <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
             <button
-              onClick={() => setShowAuthModal(true)}
+              onClick={() => {
+                // This will show the actual login modal (image 2)
+                setShowAuthModal('modal');
+              }}
               className={`w-full backdrop-blur-sm border font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-full transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center group ${
                 isDarkMode 
                   ? 'bg-white/20 border-white/30 text-white hover:bg-white/30' 
@@ -554,6 +550,25 @@ const App: React.FC = () => {
     );
   }
 
+  // Show actual login modal when user clicks "Sign In"
+  if (showAuthModal === 'modal' && !isAuthenticated) {
+    return (
+      <div className={`min-h-screen transition-all duration-500 ${
+        isDarkMode 
+          ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' 
+          : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100'
+      }`}>
+        <AuthModal 
+          onClose={() => {
+            setShowAuthModal(true); // Go back to auth page, not landing
+          }}
+          onAuthSuccess={handleAuthSuccess}
+          isDarkMode={isDarkMode}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen transition-all duration-500 relative overflow-hidden ${
       isDarkMode 
@@ -605,6 +620,25 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            {/* Home Button */}
+            <button 
+              onClick={() => {
+                setShowAuthModal(false);
+                setShowLandingPage(true);
+              }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 font-medium text-sm backdrop-blur-sm ${
+                isDarkMode 
+                  ? 'bg-white/10 text-white/90 hover:bg-white/20 hover:text-white border border-white/20 hover:border-white/30' 
+                  : 'bg-blue-50/80 text-blue-700 hover:bg-blue-100/80 hover:text-blue-800 border border-blue-200/50 hover:border-blue-300/60'
+              } shadow-lg hover:shadow-xl hover:scale-105 active:scale-95`}
+              title="Back to Home"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span className="hidden sm:inline">Home</span>
+            </button>
+            
             <ProfileDropdown
               user={user}
               userProfile={userProfile}
@@ -643,17 +677,38 @@ const App: React.FC = () => {
                 imagePreviewUrl={image}
               />
               
-              <div className="text-center">
-                <h3 className={`text-base sm:text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Select Your Diet</h3>
-                <DietSelector 
-                  selectedDiet={userProfile?.diet || Diet.None} 
-                  onDietChange={(newDiet) => {
-                    setDiet(newDiet);
-                    if (userProfile) {
-                      setUserProfile({...userProfile, diet: newDiet});
-                    }
-                  }} 
-                />
+              <div className="space-y-4">
+                <div>
+                  <h3 className={`text-base sm:text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Select Your Diet</h3>
+                  <DietSelector 
+                    selectedDiet={userProfile?.diet || Diet.None} 
+                    onDietChange={(newDiet) => {
+                      setDiet(newDiet);
+                      if (userProfile) {
+                        setUserProfile({...userProfile, diet: newDiet});
+                      }
+                    }} 
+                  />
+                </div>
+                
+                <div>
+                  <MedicalConditionsModal
+                    selectedConditions={userProfile?.medicalConditions || [MedicalCondition.None]}
+                    customCondition={userProfile?.customCondition}
+                    onConditionsChange={(conditions, customCondition) => {
+                      if (userProfile) {
+                        const updatedProfile = { 
+                          ...userProfile, 
+                          medicalConditions: conditions,
+                          customCondition 
+                        };
+                        setUserProfile(updatedProfile);
+                        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+                      }
+                    }}
+                    isDarkMode={isDarkMode}
+                  />
+                </div>
               </div>
 
               <button
@@ -672,7 +727,6 @@ const App: React.FC = () => {
                   </>
                 ) : (
                    <>
-                    <SparklesIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3"/>
                     Analyze Food
                    </>
                 )}
@@ -735,7 +789,7 @@ const App: React.FC = () => {
 
         </div>
 
-        {/* Health Profile Setup Section - Glass morphism style */}
+        {/* BMI Calculator Section - Glass morphism style */}
         <div className={`backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border overflow-hidden ${
           isDarkMode 
             ? 'bg-white/10 border-white/20' 
@@ -747,22 +801,17 @@ const App: React.FC = () => {
               : 'bg-blue-50/50 border-blue-200/50'
           }`}>
             <div className="text-center">
-              <h2 className={`text-lg sm:text-2xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Health Profile Setup</h2>
-              <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Personalize your experience with BMI calculation and health conditions</p>
+              <h2 className={`text-lg sm:text-2xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>BMI Health Calculator</h2>
+              <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-white/80' : 'text-gray-600'}`}>Calculate your Body Mass Index with AI health advice</p>
             </div>
           </div>
           
           {/* Profile Content */}
           <div className="p-4 sm:p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div className="flex justify-center">
               <BMICalculator
                 userProfile={userProfile}
                 onBMIUpdate={handleBMIUpdate}
-                isDarkMode={isDarkMode}
-              />
-              <MedicalConditionsSelector
-                selectedConditions={userProfile?.medicalConditions || []}
-                onConditionsChange={handleConditionsUpdate}
                 isDarkMode={isDarkMode}
               />
             </div>
@@ -857,15 +906,6 @@ const App: React.FC = () => {
             setShowShareCard(false);
             setMealToShare(null);
           }}
-        />
-      )}
-
-      {/* Auth Modal - shown from landing page or auth flow */}
-      {showAuthModal && (
-        <AuthModal 
-          onClose={() => setShowAuthModal(false)}
-          onAuthSuccess={handleAuthSuccess}
-          isDarkMode={isDarkMode}
         />
       )}
 

@@ -66,131 +66,293 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate,
   };
 
   return (
-    <div className={`${isDarkMode ? 'bg-gradient-to-br from-blue-900/30 to-indigo-900/30 border-blue-700' : 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100'} p-6 rounded-3xl border shadow-lg`}>
-      <div className="text-center mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-3 flex items-center justify-center shadow-lg shadow-blue-200/50">
-          <DarkModeIcon src="/body-mass-index-svgrepo-com.svg" alt="BMI" className="w-6 h-6" isDarkMode={false} invertInDarkMode={true} />
-        </div>
-        <h3 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-1`}>BMI Calculator</h3>
-        <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-sm`}>Calculate your Body Mass Index with AI health advice</p>
-      </div>
-
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className={`block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-              Height (cm)
-            </label>
-            <input
-              type="number"
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-              className={`w-full p-3 border-2 ${isDarkMode ? 'border-blue-600 bg-gray-700 text-white focus:border-blue-400 focus:ring-blue-900/50' : 'border-blue-200 bg-white/80 text-gray-900 focus:border-blue-500 focus:ring-blue-100'} rounded-2xl focus:ring-4 outline-none transition-all duration-200 text-lg font-medium backdrop-blur-sm`}
-              placeholder="170"
+    <div className={`w-full max-w-2xl mx-auto relative overflow-hidden ${
+      isDarkMode 
+        ? 'bg-gradient-to-br from-gray-800/80 via-blue-900/40 to-slate-800/80' 
+        : 'bg-gradient-to-br from-white/90 via-blue-50/80 to-indigo-50/90'
+    } backdrop-blur-xl p-6 sm:p-8 rounded-3xl border shadow-2xl ${
+      isDarkMode ? 'border-white/20 shadow-black/20' : 'border-blue-200/50 shadow-blue-500/10'
+    }`}>
+      
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-transparent rounded-full blur-2xl"></div>
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-400/20 to-transparent rounded-full blur-2xl"></div>
+      
+      <div className="relative z-10">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center shadow-lg ${
+            isDarkMode 
+              ? 'bg-gradient-to-br from-blue-600 to-indigo-700 shadow-blue-500/25' 
+              : 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/30'
+          }`}>
+            <DarkModeIcon 
+              src="/body-mass-index-svgrepo-com.svg" 
+              alt="BMI" 
+              className="w-8 h-8" 
+              isDarkMode={false} 
+              invertInDarkMode={true} 
             />
           </div>
-          
-          <div>
-            <label className={`block text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-              Weight (kg)
-            </label>
-            <input
-              type="number"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              className={`w-full p-3 border-2 ${isDarkMode ? 'border-blue-600 bg-gray-700 text-white focus:border-blue-400 focus:ring-blue-900/50' : 'border-blue-200 bg-white/80 text-gray-900 focus:border-blue-500 focus:ring-blue-100'} rounded-2xl focus:ring-4 outline-none transition-all duration-200 text-lg font-medium backdrop-blur-sm`}
-              placeholder="70"
-            />
-          </div>
+          <h3 className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            BMI Calculator
+          </h3>
+          <p className={`text-sm font-medium ${isDarkMode ? 'text-white/70' : 'text-gray-600'}`}>
+            Calculate your Body Mass Index with AI health advice
+          </p>
         </div>
 
-        <button
-          onClick={handleCalculate}
-          disabled={!height || !weight || loading}
-          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-full hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-blue-200/50 disabled:shadow-none flex items-center justify-center gap-3"
-        >
-          {loading ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              Calculating with AI...
-            </>
-          ) : (
-            <>
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-              Calculate BMI
-            </>
-          )}
-        </button>
+        <div className="space-y-6">
+          {/* Input Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className={`block text-sm font-semibold ${isDarkMode ? 'text-white/90' : 'text-gray-700'}`}>
+                Height (cm)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  className={`w-full p-4 text-lg font-medium rounded-2xl border-2 transition-all duration-200 backdrop-blur-sm ${
+                    isDarkMode 
+                      ? 'bg-gray-800/60 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-900/50' 
+                      : 'bg-white/70 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
+                  } outline-none`}
+                  placeholder="170"
+                />
+                <div className={`absolute right-4 top-1/2 transform -translate-y-1/2 text-sm font-medium ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  cm
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className={`block text-sm font-semibold ${isDarkMode ? 'text-white/90' : 'text-gray-700'}`}>
+                Weight (kg)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  className={`w-full p-4 text-lg font-medium rounded-2xl border-2 transition-all duration-200 backdrop-blur-sm ${
+                    isDarkMode 
+                      ? 'bg-gray-800/60 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-900/50' 
+                      : 'bg-white/70 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
+                  } outline-none`}
+                  placeholder="70"
+                />
+                <div className={`absolute right-4 top-1/2 transform -translate-y-1/2 text-sm font-medium ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                  kg
+                </div>
+              </div>
+            </div>
+          </div>
 
-        {results && (
-          <div className="space-y-4">
-            {/* BMI Result */}
-            <div className={`p-4 rounded-2xl border-2 ${getBMIColor(results.category)} shadow-inner`}>
+          {/* Calculate Button */}
+          <button
+            onClick={handleCalculate}
+            disabled={!height || !weight || loading}
+            className={`w-full py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 transform ${
+              !height || !weight || loading
+                ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                : `bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 hover:scale-[1.02] active:scale-95 shadow-lg ${
+                    isDarkMode ? 'shadow-blue-500/25' : 'shadow-blue-500/30'
+                  }`
+            } flex items-center justify-center gap-3`}
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                <span>Calculating with AI...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <span>Calculate BMI</span>
+              </>
+            )}
+          </button>
+
+          {results && (
+            <div className="space-y-6">
+            {/* BMI Result Card */}
+            <div className={`p-6 rounded-2xl border-2 backdrop-blur-sm transition-all duration-500 shadow-xl ${
+              isDarkMode 
+                ? 'bg-gray-800/50 border-gray-600 shadow-gray-800/30' 
+                : 'bg-white/60 border-gray-200 shadow-gray-500/10'
+            }`}>
               <div className="text-center">
-                <p className="text-3xl font-bold mb-1">{results.bmi}</p>
-                <p className="text-lg font-semibold">{results.category}</p>
+                <div className={`text-5xl font-black mb-3 ${getBMIColor(results.category)}`}>
+                  {results.bmi}
+                </div>
+                <div className={`text-xl font-bold mb-6 ${getBMIColor(results.category)}`}>
+                  {results.category}
+                </div>
+                
+                {/* BMI Scale Indicator */}
+                <div className="relative w-full h-4 bg-gradient-to-r from-blue-400 via-green-500 to-red-500 rounded-full mb-6 overflow-hidden shadow-inner">
+                  <div 
+                    className="absolute top-0 w-1 h-full bg-white shadow-lg transform -translate-x-1/2"
+                    style={{ left: `${Math.min(Math.max((parseFloat(results.bmi) - 15) / 25 * 100, 0), 100)}%` }}
+                  >
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-white"></div>
+                  </div>
+                </div>
+                
+                {/* BMI Categories Legend */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-medium">
+                  <div className="text-blue-500 text-center">
+                    <div className="w-4 h-2 bg-blue-400 rounded mx-auto mb-1"></div>
+                    Under (≤18.5)
+                  </div>
+                  <div className="text-green-500 text-center">
+                    <div className="w-4 h-2 bg-green-500 rounded mx-auto mb-1"></div>
+                    Normal (18.5-25)
+                  </div>
+                  <div className="text-yellow-500 text-center">
+                    <div className="w-4 h-2 bg-yellow-500 rounded mx-auto mb-1"></div>
+                    Over (25-30)
+                  </div>
+                  <div className="text-red-500 text-center">
+                    <div className="w-4 h-2 bg-red-500 rounded mx-auto mb-1"></div>
+                    Obese (≥30)
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Health Advice */}
-            <div className={`${isDarkMode ? 'bg-gray-700/70 border-blue-600' : 'bg-white/70 border-blue-200'} backdrop-blur-sm p-4 rounded-2xl border shadow-lg`}>
-              <h4 className={`font-bold ${isDarkMode ? 'text-blue-300' : 'text-blue-800'} mb-3 flex items-center gap-2 text-base`}>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Health Advice
-              </h4>
-              <div className="space-y-2">
+            {/* Health Advice Card */}
+            <div className={`p-6 rounded-2xl border-2 backdrop-blur-sm transition-all duration-500 shadow-xl ${
+              isDarkMode 
+                ? 'bg-gradient-to-br from-blue-900/40 to-indigo-900/40 border-blue-700/50 shadow-blue-900/20' 
+                : 'bg-gradient-to-br from-blue-50/80 to-indigo-50/80 border-blue-200/50 shadow-blue-500/10'
+            }`}>
+              <div className="flex items-start gap-4 mb-4">
+                <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-br from-blue-600 to-indigo-700 shadow-blue-500/25' 
+                    : 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/30'
+                }`}>
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h4 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  🩺 Health Insights
+                </h4>
+              </div>
+              <div className="space-y-3">
                 {results.healthAdvice.map((advice: string, index: number) => (
-                  <div key={index} className={`flex items-start gap-3 p-2 ${isDarkMode ? 'bg-blue-900/50' : 'bg-blue-50'} rounded-xl`}>
-                    <span className={`${isDarkMode ? 'text-blue-400' : 'text-blue-500'} mt-0.5 text-sm`}>•</span>
-                    <span className={`${isDarkMode ? 'text-blue-300' : 'text-blue-700'} text-sm font-medium`}>{advice}</span>
+                  <div key={index} className={`flex items-start gap-3 p-3 rounded-xl transition-all duration-200 ${
+                    isDarkMode 
+                      ? 'bg-blue-800/30 hover:bg-blue-800/40 border border-blue-700/30' 
+                      : 'bg-blue-100/50 hover:bg-blue-100/70 border border-blue-200/30'
+                  }`}>
+                    <div className={`w-2 h-2 rounded-full mt-2 ${
+                      isDarkMode ? 'bg-blue-400' : 'bg-blue-500'
+                    }`}></div>
+                    <span className={`text-sm font-medium leading-relaxed ${
+                      isDarkMode ? 'text-blue-100' : 'text-blue-800'
+                    }`}>
+                      {advice}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Risk Factors */}
+            {/* Risk Factors Card */}
             {results.risks.length > 0 && (
-              <div className={`${isDarkMode ? 'bg-gray-700/70 border-orange-600' : 'bg-white/70 border-orange-200'} backdrop-blur-sm p-4 rounded-2xl border shadow-lg`}>
-                <h4 className={`font-bold ${isDarkMode ? 'text-orange-300' : 'text-orange-800'} mb-3 flex items-center gap-2 text-base`}>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                  Risk Factors
-                </h4>
-                <div className="space-y-2">
+              <div className={`p-6 rounded-2xl border-2 backdrop-blur-sm transition-all duration-500 shadow-xl ${
+                isDarkMode 
+                  ? 'bg-gradient-to-br from-orange-900/40 to-red-900/40 border-orange-700/50 shadow-orange-900/20' 
+                  : 'bg-gradient-to-br from-orange-50/80 to-red-50/80 border-orange-200/50 shadow-orange-500/10'
+              }`}>
+                <div className="flex items-start gap-4 mb-4">
+                  <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
+                    isDarkMode 
+                      ? 'bg-gradient-to-br from-orange-600 to-red-700 shadow-orange-500/25' 
+                      : 'bg-gradient-to-br from-orange-500 to-red-600 shadow-orange-500/30'
+                  }`}>
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                  <h4 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    ⚠️ Risk Factors
+                  </h4>
+                </div>
+                <div className="space-y-3">
                   {results.risks.map((risk: string, index: number) => (
-                    <div key={index} className={`flex items-start gap-3 p-2 ${isDarkMode ? 'bg-orange-900/50' : 'bg-orange-50'} rounded-xl`}>
-                      <span className={`${isDarkMode ? 'text-orange-400' : 'text-orange-500'} mt-0.5 text-sm`}>•</span>
-                      <span className={`${isDarkMode ? 'text-orange-300' : 'text-orange-700'} text-sm font-medium`}>{risk}</span>
+                    <div key={index} className={`flex items-start gap-3 p-3 rounded-xl transition-all duration-200 ${
+                      isDarkMode 
+                        ? 'bg-orange-800/30 hover:bg-orange-800/40 border border-orange-700/30' 
+                        : 'bg-orange-100/50 hover:bg-orange-100/70 border border-orange-200/30'
+                    }`}>
+                      <div className={`w-2 h-2 rounded-full mt-2 ${
+                        isDarkMode ? 'bg-orange-400' : 'bg-orange-500'
+                      }`}></div>
+                      <span className={`text-sm font-medium leading-relaxed ${
+                        isDarkMode ? 'text-orange-100' : 'text-orange-800'
+                      }`}>
+                        {risk}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Recommendations */}
-            <div className={`${isDarkMode ? 'bg-gray-700/70 border-emerald-600' : 'bg-white/70 border-emerald-200'} backdrop-blur-sm p-4 rounded-2xl border shadow-lg`}>
-              <h4 className={`font-bold ${isDarkMode ? 'text-emerald-300' : 'text-emerald-800'} mb-3 flex items-center gap-2 text-base`}>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                Recommendations
-              </h4>
-              <div className="space-y-2">
+            {/* Recommendations Card */}
+            <div className={`p-6 rounded-2xl border-2 backdrop-blur-sm transition-all duration-500 shadow-xl ${
+              isDarkMode 
+                ? 'bg-gradient-to-br from-emerald-900/40 to-green-900/40 border-emerald-700/50 shadow-emerald-900/20' 
+                : 'bg-gradient-to-br from-emerald-50/80 to-green-50/80 border-emerald-200/50 shadow-emerald-500/10'
+            }`}>
+              <div className="flex items-start gap-4 mb-4">
+                <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-br from-emerald-600 to-green-700 shadow-emerald-500/25' 
+                    : 'bg-gradient-to-br from-emerald-500 to-green-600 shadow-emerald-500/30'
+                }`}>
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h4 className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  💡 Recommendations
+                </h4>
+              </div>
+              <div className="space-y-3">
                 {results.recommendations.map((rec: string, index: number) => (
-                  <div key={index} className={`flex items-start gap-3 p-2 ${isDarkMode ? 'bg-emerald-900/50' : 'bg-emerald-50'} rounded-xl`}>
-                    <span className={`${isDarkMode ? 'text-emerald-400' : 'text-emerald-500'} mt-0.5 text-sm`}>•</span>
-                    <span className={`${isDarkMode ? 'text-emerald-300' : 'text-emerald-700'} text-sm font-medium`}>{rec}</span>
+                  <div key={index} className={`flex items-start gap-3 p-3 rounded-xl transition-all duration-200 ${
+                    isDarkMode 
+                      ? 'bg-emerald-800/30 hover:bg-emerald-800/40 border border-emerald-700/30' 
+                      : 'bg-emerald-100/50 hover:bg-emerald-100/70 border border-emerald-200/30'
+                  }`}>
+                    <div className={`w-2 h-2 rounded-full mt-2 ${
+                      isDarkMode ? 'bg-emerald-400' : 'bg-emerald-500'
+                    }`}></div>
+                    <span className={`text-sm font-medium leading-relaxed ${
+                      isDarkMode ? 'text-emerald-100' : 'text-emerald-800'
+                    }`}>
+                      {rec}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

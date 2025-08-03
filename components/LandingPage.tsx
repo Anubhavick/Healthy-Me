@@ -26,14 +26,14 @@ const LandingPage: React.FC<LandingPageProps> = ({
         : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100'
     }`}>
       {/* Floating Navigation Header */}
-      <div className="w-full px-4 sm:px-6 pt-4 sm:pt-6">
-        <nav className={`flex items-center justify-between p-4 sm:p-6 rounded-2xl backdrop-blur-md border shadow-lg ${
+      <div className="w-full px-3 sm:px-6 pt-3 sm:pt-6">
+        <nav className={`flex items-center justify-between p-3 sm:p-6 rounded-2xl backdrop-blur-md border shadow-lg ${
           isDarkMode 
             ? 'bg-white/10 border-white/20 shadow-black/20' 
             : 'bg-white/80 border-gray-200/30 shadow-gray-500/10'
         }`}>
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg p-1 ${
+          <div className="flex items-center space-x-3">
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl p-1.5 ${
               isDarkMode ? 'bg-white/20 backdrop-blur-sm' : 'bg-blue-600/10 backdrop-blur-sm'
             }`}>
               <img 
@@ -42,49 +42,56 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 className={`w-full h-full ${isDarkMode ? '' : 'filter hue-rotate-200 saturate-150'}`} 
               />
             </div>
-            <span className={`font-semibold text-lg sm:text-xl ${
-              isDarkMode ? 'text-white' : 'text-gray-800'
-            }`}>
-              Healthy Me
-            </span>
+            <div className="flex flex-col">
+              <span className={`font-bold text-lg sm:text-xl leading-tight ${
+                isDarkMode ? 'text-white' : 'text-gray-800'
+              }`}>
+                Healthy Me
+              </span>
+              <p className={`text-xs sm:text-sm font-medium leading-tight ${
+                isDarkMode ? 'text-white/70' : 'text-gray-600'
+              }`}>
+                Smart Nutrition Analysis
+              </p>
+            </div>
           </div>
           
-          <div className="flex items-center space-x-3 sm:space-x-6">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <button 
               onClick={onHome}
-              className={`transition-colors duration-200 font-medium text-sm sm:text-base hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              className={`px-3 py-2 rounded-lg transition-all duration-200 font-medium text-sm hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 isDarkMode 
-                  ? 'text-white/80 hover:text-white focus:ring-white/20' 
-                  : 'text-gray-600 hover:text-gray-800 focus:ring-gray-300'
+                  ? 'text-white/80 hover:text-white hover:bg-white/10 focus:ring-white/20' 
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100/50 focus:ring-gray-300'
               }`}
               aria-label="Go to Home"
             >
-              <span className="hidden sm:inline">Home</span>
+              Home
             </button>
             <button 
               onClick={onDocs}
-              className={`transition-colors duration-200 font-medium text-sm sm:text-base hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              className={`px-3 py-2 rounded-lg transition-all duration-200 font-medium text-sm hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 isDarkMode 
-                  ? 'text-white/80 hover:text-white focus:ring-white/20' 
-                  : 'text-gray-600 hover:text-gray-800 focus:ring-gray-300'
+                  ? 'text-white/80 hover:text-white hover:bg-white/10 focus:ring-white/20' 
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100/50 focus:ring-gray-300'
               }`}
               aria-label="Go to Documentation"
             >
-              <span className="hidden sm:inline">Docs</span>
+              Docs
             </button>
             <button
               onClick={onToggleDarkMode}
-              className={`relative w-16 h-8 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-inner ${
+              className={`relative w-14 h-7 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-inner flex items-center ${
                 isDarkMode 
                   ? 'bg-gradient-to-r from-blue-500 to-blue-600 focus:ring-blue-500 shadow-blue-500/20' 
                   : 'bg-gradient-to-r from-gray-200 to-gray-300 focus:ring-gray-400 shadow-gray-400/20'
               }`}
               aria-label="Toggle dark mode"
             >
-              <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-lg transform transition-all duration-300 flex items-center justify-center ${
-                isDarkMode ? 'translate-x-8' : 'translate-x-0'
+              <div className={`absolute w-5 h-5 bg-white rounded-full shadow-lg transform transition-all duration-300 flex items-center justify-center ${
+                isDarkMode ? 'translate-x-7' : 'translate-x-1'
               } hover:scale-110`}>
-                <span className="text-xs">
+                <span className="text-xs leading-none">
                   {isDarkMode ? '🌙' : '☀️'}
                 </span>
               </div>
@@ -94,9 +101,9 @@ const LandingPage: React.FC<LandingPageProps> = ({
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-140px)] px-6 pt-2">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1 className={`text-5xl md:text-7xl font-bold mb-8 leading-tight ${
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] px-4 sm:px-6 pt-4 sm:pt-8">
+        <div className="text-center max-w-5xl mx-auto">
+          <h1 className={`text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 md:mb-8 leading-tight ${
             isDarkMode ? 'text-white' : 'text-gray-800'
           }`}>
             Bring the{' '}
@@ -106,10 +113,12 @@ const LandingPage: React.FC<LandingPageProps> = ({
                 : 'bg-gradient-to-r from-blue-600 to-indigo-600'
             }`}>
               <ShinyText text="Healthy Life" speed={4} />
-            </span>{' '}
+            </span>
+            <br className="hidden sm:inline" />
+            <span className="sm:hidden"> </span>
             to you, with
           </h1>
-          <h2 className={`text-5xl md:text-7xl font-bold mb-12 leading-tight ${
+          <h2 className={`text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 md:mb-12 leading-tight ${
             isDarkMode ? 'text-white' : 'text-gray-800'
           }`}>
             one line of{' '}
@@ -123,10 +132,10 @@ const LandingPage: React.FC<LandingPageProps> = ({
           </h2>
           
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mt-8 sm:mt-12">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mt-6 sm:mt-8 md:mt-12 max-w-md sm:max-w-none mx-auto">
             <button
               onClick={onGetStarted}
-              className={`px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg min-w-[180px] sm:min-w-[200px] ${
+              className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg min-w-[200px] ${
                 isDarkMode 
                   ? 'bg-white text-gray-900 hover:bg-gray-100' 
                   : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -136,7 +145,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
             </button>
             <button
               onClick={onTryDemo}
-              className={`px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 min-w-[180px] sm:min-w-[200px] ${
+              className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 min-w-[200px] ${
                 isDarkMode 
                   ? 'border-white text-white hover:bg-white/10' 
                   : 'border-blue-300 text-blue-700 hover:bg-blue-50'
@@ -148,9 +157,9 @@ const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         {/* Feature Carousel */}
-        <div className="flex justify-center mt-12 sm:mt-20 px-4 sm:px-0">
+        <div className="flex justify-center mt-8 sm:mt-12 md:mt-16 lg:mt-20 px-2 sm:px-4 w-full max-w-6xl">
           <Carousel
-            baseWidth={300}
+            baseWidth={280}
             autoplay={true}
             autoplayDelay={4000}
             pauseOnHover={true}
