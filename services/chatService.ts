@@ -38,10 +38,10 @@ export class ChatService {
             }]
           }],
           generationConfig: {
-            temperature: 0.7,
+            temperature: 0.8,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 300,
+            maxOutputTokens: 500,
           },
           safetySettings: [
             {
@@ -93,6 +93,10 @@ CORE INSTRUCTIONS:
 - Always recommend consulting healthcare professionals for medical concerns
 - Focus on practical, actionable advice
 - Use emojis sparingly and naturally
+- IMPORTANT: Read the conversation history carefully and provide contextual, varied responses
+- Avoid repeating the same information if already discussed
+- Build upon previous conversations naturally
+- If user asks similar questions, acknowledge it and provide different angles or deeper insights
 
 `;
 
@@ -119,9 +123,9 @@ CORE INSTRUCTIONS:
     }
 
     if (conversationHistory && conversationHistory.length > 0) {
-      prompt += `RECENT CONVERSATION:
-${conversationHistory.slice(-4).map(msg => 
-  `${msg.isUser ? 'User' : 'Assistant'}: ${msg.text}`
+      prompt += `CONVERSATION HISTORY (most recent last):
+${conversationHistory.map((msg, index) => 
+  `${index + 1}. ${msg.isUser ? 'User' : 'Assistant'}: ${msg.text}`
 ).join('\n')}
 
 `;
@@ -133,53 +137,79 @@ ${conversationHistory.slice(-4).map(msg =>
 - Suggest healthy alternatives and practical tips
 - Encourage positive habits and lifestyle changes
 - If asked about specific foods, provide nutritional insights
-- For weight management questions, focus on balanced approaches`;
+- For weight management questions, focus on balanced approaches
+- VARY your responses even for similar topics - provide different tips, examples, or perspectives
+- If the user asks follow-up questions, build on the previous discussion
+- Keep track of what you've already mentioned to avoid repetition`;
 
     return prompt;
   }
 
   private getFallbackResponse(userMessage: string, context: ChatContext): string {
     const lowerMessage = userMessage.toLowerCase();
-    const { userProfile, recentAnalysis } = context;
+    const { userProfile, recentAnalysis, conversationHistory } = context;
+    
+    // Check if this is a repeated question from conversation history
+    const isRepeatedQuestion = conversationHistory?.some(msg => 
+      msg.isUser && msg.text.toLowerCase().includes(lowerMessage.split(' ')[0])
+    );
     
     // Diet-specific responses
     if (lowerMessage.includes('protein')) {
       if (userProfile?.diet === 'Vegan') {
-        return "Great vegan protein sources include lentils, chickpeas, quinoa, tofu, tempeh, and hemp seeds! 🌱 Try to include a variety throughout your day for complete amino acids.";
+        return isRepeatedQuestion 
+          ? "Since we talked about protein, let me add that combining different plant proteins (like rice & beans) creates complete amino acids! Also consider spirulina and nutritional yeast. 🌱"
+          : "Great vegan protein sources include lentils, chickpeas, quinoa, tofu, tempeh, and hemp seeds! 🌱 Try to include a variety throughout your day for complete amino acids.";
       }
-      return "Excellent protein sources include lean meats, fish, eggs, dairy, legumes, and nuts. Aim for about 0.8-1.2g per kg of body weight daily! 💪";
+      return isRepeatedQuestion
+        ? "Building on protein - aim for 20-30g per meal for optimal muscle synthesis. Fish, Greek yogurt, and lean poultry are especially bioavailable! 🐟"
+        : "Excellent protein sources include lean meats, fish, eggs, dairy, legumes, and nuts. Aim for about 0.8-1.2g per kg of body weight daily! 💪";
     }
 
     if (lowerMessage.includes('weight loss') || lowerMessage.includes('lose weight')) {
-      return "Focus on creating a moderate calorie deficit through balanced nutrition and regular activity. Include plenty of vegetables, lean proteins, and whole grains. Small, sustainable changes work best! 🎯";
+      return isRepeatedQuestion
+        ? "For sustainable weight loss, try meal prep on Sundays and keep a food journal. Small plates can help with portion control too! 📝"
+        : "Focus on creating a moderate calorie deficit through balanced nutrition and regular activity. Include plenty of vegetables, lean proteins, and whole grains. Small, sustainable changes work best! 🎯";
     }
 
     if (lowerMessage.includes('calories') || lowerMessage.includes('calorie')) {
       const recentCalories = recentAnalysis?.estimatedCalories;
-      return `${recentCalories ? `Your recent meal had ${recentCalories} calories. ` : ''}Focus on nutrient-dense foods that provide energy and essential nutrients. Quality matters as much as quantity! ⚡`;
+      return isRepeatedQuestion
+        ? `${recentCalories ? `Your recent meal's ${recentCalories} calories can guide portion sizes. ` : ''}Remember that timing matters too - spread calories throughout the day for steady energy! ⏰`
+        : `${recentCalories ? `Your recent meal had ${recentCalories} calories. ` : ''}Focus on nutrient-dense foods that provide energy and essential nutrients. Quality matters as much as quantity! ⚡`;
     }
 
     if (lowerMessage.includes('healthy') || lowerMessage.includes('nutrition')) {
       const dietAdvice = userProfile?.diet && userProfile.diet !== 'None' 
         ? ` Your ${userProfile.diet} diet can be very nutritious when well-planned.`
         : '';
-      return `Focus on whole foods, plenty of vegetables, adequate hydration, and balanced meals.${dietAdvice} What specific aspect interests you most? 🥗`;
+      return isRepeatedQuestion
+        ? `Building healthy habits gradually works best! Try the 80/20 rule - eat nutritiously 80% of the time.${dietAdvice} What's your biggest nutrition challenge? 🎯`
+        : `Focus on whole foods, plenty of vegetables, adequate hydration, and balanced meals.${dietAdvice} What specific aspect interests you most? 🥗`;
     }
 
     if (lowerMessage.includes('meal') || lowerMessage.includes('food')) {
-      return "I'd love to help with meal ideas! What type of meal are you planning - breakfast, lunch, or dinner? Any specific preferences or dietary restrictions? 🍽️";
+      return isRepeatedQuestion
+        ? "For meal variety, try theme nights like 'Meatless Monday' or 'Fish Friday'! Batch cooking proteins and roasted veggies saves time too. 🍽️"
+        : "I'd love to help with meal ideas! What type of meal are you planning - breakfast, lunch, or dinner? Any specific preferences or dietary restrictions? 🍽️";
     }
 
     if (lowerMessage.includes('sugar') || lowerMessage.includes('sweet')) {
-      return "Try satisfying sweet cravings with fresh fruits, dates, or small amounts of dark chocolate. Natural sugars come with fiber and nutrients! 🍓";
+      return isRepeatedQuestion
+        ? "To reduce sugar cravings, try eating regular balanced meals with protein and fiber. Cinnamon and vanilla can add sweetness naturally! ✨"
+        : "Try satisfying sweet cravings with fresh fruits, dates, or small amounts of dark chocolate. Natural sugars come with fiber and nutrients! 🍓";
     }
 
     if (lowerMessage.includes('water') || lowerMessage.includes('hydration')) {
-      return "Great question! Aim for about 8 glasses of water daily, more if you're active. Add lemon, cucumber, or mint for variety! 💧";
+      return isRepeatedQuestion
+        ? "Pro hydration tip: Start each day with a glass of water and keep a marked water bottle to track intake. Herbal teas count too! 🫖"
+        : "Great question! Aim for about 8 glasses of water daily, more if you're active. Add lemon, cucumber, or mint for variety! 💧";
     }
 
     // Generic helpful response
-    return "I'm here to help with nutrition questions! Ask me about healthy eating, meal planning, specific foods, or nutrition tips. What would you like to know? 😊";
+    return isRepeatedQuestion
+      ? "I notice we've covered similar topics! Feel free to ask for specific meal ideas, cooking tips, or dive deeper into any nutrition topic. What interests you most? 🤔"
+      : "I'm here to help with nutrition questions! Ask me about healthy eating, meal planning, specific foods, or nutrition tips. What would you like to know? 😊";
   }
 }
 

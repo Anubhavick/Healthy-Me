@@ -38,11 +38,17 @@ const ChatBot: React.FC<ChatBotProps> = ({ userProfile, recentAnalysis, isDarkMo
     scrollToBottom();
   }, [messages]);
 
-  const generateChatResponse = async (userMessage: string): Promise<string> => {
+  const generateChatResponse = async (userMessage: string, currentMessages: Message[]): Promise<string> => {
+    // Include the current conversation history with the new user message
+    const fullConversationHistory = [
+      ...currentMessages.map(msg => ({ text: msg.text, isUser: msg.isUser })),
+      { text: userMessage, isUser: true }
+    ];
+
     const context = {
       userProfile,
       recentAnalysis,
-      conversationHistory: messages.slice(-5).map(msg => ({ text: msg.text, isUser: msg.isUser }))
+      conversationHistory: fullConversationHistory.slice(-8) // Increase to 8 for better context
     };
 
     try {
@@ -69,7 +75,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ userProfile, recentAnalysis, isDarkMo
     setIsLoading(true);
 
     try {
-      const response = await generateChatResponse(userMessage.text);
+      const response = await generateChatResponse(userMessage.text, messages);
       
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
