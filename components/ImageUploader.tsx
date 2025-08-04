@@ -64,11 +64,43 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('Image file is too large. Please select an image smaller than 10MB');
+        return;
+      }
+      
+      setError(null); // Clear any previous errors
+      
       const reader = new FileReader();
       reader.onloadend = () => {
-        onImageUpload(reader.result as string);
+        try {
+          const result = reader.result as string;
+          if (result && result.startsWith('data:image/')) {
+            onImageUpload(result);
+          } else {
+            setError('Failed to process image. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error processing image:', error);
+          setError('Failed to process image. Please try again.');
+        }
+      };
+      reader.onerror = () => {
+        setError('Failed to read image file. Please try again.');
       };
       reader.readAsDataURL(file);
+    }
+    
+    // Clear the input value to allow re-uploading the same file
+    if (event.target) {
+      event.target.value = '';
     }
   };
 
@@ -152,27 +184,53 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   }, [stream]);
 
   const capturePhoto = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current) {
+      setError('Camera not ready. Please try again.');
+      return;
+    }
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    if (!context) return;
+    if (!context) {
+      setError('Failed to initialize capture. Please try again.');
+      return;
+    }
 
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    try {
+      // Check if video is ready
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        setError('Camera not ready. Please wait and try again.');
+        return;
+      }
 
-    // Draw the video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
-    // Convert to data URL
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    onImageUpload(dataUrl);
-    
-    // Stop camera after capture
-    stopCamera();
+      // Draw the video frame to canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert to data URL with error handling
+      try {
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        
+        if (dataUrl && dataUrl.startsWith('data:image/')) {
+          onImageUpload(dataUrl);
+          stopCamera();
+          setError(null);
+        } else {
+          setError('Failed to capture image. Please try again.');
+        }
+      } catch (captureError) {
+        console.error('Error capturing image:', captureError);
+        setError('Failed to capture image. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during photo capture:', error);
+      setError('Camera capture failed. Please try again.');
+    }
   }, [onImageUpload, stopCamera]);
 
   return (

@@ -23,99 +23,112 @@ export async function analyzeImage(
   imageDataUrl: string,
   userProfile: UserProfile
 ): Promise<AnalysisResult> {
-  const [header, base64Data] = imageDataUrl.split(",");
-  if (!header || !base64Data) {
-    throw new Error("Invalid image data URL format");
-  }
-
-  const mimeTypeMatch = header.match(/data:(.*);base64/);
-  if (!mimeTypeMatch || !mimeTypeMatch[1]) {
-    throw new Error("Could not determine MIME type from image data URL");
-  }
-  const mimeType = mimeTypeMatch[1];
-  
-  const imagePart = base64ToGenerativePart(base64Data, mimeType);
-
-  // Run TensorFlow and Gemini in parallel for faster processing
-  const [tensorflowResult, geminiResult] = await Promise.allSettled([
-    runTensorFlowAnalysis(imageDataUrl),
-    runGeminiAnalysis(imagePart, userProfile)
-  ]);
-
-  // Extract results from Promise.allSettled
-  const tensorflowAnalysis = tensorflowResult.status === 'fulfilled' ? tensorflowResult.value : undefined;
-  let geminiAnalysis = geminiResult.status === 'fulfilled' ? geminiResult.value : null;
-
-  // Check for cached analysis for consistency if Gemini analysis exists
-  if (geminiAnalysis?.productIdentifier) {
-    const cachedAnalysis = ConsistencyService.getCachedAnalysis(geminiAnalysis.productIdentifier);
-    if (cachedAnalysis) {
-      // Use cached analysis but update with current TensorFlow data
-      geminiAnalysis = {
-        ...cachedAnalysis,
-        tensorflowAnalysis: tensorflowAnalysis
-      };
+  try {
+    const [header, base64Data] = imageDataUrl.split(",");
+    if (!header || !base64Data) {
+      throw new Error("Invalid image data URL format");
     }
-  } else if (geminiAnalysis) {
-    // Try to find similar cached analysis as fallback
-    const similarAnalysis = ConsistencyService.findSimilarCachedAnalysis(
-      geminiAnalysis.dishName, 
-      geminiAnalysis.ingredients
-    );
-    if (similarAnalysis) {
-      geminiAnalysis = {
-        ...similarAnalysis,
-        dishName: geminiAnalysis.dishName,
-        ingredients: geminiAnalysis.ingredients,
-        tensorflowAnalysis: tensorflowAnalysis
-      };
-    }
-  }
 
-  if (!geminiAnalysis) {
-    // Fallback: if Gemini fails but TensorFlow succeeded, provide basic analysis
+    const mimeTypeMatch = header.match(/data:(.*);base64/);
+    if (!mimeTypeMatch || !mimeTypeMatch[1]) {
+      throw new Error("Could not determine MIME type from image data URL");
+    }
+    const mimeType = mimeTypeMatch[1];
+    
+    const imagePart = base64ToGenerativePart(base64Data, mimeType);
+
+    // Run TensorFlow and Gemini in parallel for faster processing
+    const [tensorflowResult, geminiResult] = await Promise.allSettled([
+      runTensorFlowAnalysis(imageDataUrl),
+      runGeminiAnalysis(imagePart, userProfile)
+    ]);
+
+    // Extract results from Promise.allSettled
+    const tensorflowAnalysis = tensorflowResult.status === 'fulfilled' ? tensorflowResult.value : undefined;
+    let geminiAnalysis = geminiResult.status === 'fulfilled' ? geminiResult.value : null;
+
+    // Log any errors for debugging
+    if (tensorflowResult.status === 'rejected') {
+      console.warn('TensorFlow analysis failed:', tensorflowResult.reason);
+    }
+    if (geminiResult.status === 'rejected') {
+      console.warn('Gemini analysis failed:', geminiResult.reason);
+    }
+
+    // Check for cached analysis for consistency if Gemini analysis exists
+    if (geminiAnalysis?.productIdentifier) {
+      const cachedAnalysis = ConsistencyService.getCachedAnalysis(geminiAnalysis.productIdentifier);
+      if (cachedAnalysis) {
+        // Use cached analysis but update with current TensorFlow data
+        geminiAnalysis = {
+          ...cachedAnalysis,
+          tensorflowAnalysis: tensorflowAnalysis
+        };
+      }
+    } else if (geminiAnalysis) {
+      // Try to find similar cached analysis as fallback
+      const similarAnalysis = ConsistencyService.findSimilarCachedAnalysis(
+        geminiAnalysis.dishName, 
+        geminiAnalysis.ingredients
+      );
+      if (similarAnalysis) {
+        geminiAnalysis = {
+          ...similarAnalysis,
+          dishName: geminiAnalysis.dishName,
+          ingredients: geminiAnalysis.ingredients,
+          tensorflowAnalysis: tensorflowAnalysis
+        };
+      }
+    }
+
+    if (!geminiAnalysis) {
+      // Fallback: if Gemini fails but TensorFlow succeeded, provide basic analysis
+      if (tensorflowAnalysis) {
+        return {
+          dishName: tensorflowAnalysis.foodIdentification.predictions[0]?.className || 'Unknown Food',
+          estimatedCalories: tensorflowAnalysis.nutritionalEstimation.estimatedCalories,
+          dietCompatibility: {
+            isCompatible: true,
+            reason: 'Basic compatibility assessment based on food type'
+          },
+          ingredients: ['Analysis based on visual identification'],
+          healthTips: [
+            `This appears to be ${tensorflowAnalysis.foodIdentification.primaryFoodType.toLowerCase()} food`,
+            `Processing level: ${tensorflowAnalysis.qualityAssessment.processingLevel.toLowerCase()}`
+          ],
+          nutritionalBreakdown: {
+            carbs: tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs,
+            protein: tensorflowAnalysis.nutritionalEstimation.macronutrients.protein,
+            fat: tensorflowAnalysis.nutritionalEstimation.macronutrients.fat,
+            fiber: tensorflowAnalysis.nutritionalEstimation.macronutrients.fiber,
+            sugar: 5,
+            sodium: 300
+          },
+          tensorflowAnalysis
+        };
+      }
+      throw new Error("Both AI services failed to analyze the image");
+    }
+
+    // Merge TensorFlow analysis with Gemini results
     if (tensorflowAnalysis) {
-      return {
-        dishName: tensorflowAnalysis.foodIdentification.predictions[0]?.className || 'Unknown Food',
-        estimatedCalories: tensorflowAnalysis.nutritionalEstimation.estimatedCalories,
-        dietCompatibility: {
-          isCompatible: true,
-          reason: 'Basic compatibility assessment based on food type'
-        },
-        ingredients: ['Analysis based on visual identification'],
-        healthTips: [
-          `This appears to be ${tensorflowAnalysis.foodIdentification.primaryFoodType.toLowerCase()} food`,
-          `Processing level: ${tensorflowAnalysis.qualityAssessment.processingLevel.toLowerCase()}`
-        ],
-        nutritionalBreakdown: {
-          carbs: tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs,
-          protein: tensorflowAnalysis.nutritionalEstimation.macronutrients.protein,
-          fat: tensorflowAnalysis.nutritionalEstimation.macronutrients.fat,
-          fiber: tensorflowAnalysis.nutritionalEstimation.macronutrients.fiber,
-          sugar: 5,
-          sodium: 300
-        },
-        tensorflowAnalysis
-      };
+      geminiAnalysis.tensorflowAnalysis = tensorflowAnalysis;
+      
+      // Cross-validate calorie estimates
+      const geminiCalories = geminiAnalysis.estimatedCalories;
+      const tfCalories = tensorflowAnalysis.nutritionalEstimation.estimatedCalories;
+      
+      // Use average if both estimates are reasonable
+      if (Math.abs(geminiCalories - tfCalories) < 200) {
+        geminiAnalysis.estimatedCalories = Math.round((geminiCalories + tfCalories) / 2);
+      }
     }
-    throw new Error("Both AI services failed to analyze the image");
-  }
-
-  // Merge TensorFlow analysis with Gemini results
-  if (tensorflowAnalysis) {
-    geminiAnalysis.tensorflowAnalysis = tensorflowAnalysis;
     
-    // Cross-validate calorie estimates
-    const geminiCalories = geminiAnalysis.estimatedCalories;
-    const tfCalories = tensorflowAnalysis.nutritionalEstimation.estimatedCalories;
-    
-    // Use average if both estimates are reasonable
-    if (Math.abs(geminiCalories - tfCalories) < 200) {
-      geminiAnalysis.estimatedCalories = Math.round((geminiCalories + tfCalories) / 2);
-    }
+    return geminiAnalysis;
+  } catch (error) {
+    console.error('Critical error in analyzeImage:', error);
+    throw new Error(`Image analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  
-  return geminiAnalysis;
 }
 
 // Separate TensorFlow analysis function
@@ -298,29 +311,43 @@ Respond with precise JSON only.`;
     required: ["dishName", "productIdentifier", "estimatedCalories", "nutritionalBreakdown", "healthScore", "processingLevel", "nutritionalDensity", "dietCompatibility", "medicalAdvice", "ingredients", "healthTips", "chemicalAnalysis"]
   };
 
-  const response: GenerateContentResponse = await ai.models.generateContent({
-    model: 'gemini-2.0-flash-exp',
-    contents: { parts: [imagePart, { text: prompt }] },
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: responseSchema
-    },
-  });
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: { parts: [imagePart, { text: prompt }] },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema
+      },
+    });
 
-  const result = JSON.parse(response.text) as AnalysisResult;
-  
-  // Generate identifier if not provided
-  if (!result.productIdentifier) {
-    result.productIdentifier = ConsistencyService.generateProductIdentifier(
-      result.dishName, 
-      result.ingredients
-    );
+    if (!response || !response.text) {
+      throw new Error('No response received from Gemini API');
+    }
+
+    const result = JSON.parse(response.text) as AnalysisResult;
+    
+    // Validate essential fields
+    if (!result.dishName || !result.estimatedCalories) {
+      throw new Error('Invalid response format from Gemini API');
+    }
+    
+    // Generate identifier if not provided
+    if (!result.productIdentifier) {
+      result.productIdentifier = ConsistencyService.generateProductIdentifier(
+        result.dishName, 
+        result.ingredients
+      );
+    }
+    
+    // Cache this analysis for future consistency
+    ConsistencyService.cacheAnalysis(result);
+    
+    return result;
+  } catch (error) {
+    console.error('Gemini API error:', error);
+    throw new Error(`Gemini analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-  
-  // Cache this analysis for future consistency
-  ConsistencyService.cacheAnalysis(result);
-  
-  return result;
 }
 
 // BMI Calculator with AI-powered health advice

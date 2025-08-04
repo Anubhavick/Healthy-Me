@@ -49,45 +49,53 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [mealHistory, setMealHistory] = useState<Meal[]>([]);
   const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
+  const [appInitialized, setAppInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    try {
-        const storedMeals = localStorage.getItem('mealHistory');
-        if (storedMeals) {
-            setMealHistory(JSON.parse(storedMeals));
-        }
-        
-        // Load stored user and profile
-        const storedUser = localStorage.getItem('user');
-        const storedProfile = localStorage.getItem('userProfile');
-        
-        if (storedUser) {
-            const userData = JSON.parse(storedUser);
-            setUser(userData);
-            setIsAuthenticated(true);
-            
-            if (storedProfile) {
-                setUserProfile(JSON.parse(storedProfile));
-            } else {
-                // Create default profile if user exists but no profile
-                const defaultProfile: UserProfile = {
-                  id: userData.id,
-                  email: userData.email,
-                  displayName: userData.displayName,
-                  diet: Diet.None,
-                  medicalConditions: [MedicalCondition.None],
-                  goals: {},
-                  streak: { current: 0, best: 0 }
-                };
-                setUserProfile(defaultProfile);
-            }
-        }
-    } catch (e) {
-        // Clear potentially corrupted data
-        localStorage.removeItem('mealHistory');
-        localStorage.removeItem('userProfile'); 
-        setMealHistory([]);
-    }
+    const initializeApp = async () => {
+      try {
+          const storedMeals = localStorage.getItem('mealHistory');
+          if (storedMeals) {
+              setMealHistory(JSON.parse(storedMeals));
+          }
+          
+          // Load stored user and profile
+          const storedUser = localStorage.getItem('user');
+          const storedProfile = localStorage.getItem('userProfile');
+          
+          if (storedUser) {
+              const userData = JSON.parse(storedUser);
+              setUser(userData);
+              setIsAuthenticated(true);
+              
+              if (storedProfile) {
+                  setUserProfile(JSON.parse(storedProfile));
+              } else {
+                  // Create default profile if user exists but no profile
+                  const defaultProfile: UserProfile = {
+                    id: userData.id,
+                    email: userData.email,
+                    displayName: userData.displayName,
+                    diet: Diet.None,
+                    medicalConditions: [MedicalCondition.None],
+                    goals: {},
+                    streak: { current: 0, best: 0 }
+                  };
+                  setUserProfile(defaultProfile);
+              }
+          }
+      } catch (e) {
+          console.error('Error initializing app:', e);
+          // Clear potentially corrupted data
+          localStorage.removeItem('mealHistory');
+          localStorage.removeItem('userProfile'); 
+          setMealHistory([]);
+      } finally {
+          setAppInitialized(true); // Mark app as initialized regardless of success/failure
+      }
+    };
+    
+    initializeApp();
   }, []);
 
   const handleAnalyzeImage = useCallback(async () => {
@@ -97,9 +105,24 @@ const App: React.FC = () => {
     setError(null);
     setIsModelLoading(true);
     setProductDisplayData(null);
+    setAnalysisResult(null); // Clear previous results
+
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setError('Analysis is taking too long. Please try again with a different image.');
+      setIsLoading(false);
+      setIsModelLoading(false);
+    }, 45000); // 45 second timeout
 
     try {
       const result = await analyzeImage(image, userProfile);
+      
+      clearTimeout(timeoutId); // Clear timeout on success
+      
+      if (!result) {
+        throw new Error('Analysis failed - no result returned');
+      }
+      
       setAnalysisResult(result);
       
       // Try to find OpenFoodFacts match for additional context
@@ -117,6 +140,7 @@ const App: React.FC = () => {
           });
         }
       } catch (searchError) {
+        console.warn('OpenFoodFacts search failed:', searchError);
         // No OpenFoodFacts match found, using AI analysis only
       }
       
@@ -131,11 +155,21 @@ const App: React.FC = () => {
         healthScore
       };
       
-      const updatedHistory = [newMeal, ...mealHistory];
-      setMealHistory(updatedHistory);
-      localStorage.setItem('mealHistory', JSON.stringify(updatedHistory));
+      try {
+        const updatedHistory = [newMeal, ...mealHistory];
+        setMealHistory(updatedHistory);
+        localStorage.setItem('mealHistory', JSON.stringify(updatedHistory));
+      } catch (storageError) {
+        console.warn('Failed to save meal history:', storageError);
+        // Continue without saving to localStorage
+      }
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      clearTimeout(timeoutId); // Clear timeout on error
+      console.error('Analysis error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred during analysis';
+      setError(errorMessage);
+      setAnalysisResult(null); // Clear any partial results
     } finally {
       setIsLoading(false);
       setIsModelLoading(false);
