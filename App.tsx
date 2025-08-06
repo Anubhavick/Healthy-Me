@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Diet, AnalysisResult, Meal, UserProfile, MedicalCondition } from './types';
-import { analyzeImage, calculateBMI } from './services/geminiService';
+import { analyzeImage, calculateBMI } from './services/openaiService'; // SWITCHED TO OPENAI FOR SPEED
 import { HealthScoreService } from './services/healthScoreService';
 import { tensorflowService } from './services/tensorflowService';
 import { findBestFoodMatch } from './services/foodSearchService';
