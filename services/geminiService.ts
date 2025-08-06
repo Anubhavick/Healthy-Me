@@ -1,7 +1,7 @@
 
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { Diet, AnalysisResult, MedicalCondition, UserProfile } from '../types';
-import { tensorflowService, TensorFlowAnalysis } from './tensorflowService';
+// import { tensorflowService, TensorFlowAnalysis } from './tensorflowService'; // BYPASSED for speed
 import { ConsistencyService } from './consistencyService';
 
 if (!import.meta.env.VITE_GEMINI_API_KEY) {
@@ -37,111 +37,44 @@ export async function analyzeImage(
     
     const imagePart = base64ToGenerativePart(base64Data, mimeType);
 
-    // Run TensorFlow and Gemini in parallel for faster processing
-    const [tensorflowResult, geminiResult] = await Promise.allSettled([
-      runTensorFlowAnalysis(imageDataUrl),
-      runGeminiAnalysis(imagePart, userProfile)
-    ]);
+    // BYPASS: Skip TensorFlow for faster processing
+    // const [tensorflowResult, geminiResult] = await Promise.allSettled([
+    //   runTensorFlowAnalysis(imageDataUrl),
+    //   runGeminiAnalysis(imagePart, userProfile)
+    // ]);
 
-    // Extract results from Promise.allSettled
-    const tensorflowAnalysis = tensorflowResult.status === 'fulfilled' ? tensorflowResult.value : undefined;
-    let geminiAnalysis = geminiResult.status === 'fulfilled' ? geminiResult.value : null;
-
-    // Log any errors for debugging
-    if (tensorflowResult.status === 'rejected') {
-      console.warn('TensorFlow analysis failed:', tensorflowResult.reason);
-    }
-    if (geminiResult.status === 'rejected') {
-      console.warn('Gemini analysis failed:', geminiResult.reason);
+    // Run only Gemini AI for faster results
+    let geminiAnalysis: AnalysisResult | null = null;
+    try {
+      geminiAnalysis = await runGeminiAnalysis(imagePart, userProfile);
+    } catch (error) {
+      console.error('Gemini analysis failed:', error);
     }
 
-    // Check for cached analysis for consistency if Gemini analysis exists
-    if (geminiAnalysis?.productIdentifier) {
-      const cachedAnalysis = ConsistencyService.getCachedAnalysis(geminiAnalysis.productIdentifier);
-      if (cachedAnalysis) {
-        // Use cached analysis but update with current TensorFlow data
-        geminiAnalysis = {
-          ...cachedAnalysis,
-          tensorflowAnalysis: tensorflowAnalysis
-        };
-      }
-    } else if (geminiAnalysis) {
-      // Try to find similar cached analysis as fallback
-      const similarAnalysis = ConsistencyService.findSimilarCachedAnalysis(
-        geminiAnalysis.dishName, 
-        geminiAnalysis.ingredients
-      );
-      if (similarAnalysis) {
-        geminiAnalysis = {
-          ...similarAnalysis,
-          dishName: geminiAnalysis.dishName,
-          ingredients: geminiAnalysis.ingredients,
-          tensorflowAnalysis: tensorflowAnalysis
-        };
-      }
-    }
+    // BYPASS: No TensorFlow analysis for speed
+    const tensorflowAnalysis = undefined;
 
+    // Simplified error handling (TensorFlow bypassed)
     if (!geminiAnalysis) {
-      // Fallback: if Gemini fails but TensorFlow succeeded, provide basic analysis
-      if (tensorflowAnalysis) {
-        return {
-          dishName: tensorflowAnalysis.foodIdentification.predictions[0]?.className || 'Unknown Food',
-          estimatedCalories: tensorflowAnalysis.nutritionalEstimation.estimatedCalories,
-          dietCompatibility: {
-            isCompatible: true,
-            reason: 'Basic compatibility assessment based on food type'
-          },
-          ingredients: ['Analysis based on visual identification'],
-          healthTips: [
-            `This appears to be ${tensorflowAnalysis.foodIdentification.primaryFoodType.toLowerCase()} food`,
-            `Processing level: ${tensorflowAnalysis.qualityAssessment.processingLevel.toLowerCase()}`
-          ],
-          nutritionalBreakdown: {
-            carbs: tensorflowAnalysis.nutritionalEstimation.macronutrients.carbs,
-            protein: tensorflowAnalysis.nutritionalEstimation.macronutrients.protein,
-            fat: tensorflowAnalysis.nutritionalEstimation.macronutrients.fat,
-            fiber: tensorflowAnalysis.nutritionalEstimation.macronutrients.fiber,
-            sugar: 5,
-            sodium: 300
-          },
-          tensorflowAnalysis
-        };
-      }
-      throw new Error("Both AI services failed to analyze the image");
+      console.warn('Gemini AI analysis failed');
     }
 
-    // Merge TensorFlow analysis with Gemini results
-    if (tensorflowAnalysis) {
-      geminiAnalysis.tensorflowAnalysis = tensorflowAnalysis;
-      
-      // Cross-validate calorie estimates
-      const geminiCalories = geminiAnalysis.estimatedCalories;
-      const tfCalories = tensorflowAnalysis.nutritionalEstimation.estimatedCalories;
-      
-      // Use average if both estimates are reasonable
-      if (Math.abs(geminiCalories - tfCalories) < 200) {
-        geminiAnalysis.estimatedCalories = Math.round((geminiCalories + tfCalories) / 2);
-      }
+    // Skip complex caching for speed - just return the analysis
+    if (!geminiAnalysis) {
+      throw new Error("Gemini AI analysis failed - please try again");
     }
-    
+
+    // Cache this analysis for future consistency (async, non-blocking)
+    if (geminiAnalysis.productIdentifier) {
+      setTimeout(() => ConsistencyService.cacheAnalysis(geminiAnalysis), 0);
+    }
+
+    // Return Gemini analysis directly for speed
     return geminiAnalysis;
   } catch (error) {
     console.error('Critical error in analyzeImage:', error);
     throw new Error(`Image analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-}
-
-// Separate TensorFlow analysis function
-async function runTensorFlowAnalysis(imageDataUrl: string): Promise<TensorFlowAnalysis | undefined> {
-  try {
-    const validation = await tensorflowService.validateFoodImage(imageDataUrl);
-    if (validation.isValidFood) {
-      return await tensorflowService.enhancedFoodAnalysis(imageDataUrl);
-    }
-  } catch (error) {
-    console.warn('TensorFlow analysis failed:', error);
-  }
-  return undefined;
 }
 
 // Separate Gemini analysis function with consistency checking
@@ -155,58 +88,24 @@ async function runGeminiAnalysis(imagePart: any, userProfile: UserProfile): Prom
     ? `Medical conditions: ${medicalConditions.join(', ')}${userProfile.customCondition ? `, ${userProfile.customCondition}` : ''}.`
     : "";
 
-  // Enhanced prompt with specific health score calculation instructions
-  const prompt = `Analyze this food image comprehensively. ${dietInstruction} ${medicalInstruction}
+  // Optimized prompt for faster processing
+  const prompt = `Analyze this food image quickly. ${dietInstruction} ${medicalInstruction}
 
-CRITICAL: Be consistent - same product must get same analysis every time.
+Quick analysis requirements:
+1. Identify food name
+2. Estimate calories for visible portion
+3. List main ingredients
+4. Basic health score (1-10)
+5. Diet compatibility check
+6. Key health tips
 
-Analysis requirements:
-1. Identify food name precisely
-2. Estimate calories based on visible portion size
-3. List ALL visible ingredients from packaging (if packaged food)
-4. MANDATORY CHEMICAL ANALYSIS: Scan for ALL chemicals, preservatives, additives, artificial ingredients
-5. Calculate health score (1-10) based on:
-   - Nutritional density: protein, fiber, vitamins (high=better)
-   - Processing level: minimal=10, moderate=6-7, highly processed=1-4
-   - Chemical safety: preservatives, artificial additives, harmful compounds (CRITICAL FACTOR)
-   - Medical compatibility with user's conditions
-
-For packaged foods - CRITICAL CHEMICAL SCANNING:
-- Read ALL ingredient labels word-by-word
-- Identify ALL preservatives (E200-E400 series): BHA, BHT, sodium benzoate, potassium sorbate
-- Find ALL artificial colors (E100-E199): Red 40, Yellow 6, Blue 1, tartrazine
-- Detect ALL flavor enhancers: MSG, disodium inosinate, disodium guanylate
-- Spot ALL emulsifiers and stabilizers: lecithin, carrageenan, xanthan gum
-- Find ALL artificial sweeteners: aspartame, sucralose, acesulfame K
-- Check for harmful chemicals: trans fats, high fructose corn syrup, nitrates/nitrites
-- Assess EVERY E-number and chemical compound for safety
-- Note any cancer-linked, hormone-disrupting, or toxic substances
-
-Chemical Analysis Requirements:
-- Rate EVERY chemical found (SAFE/CAUTION/AVOID)
-- List health effects for harmful chemicals
-- Calculate chemical safety score (1-10) - heavily weight this in final health score
-- If multiple harmful chemicals present, significantly lower health score (max 4/10)
-- Natural, organic foods with no additives = higher scores
-
-Health Score Guidelines (Chemical-Weighted):
-- 9-10: Whole foods, no harmful chemicals, minimal processing, high nutrients
-- 7-8: Good nutrition, minor safe additives only
-- 5-6: Moderate nutrition, some concerning chemicals
-- 3-4: Poor nutrition, multiple harmful chemicals (MSG, artificial colors, preservatives)
-- 1-2: Very harmful ingredients, toxic chemicals, cancer-linked substances
-
-Respond with precise JSON only.`;
+Respond with precise JSON only - keep it concise for speed.`;
 
   // Simplified response schema for faster processing
   const responseSchema = {
     type: Type.OBJECT,
     properties: {
       dishName: { type: Type.STRING },
-      productIdentifier: { 
-        type: Type.STRING,
-        description: "Unique product identifier based on brand+name+key ingredients for consistency"
-      },
       estimatedCalories: { type: Type.INTEGER },
       nutritionalBreakdown: {
         type: Type.OBJECT,
@@ -220,20 +119,7 @@ Respond with precise JSON only.`;
         },
         required: ["carbs", "protein", "fat", "fiber", "sugar", "sodium"]
       },
-      healthScore: {
-        type: Type.INTEGER,
-        description: "Health score from 1-10 based on nutritional value, processing level, and safety"
-      },
-      processingLevel: {
-        type: Type.STRING,
-        enum: ["MINIMAL", "MODERATE", "HIGHLY_PROCESSED"],
-        description: "Level of food processing"
-      },
-      nutritionalDensity: {
-        type: Type.STRING,
-        enum: ["LOW", "MODERATE", "HIGH"],
-        description: "Overall nutritional density and quality"
-      },
+      healthScore: { type: Type.INTEGER },
       dietCompatibility: {
         type: Type.OBJECT,
         properties: {
@@ -242,15 +128,6 @@ Respond with precise JSON only.`;
         },
         required: ["isCompatible", "reason"]
       },
-      medicalAdvice: {
-        type: Type.OBJECT,
-        properties: {
-          isSafeForConditions: { type: Type.BOOLEAN },
-          warnings: { type: Type.ARRAY, items: { type: Type.STRING } },
-          recommendations: { type: Type.ARRAY, items: { type: Type.STRING } }
-        },
-        required: ["isSafeForConditions", "warnings", "recommendations"]
-      },
       ingredients: {
         type: Type.ARRAY,
         items: { type: Type.STRING }
@@ -258,57 +135,9 @@ Respond with precise JSON only.`;
       healthTips: {
         type: Type.ARRAY,
         items: { type: Type.STRING }
-      },
-      chemicalAnalysis: {
-        type: Type.OBJECT,
-        properties: {
-          harmfulChemicals: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING },
-                riskLevel: { type: Type.STRING },
-                description: { type: Type.STRING },
-                healthEffects: { type: Type.ARRAY, items: { type: Type.STRING } }
-              },
-              required: ["name", "riskLevel", "description", "healthEffects"]
-            }
-          },
-          additives: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING },
-                eNumber: { type: Type.STRING },
-                type: { type: Type.STRING },
-                safetyRating: { type: Type.STRING },
-                description: { type: Type.STRING }
-              },
-              required: ["name", "type", "safetyRating", "description"]
-            }
-          },
-          allergens: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                name: { type: Type.STRING },
-                severity: { type: Type.STRING },
-                commonReactions: { type: Type.ARRAY, items: { type: Type.STRING } }
-              },
-              required: ["name", "severity", "commonReactions"]
-            }
-          },
-          overallSafetyScore: { type: Type.INTEGER },
-          isOrganicCertified: { type: Type.BOOLEAN },
-          hasArtificialIngredients: { type: Type.BOOLEAN }
-        },
-        required: ["overallSafetyScore", "isOrganicCertified", "hasArtificialIngredients"]
       }
     },
-    required: ["dishName", "productIdentifier", "estimatedCalories", "nutritionalBreakdown", "healthScore", "processingLevel", "nutritionalDensity", "dietCompatibility", "medicalAdvice", "ingredients", "healthTips", "chemicalAnalysis"]
+    required: ["dishName", "estimatedCalories", "nutritionalBreakdown", "healthScore", "dietCompatibility", "ingredients", "healthTips"]
   };
 
   try {
@@ -327,21 +156,10 @@ Respond with precise JSON only.`;
 
     const result = JSON.parse(response.text) as AnalysisResult;
     
-    // Validate essential fields
+    // Basic validation only
     if (!result.dishName || !result.estimatedCalories) {
       throw new Error('Invalid response format from Gemini API');
     }
-    
-    // Generate identifier if not provided
-    if (!result.productIdentifier) {
-      result.productIdentifier = ConsistencyService.generateProductIdentifier(
-        result.dishName, 
-        result.ingredients
-      );
-    }
-    
-    // Cache this analysis for future consistency
-    ConsistencyService.cacheAnalysis(result);
     
     return result;
   } catch (error) {

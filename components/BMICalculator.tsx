@@ -112,6 +112,7 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate,
               <div className="relative">
                 <input
                   type="number"
+                  placeholder="height"
                   value={height}
                   onChange={(e) => setHeight(e.target.value)}
                   className={`w-full p-4 text-lg font-medium rounded-2xl border-2 transition-all duration-200 backdrop-blur-sm ${
@@ -119,12 +120,12 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate,
                       ? 'bg-gray-800/60 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-900/50' 
                       : 'bg-white/70 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
                   } outline-none`}
-                  placeholder="170"
+                
                 />
                 <div className={`absolute right-4 top-1/2 transform -translate-y-1/2 text-sm font-medium ${
                   isDarkMode ? 'text-gray-400' : 'text-gray-500'
                 }`}>
-                  cm
+                
                 </div>
               </div>
             </div>
@@ -143,7 +144,8 @@ const BMICalculator: React.FC<BMICalculatorProps> = ({ userProfile, onBMIUpdate,
                       ? 'bg-gray-800/60 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-900/50' 
                       : 'bg-white/70 border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
                   } outline-none`}
-                  placeholder="70"
+                  placeholder="Weight"
+                  
                 />
                 <div className={`absolute right-4 top-1/2 transform -translate-y-1/2 text-sm font-medium ${
                   isDarkMode ? 'text-gray-400' : 'text-gray-500'
